@@ -1,5 +1,5 @@
 import os
-from web import webapi
+from web import webapi, dictadd
 
 def safestr(obj, encoding='utf-8'):
     r"""

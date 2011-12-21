@@ -61,7 +61,7 @@ def dispatch(path):
             return out
 
         jt.site = None
-        if (host in ['jottit.com', 'new.jottit.com'] + TESTING_SITES):
+        if (host in ['jottit.com', 'new.jottit.com', 'jottit.herokuapp.com'] + TESTING_SITES):
             if '/' not in path:
                 if not path: path = 'index'
                 try:
@@ -82,7 +82,8 @@ def dispatch(path):
             return out
 
         res = re.match(r'([^\.]+)\.jottit.com', host)
-        res = res or re.match(r'([^\.]+)\.lh\.jottit.com', host)
+        res = res or re.match(r'([^\.]+)\.lh\.jottit\.com', host)
+        res = res or re.match(r'([^\.]+)\.jottit\.herokuapp\.com', host)
         if res:
             url = res.groups()[0]
             out = dispatch_public(url, path)

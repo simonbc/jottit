@@ -1,6 +1,0 @@
-#!/usr/bin/php
-<?php
-  include_once('markdown.php');
-  $text = file_get_contents('php://stdin');
-  echo Markdown($text);
-?>

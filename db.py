@@ -127,7 +127,7 @@ def recover_password(password):
 
 def delete_site():
     site_id = jt.site.id
-    web.update('sites', where='id=$site_id', deleted=True, public_url='', public_url='', vars=locals())
+    web.update('sites', where='id=$site_id', deleted=True, public_url='', vars=locals())
 
 def claim_site(password, email, security):
     pwd_d = auth.digest(password)

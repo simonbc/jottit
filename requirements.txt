@@ -1,0 +1,3 @@
+web.py==0.22
+Jinja==1.1
+psycopg2==2.0.6

@@ -1,0 +1,34 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+    <title>Delete page: {{page_name}}</title>
+    <link rel="stylesheet" type="text/css" media="screen, projection" href="/static/css-generated.css?{{csstime}}" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    <meta name="ROBOTS" content="NOINDEX, NOFOLLOW" />
+</head>
+
+<body class="app">
+
+<div id="dialog_wrapper">
+<div id="dialog">
+
+<h1>Want to delete <span class="page_name">{{page.title}}</span>?</h1>
+
+<form method="post" action="{{page.url}}">
+<input type="hidden" name="m" value="delete" />
+
+<p>You can always undo it later if you change your mind.</p>
+
+<p id="buttons">
+    <input type="submit" value="Delete this page" /> 
+    or <a href="{{page.url}}" accesskey="g">Cancel</a>
+</p>
+
+</form>
+</div>
+</div>
+
+</body>
+</html>

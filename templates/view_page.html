@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+
+{% block title %}{{page.title}}{% endblock %}
+
+{% block head %}
+<link rel="alternate" type="application/atom+xml" title="{{jt.site.title or jt.site.public_url or jt.site.secret_url}}: Recent changes" href="{{jt.site.url}}site/changes.atom" />
+<link rel="alternate" type="application/atom+xml" title="{{page.title}}: Recent changes" href="{{page.url}}?m=history.atom" />
+{% endblock %}
+
+{% block design %}
+    #content h1,
+    #content h2,
+    #content h3,
+    #content h4,
+    #content h5,
+    #content h6 { 
+        font-family: {{Markup(font_family(design.headings_font))}}; 
+    }
+    #content h1 { font-size: {{design.headings_size+70}}%; }
+    #content h2 { font-size: {{design.headings_size+40}}%; }
+    #content h3 { font-size: {{design.headings_size+20}}%; }
+    #content h4 { font-size: {{design.headings_size}}%; }
+    #content h5 { font-size: {{(int(design.subtitle_size) < 15 and [1] or [design.headings_size-15])[0]}}%; }
+    #content h6 { font-size: {{(int(design.subtitle_size) < 30 and [1] or [design.headings_size-30])[0]}}%; }
+    #content { 
+        font-family: {{Markup(font_family(design.content_font))}}; 
+        font-size: {{design.content_size}}%; 
+    }
+
+    #sidebar { font-family: {{Markup(font_family(design.content_font))}} }
+{% endblock %}
+
+{% block script %}
+<script type="text/javascript">
+    Page.name = "{{page.name}}";
+    Page.url = "{{page_url(page.name)}}";
+    AJS.AEV(window, 'load', View.init);
+{% if i.r %}
+    AJS.AEV(window, 'load', BrowseRevs.init);
+{% endif %}
+</script>
+{% endblock %}
+
+{% block content %}
+
+{%if success %}
+    <div id="success">
+            {{success}}
+    </div>
+{% endif %}
+
+{% if jt.site.show_primer and not page.name %}
+<div id="primer" class="box">
+    <div id="hide"><a href="#" onclick="return View.hidePrimer();">Remove this message</a></div>
+    <h1>That was easy!</h1>
+    <p>
+        Here's your new site. Be sure to bookmark it so you can find it again.
+        To change it, just press the edit button at the bottom of the page. Enjoy!
+    </p>
+</div>
+{% endif %}
+
+{% if i.r %}
+<form method="post" action="">
+    <input type="hidden" name="m" value="revert" />
+    <input type="hidden" name="r" value="{{i.r}}" />
+    <div id="browse_revs">
+        <div id="left">
+        {% if revisions[0].revision == revision.revision %}
+            This is the current version of <a href="{{page.url}}">{{page.title}}</a> posted <strong>{{datestr(revision.created, None, False)}}</strong>.
+        {% else %}
+            This is the version of <a href="{{page.url}}">{{page.title}}</a> posted <strong>{{datestr(revision.created, None, False)}}</strong>.
+        {% endif %}
+
+        {% if revision.revision == latest.revision or revision.changes == '<em>Page deleted.</em>' %}
+        <input id="revert_button" type="submit" tabindex="4" value="revert to this" disabled="disabled" />
+        {% else %}
+        <input id="revert_button" type="submit" tabindex="4" value="revert to this" />
+        {% endif %}
+        </div>
+
+        <div id="right">
+        {% if revision.revision == 1 %} 
+            &laquo; prev
+        {% else %}
+            <a href="{{page.url}}?r={{revision.revision-1}}" tabindex="2">&laquo; prev</a> 
+        {% endif %}
+            | <a href="{{page.url}}?m=history">history</a> | 
+        {% if revision.revision == latest.revision %} 
+            next &raquo;
+        {% else %}
+            <a href="{{page.url}}?r={{revision.revision+1}}" tabindex="3">next &raquo;</a> 
+        {% endif %}
+
+        <select id="change_rev" tabindex="1">
+        {% for r in revisions %}
+            {% if loop.first %}
+                <option value="{{r.revision}}" {{ (r.revision == revision.revision) and Markup('selected="selected"') or '' }}>current revision</option>
+            {% else %}
+                <option value="{{r.revision}}" {{ (r.revision == revision.revision) and Markup('selected="selected"') or '' }}>#{{r.revision}} ({{Markup(datestr(r.created, None, False))}})</option>
+            {% endif %}
+        {% endfor %}
+        </select>
+        </div>
+    </div>
+</form>
+{% endif %}
+
+{% if i.r and revision.changes == '<em>Page deleted.</em>' %}
+    <p><em>Page deleted.</em></p>
+{% elif jt.site.security == 'private' and jt.site.password %}
+    {{Markup(format(revision.content))}}
+{% else %}
+    {{Markup(sanitize(format(revision.content)))}}
+{% endif %}
+
+
+<div id="dateline">
+{% if not i.r %}
+    changed <span id="datestr">{{Markup(datestr(revision.created))}}</span>
+{% if auth.auth('edit') %}
+    {% if page_name != "" %}
+    <a accesskey="d" href="{{page.url}}?m=delete">delete</a>
+    {% endif %}
+    <a accesskey="h" href="{{page.url}}?m=history">history</a>
+    <a accesskey="e" href="{{page.url}}?m=edit">edit</a>
+{% endif %}
+{% endif %}
+</div>
+
+{% endblock %}

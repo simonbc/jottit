@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}Recent changes{% endblock %}
+
+{% block head %}
+<link rel='alternate' type='application/atom+xml' title='{{jt.site.title or jt.site.url}}' href='{{jt.site.url}}site/changes.atom' />
+{% endblock %}
+
+{% block content %}
+
+<div id="changes">
+
+<h1>Recent changes</h1>
+
+<table cellspacing="0">
+{% for c in changes[start:start+10] %}
+    <tr class="{% cycle 'gray', '' %}">
+        <td><a href="{{c.url}}?r={{c.revision}}" title="View page">{{Markup(c.name or 'Home')}}</a></td>
+        <td>{{datestr(c.created, None, False)}}</td>
+        <td style="white-space: normal;">{{Markup(c.changes)}} 
+        {% if c.revision > 1 %}
+            (<a href="{{c.url}}?m=diff&r={{c.revision}}&r={{c.revision-1}}">comparison</a>)
+        {% endif %}
+        </td>
+    </tr>
+{% endfor %}
+</table>
+{% if len(changes) > 10 %}
+<div id="pagination">
+{% if start > 0 %}
+<strong><a href="{{page.url}}?m=history&start={{start-10}}">Prev</a></strong>
+{% endif %}
+{% for i in range(pagination_start,pagination_end) %}
+{% if i == ((start+10) / 10) %}
+    {{i}}
+{% else %}
+    <a href="{{page.url}}?m=history&start={{i*10-10}}">{{i}}</a>
+{% endif %}
+{% endfor %}
+{% if start < len(changes)-10 and len(changes) > 10 %}
+<strong><a href="{{page.url}}?m=history&start={{start+10}}">Next</a></strong>
+{% endif %}
+</div>
+{% endif %}
+</div>
+{% endblock %}

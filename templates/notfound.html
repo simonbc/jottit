@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}{{page_title(page_name)}} does not exist{% endblock %}
+
+{% block content %}
+
+<h1><span class="page_name">{{page_title(page_name)}}</span> does not exist</h1>
+
+{% if not jt.site.password or logged_in or jt.site.security == 'open' %}
+<p>
+    Want to make it? Just type some text in the space below and press "Create page".
+</p>
+
+ <form method="post" action="" onsubmit="Create.saveCaretPos();">
+<input type="hidden" name="m" value="create" />
+<input type="hidden" id="scroll_pos" name="scroll_pos" value="0" />
+<input type="hidden" id="caret_pos" name="caret_pos" value="0" />
+<p><textarea id="content_text" tabindex="1" name="content" cols="50" rows="10"></textarea></p>
+<p>
+    <input type="submit" value="Create page" tabindex="2" />
+</p>
+</form>
+
+{% else %}
+    <p>But you can <a href="{{jt.site.url}}site/signin?return_to={{page.url}}?m=edit">sign in</a> to create it.</p>
+{% endif %}
+
+{% endblock %}

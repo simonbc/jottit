@@ -1,0 +1,143 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+    <title>{{jt.site.title and jt.site.title+':' or ''}} {% block title %}{% endblock %}</title> 
+    {% if jt.site.security == 'private' or not jt.site.public_url %}<meta name="ROBOTS" content="NOINDEX, NOFOLLOW" />{% endif %}
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="stylesheet" type="text/css" media="screen, projection" href="/static/css-generated.css?{{csstime}}" />
+    <style type="text/css">
+        <!--
+
+    #header { background: {{design.header_color}};} 
+    #header h1 a { 
+        font-family: {{Markup(font_family(design.title_font))}};
+        color: {{design.title_color}}; 
+        font-size: {{design.title_size}}%; 
+        {% if design.title_font == 'Arial_Black' %}
+        letter-spacing: 0px;
+        {% else %}
+        letter-spacing: -1px; 
+        {% endif %}
+    } 
+    #header #subtitle { 
+        color: {{design.subtitle_color}}; 
+        font-family: {{Markup(font_family(design.subtitle_font))}};
+        font-size: {{design.subtitle_size}}%; 
+        {% if design.subtitle_font == 'Arial_Black' %}
+        letter-spacing: 0px;
+        {% else %}
+        letter-spacing: -1px; 
+        {% endif %}
+    } 
+    #title_and_subtitle a { 
+        font-family: {{Markup(font_family(design.title_font))}};
+        color: {{design.subtitle_color}}; 
+    }
+    #header #menu { 
+        font-family: {{Markup(font_family(design.title_font))}};
+        color: {{design.subtitle_color}}; 
+    }
+    * + html #header #menu a { font-size: 0.95em; }
+    * html #header #menu a { font-size: 0.95em; }
+    #header #menu a {
+        color: {{design.subtitle_color}}; 
+    }
+    {% block design %}{% endblock %}
+    -->
+    </style>
+    {% block head %}{% endblock %}
+</head>
+
+<body class="app">
+
+<div id="wrapper">
+
+{% if not jt.site.password %}
+<form method="post" action="{{jt.site.url}}site/claim">
+<div id="claim_site">
+    <a href="{{jt.site.url}}site/claim">Claim this site</a>
+    <div id="pick_password">
+        <span>Pick a password:</span>
+        <input type="password" name="password" value="" style="width: 9em;" /> <input type="submit" value="Claim" />
+    </div>
+</div>
+</form>
+{% endif %}
+
+<div id="header">
+    <div id="title_and_subtitle">
+        <h1><a id="title" href="{{jt.site.url}}">{{jt.site.title}}</a></h1>
+        <div id="subtitle">{{jt.site.subtitle}}</div>
+    </div>
+
+    <div id="menu">
+    {% if auth.auth('edit') %}
+        <a href="{{jt.site.url}}site/changes">recent changes</a> 
+    {% endif %}
+    {% if auth.logged_in() or not jt.site.password %}
+      | <a href="{{jt.site.url}}admin/settings">settings</a> 
+      | <a href="{{jt.site.url}}admin/design">design</a>
+    {% endif %}
+    {% if auth.logged_in() %}
+        | <a href="#" onclick="return Page.signout();">sign out</a>
+    {% elif jt.site.password %}
+        <a href="{{jt.site.url}}site/signin?return_to={{quote(page.name)}}">sign in</a>
+    {% endif %}
+    </div>
+</div>
+
+<div id="content_wrapper">
+<div id="content">
+    {% block content %}{% endblock %}
+</div> <!-- end #content -->
+<div id="footer">
+    <p>powered by <strong><a href="http://jottit.com/">Jottit</a></strong></p>
+    <p>(<a href="http://jottit.com/help">talk to us</a>)</p>
+</div>
+</div> <!-- end #content_wrapper -->
+
+<div id="sidebar">
+{% if auth.auth('edit') %}
+    <form action="" method="get" onsubmit="return Page.create();">
+    <div id="new_page">
+        <input accesskey="m" onclick="return Page.show_new();" type="button" value="Create a new page" />
+    </div>
+    <div id="new_page_input" style="display: none;">
+        <input type="text" id="new_page_name" name="name" value="" />
+        <input type="submit" value="Create" />
+        or <a href="#" onclick="return Page.hide_new();" accesskey="g">Close</a>
+    </div>
+    </form>
+{% endif %}
+<ul id="pages">
+{% for p in pages %}
+    {% if page and ((not page.name and p.title == 'Home') or (page.name and p.url == page.url)) %}
+    <li><strong>{{p.title}}</strong></li>
+    {% else %}
+    <li><a href="{{p.url}}">{{p.title}}</a></li>
+    {% endif %}
+{% endfor %}
+</ul>
+
+</div> <!-- end #sidebar --> 
+</div> <!-- end #wrapper --> 
+{% if jt.testing %}
+<script type="text/javascript" src="/javascripts/AJS.js"></script>
+<script type="text/javascript" src="/javascripts/yahoo-dom-event.js"></script>
+<script type="text/javascript" src="/javascripts/dragdrop.js"></script>
+<script type="text/javascript" src="/javascripts/slider.js"></script>
+<script type="text/javascript" src="/javascripts/color.js"></script>
+<script type="text/javascript" src="/javascripts/app.js"></script>
+{% else %}
+<script type="text/javascript" src="/static/js-generated.js?{{jstime}}"></script>
+{% endif %}
+<script type="text/javascript">
+    AJS.exportToGlobalScope();
+    BASE_URL = "{{jt.site.url}}";
+    Site.url = "{{jt.site.url}}";
+</script>
+{% block script %}{% endblock %}
+</body>
+</html>

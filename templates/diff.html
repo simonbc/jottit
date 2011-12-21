@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}Comparison: {{page.title}}{% endblock %}
+
+{% block script %}
+<script type="text/javascript">
+    Page.url= "{{page.url}}";
+    AJS.AEV(window, 'load', Diff.init);
+</script>
+{% endblock %}
+
+{% block content %}
+
+<form action="" method="get" id="diff_form">
+<input type="hidden" name="m" value="diff" />
+<div style="position: relative;">
+<p>Compare
+<select id="a" name="r" tabindex="1">
+{% for r in revisions %}
+    <option value="{{r.revision}}" {{ (r.revision == a.revision) and 'selected="selected"' or '' }}>
+    {% if loop.first %}
+        current version
+    {% else %}
+        #{{r.revision}} ({{Markup(datestr(r.created, None, false))}})
+    {% endif %}
+    </option>
+{% endfor %}
+</select>
+to
+<select id="b" name="r" tabindex="2">
+{% for r in revisions %}
+    <option value="{{r.revision}}" {{ (r.revision == b.revision) and 'selected="selected"' or '' }}>
+    {% if loop.first %}
+        current version
+    {% else %}
+        #{{r.revision}} ({{Markup(datestr(r.created, None, false))}})
+    {% endif %}
+    </option>
+{% endfor %}
+</select> <noscript><input type="submit" value="Go" /></noscript></p>
+
+<div id="browse_diffs">
+{% if prevrev %}<a href="{{page.url}}?m=diff&amp;r={{a.revision}}&amp;r={{prevrev}}">&laquo; prev</a>{% else %}&laquo; prev{% endif %}
+ | <a href="{{page.url}}?m=history" id="done_comparing">history</a> |
+{% if nextrev %}<a href="{{page.url}}?m=diff&amp;r={{b.revision}}&amp;r={{nextrev}}">next &raquo;</a>{% else %}next &raquo;{% endif %}
+</div>
+</div>
+
+</form>
+
+<div id="diff" style="clear: both;"><code>
+{{Markup(diff)}}
+</code></div>
+
+<div id="legend">
+    <h3>Legend:</h3>
+    <dl>
+        <dt id="insert"></dt><dd>added</dd>
+        <dt id="delete"></dt><dd>removed</dd>
+<!--        <dt id="replace"></dt><dd>modified</dd> -->
+    </dl>
+</div>
+
+{% endblock %}

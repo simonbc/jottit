@@ -1,0 +1,136 @@
+body.site { 
+    font-family:"Lucida Grande", Verdana, sans-serif; 
+    font-size: smaller; 
+    text-align: center;
+    background: white;
+}
+
+body.site form { margin: 0; padding: 0; }
+
+body.site #logo { margin: 20px 0 0 0; }
+
+body.site #submit { 
+    font-size: 1.1em; 
+    padding: 0.2em;
+}
+
+body.site label {
+    display: block;
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+body.site textarea {
+    width: 450px;
+    height: 250px;
+}
+
+body.site #input {
+    margin: 15px 0 20px 0;
+    padding: 1em 0;
+    background: #eee;
+    border: 1px solid #ccc;
+}
+
+
+body.site #input table {
+    width: 100%;
+}
+
+body.site #input td {
+    vertical-align: top;
+    text-align: center;
+    min-width: 12em;
+}
+
+body.site #input td p {
+    margin: 0;
+}
+
+body.site #input td input {
+    margin: 0.5em 0 0 0;
+}
+
+body.site #input #latest {
+    text-align: left;
+}
+
+body.site #input #latest ul {
+    padding: 0 1em;
+    font-size: 1em;
+}
+
+body.site #input #latest #all {
+    font-size: 0.8em;
+    margin: 0.5em 1.1em;
+}
+
+body.site #input #latest li {
+    list-style: none;
+    padding: 0.2em 0;
+    white-space: nowrap;
+}
+
+body.site #input #latest li p {
+    color: #555;
+    font-size: 0.9em;
+}
+
+body.site #input #about,
+body.site #input #sites,
+body.site #input #help {
+    padding: 1em;
+    margin: 10px auto;
+    background: white;
+    border: 1px solid #ccc;
+    width: 30%;
+    text-align: left;
+}
+
+body.site #success {
+    padding: 5px 12px;
+    background: #dfd;
+    border: 2px solid #beb;
+    color: #252;
+    margin: 15px 0 0 0;
+}
+
+body.site #errors {
+    width: 345px;
+    padding: 5px 12px;
+    background: #FFD6D8;
+    border: 2px solid red;
+    color: red;
+    margin: 15px 0 0 0;
+}
+
+body.site #errors ul { 
+    margin: 5px; 
+    padding-left: 20px;
+}
+
+body.site .wrong { 
+    border: 2px solid red;
+    padding: 2px; 
+}
+
+body.site #feedback {
+    text-align: left;
+    width: 455px;
+    margin: 0 auto;
+}
+
+body.site #feedback #email {
+    font-size: 1.2em;
+    width: 450px;
+}
+
+body.site #menu { 
+    font-size: 0.95em; 
+    margin: 20px 0;
+}
+
+body.site #menu a { 
+    color: blue; 
+    margin: 0 4px;
+}

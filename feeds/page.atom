@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<entry xmlns='http://www.w3.org/2005/Atom' 
+       xmlns:jt='http://schemas.jottit.com/2007/Site'>
+    <id>{{page.url}}</id>
+    <link href="{{page.url}}" rel="self"/>
+    <title>{{page.title}}</title>
+    <author><name>site authors</name></author>
+    <updated>{{page.atom_updated}}</updated>
+    <jt:deleted>{{str(page.deleted).lower()}}</jt:deleted>
+</entry>

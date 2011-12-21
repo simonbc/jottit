@@ -1,0 +1,321 @@
+body.edit { 
+    font-family:"Lucida Grande", Verdana, sans-serif;
+    background: #fff;
+    font-size: smaller;
+}
+
+body.edit h1, 
+body.edit h2, 
+body.edit h3, 
+body.edit h4, 
+body.edit h5, 
+body.edit h6 { margin: 1em 0 0.5em 0; }
+
+/* page structure 
+---------------------------------------------------------- */
+
+body.edit #input_and_sidebar { 
+    padding: 6px 6px 0 6px; 
+    width: 100%;
+    margin: 0;
+    clear: both;
+}
+
+body.edit #input { 
+    width: 50%;
+    vertical-align: top;
+}
+
+body.edit #input h1 {
+    margin: 0 0 0.3em 0;
+    font-size: 1.1em;
+}
+
+body.edit #sidebar { 
+    width: 50%;
+    vertical-align: top;
+}
+
+body.edit #content_text { width: 100%; }
+
+
+/* tabs
+---------------------------------------------------------- */
+
+body.edit #tabs { 
+    font-family: verdana, arial, helvetica, sans-serif; 
+    font-size: 0.9em; 
+    padding: 3px 10px 1px 0; 
+    margin-right: 0; 
+    height: 1.3em;
+    background: #f0f0ee;
+    border-bottom: 1px solid #aaa;
+}
+
+
+* html body.edit #tabs,
+* + html body.edit #tabs { 
+    padding-bottom: 0;
+}
+
+body.edit #tabs ul {
+    list-style: none;    
+    margin: 0;
+    padding: 0;
+}
+
+body.edit #tabs li {
+    margin-top: 0.2em;
+    float: right;
+    list-style: none;
+    display: inline;
+}
+
+body.edit #tabs a { 
+    background: #ccc; 
+    color: blue; 
+    text-decoration: underline; 
+    padding: 1px 4px; 
+}
+
+body.edit #tabs .selected { 
+    display: none;
+} 
+
+
+/* buttons
+---------------------------------------------------------- */
+
+body.edit #buttons { 
+    margin: 3px 0 0 0; 
+    padding: 0; 
+    font-size: 0.9em; 
+    font-family:"Lucida Grande", Verdana, sans-serif;
+    clear: both;
+}
+
+
+body.edit #buttons input { 
+    margin-bottom: 0;
+}
+
+body.edit #buttons a { color: red; padding: 2px; }
+
+body.edit #buttons a:hover { 
+    color: white; 
+    background: red; 
+}
+
+body.edit #delete { 
+    position: absolute; 
+    bottom: 8px; 
+    right: 5px;
+    width: 5em;
+}
+
+/* drafs
+---------------------------------------------------------- */
+
+body.edit #has_draft { 
+    font-family:"Lucida Grande", Verdana, sans-serif;
+    color: white; 
+    background:  #555; 
+    padding: 7px 0; 
+    text-align: center; 
+}
+
+body.edit #has_draft a { 
+    color: white; 
+    font-weight: bold; 
+}
+
+body.edit #has_draft .close { 
+    margin: 0 10px 0 0; 
+    padding: 0; 
+    position: absolute;
+    right: 0.3em;
+    top: 0.3em;
+}
+
+body.edit #has_draft .close a { 
+    text-decoration: none; 
+    font-size: 120%; 
+    font-weight: normal; 
+}
+
+body.edit #draft_msg { 
+    font-family:"Lucida Grande", Verdana, sans-serif;
+    font-size: 0.9em; 
+    color: #555;
+    position: absolute; 
+    bottom: 14px; 
+    right: 6px;
+}
+
+body.edit #draft_msg a { color: #555; font-weight: bold; }
+
+/* sidebar
+---------------------------------------------------------- */
+
+body.edit #preview { 
+    background: #eee; 
+    margin: 1px 0 0 10px; 
+    padding: 0 0 0 10px; 
+    overflow: auto; 
+    line-height: 130%;
+}
+
+body.edit #preview ul,
+body.edit #preview ol { 
+    /*margin: 1em 0;*/
+    margin-left: 2em;
+}
+
+body.edit #help { 
+    padding-left: 10px; 
+    overflow: auto;
+}
+
+body.edit #help td { 
+    vertical-align: top; 
+    padding-bottom: 20px; 
+}
+
+body.edit #help ol, ul, h3, h4 { 
+    margin: 0; 
+    padding: 0;
+}
+
+body.edit #help ul, ol { 
+    padding-left: 1.5em;
+}
+
+body.edit #help blockquote { 
+    margin-left: 1em; 
+    margin-top: 0;
+    margin-right: 0;
+    padding: 0; 
+}
+
+body.edit #help pre { 
+    margin: 0;
+}
+
+body.edit #help h1 { 
+    font-size: 1.4em; 
+    margin: 0 0 5px 0; 
+}
+
+body.edit #help h2 { 
+    font-size: 1.3em; 
+    margin: 0 0 5px 0; 
+}
+
+body.edit #help h6 { 
+    font-size: 1em; 
+    margin: 0 0 5px 0;
+}
+
+body.edit #help th {
+    text-align: left;
+    padding-bottom: 0.5em;
+}
+
+body.edit #help table {
+    width: 93%;
+    margin-right: 1em;
+}
+
+body.edit #help td {
+    white-space: nowrap;
+    padding: 1em 0 1em 1em;
+}
+
+body.edit #help tr.gray {
+    background: #eee;
+}
+
+body.edit #help p, 
+body.edit #help blockquote {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+body.edit #help ol {
+    margin-left: 1.7em;
+}
+
+body.edit #help ul {
+    margin-left: 0.1em;
+}
+
+body.edit #help .src {
+    font-family: courier, "Courier New", sans-serif;
+    font-size: 0.95em;
+    padding-top: 1.2em;
+    white-space: pre;
+}
+
+/* edit conflicts
+---------------------------------------------------------- */
+
+body.edit #errors {
+    margin: 7px 5px;
+    padding: 6px 12px;
+    background: #FFD6D8;
+    border: 1px solid red;
+    color: red;
+}
+
+body.edit #replace { background: #fd8;}
+body.edit #insert { background: #afa; }
+body.edit #remove { background: #faa; }
+
+body.edit #changes {
+    font-size: 0.9em;
+    margin: 0 1em 0 1em;
+}
+
+body.edit #changes h1 {
+    margin: 0 0 0.4em 0;
+    font-size: 1.2em;
+}
+
+body.edit #changes #diff {
+    background: #eee;
+    border: 1px solid #555;
+    padding: 1em;
+
+}
+
+body.edit #legend { 
+    font-size: 80%; 
+    line-height: 1em; 
+    margin: 1em 0 3em 0; 
+    padding: 0; 
+}
+
+body.edit #legend h3 {
+    margin: 1em 0;
+} 
+
+body.edit #legend dt {
+      background: #fff;
+      border: 1px solid #999;
+      float: left;
+      margin: .1em .5em .1em 0;
+      overflow: hidden;
+      width: .8em; height: .8em;
+}
+
+body.edit #legend dl, #legend dd {
+    display: inline; 
+    float: left;
+    padding: 0;
+    margin: 0;
+    margin-right: 1.5em;
+}
+
+body.edit #legend #l_replace { background: #fd8 }
+body.edit #legend #l_insert { background: #afa }
+body.edit #legend #l_delete { background: #faa }

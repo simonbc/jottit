@@ -1,0 +1,52 @@
+{% extends "site_base.html" %}
+
+{% set page_title = "" %}
+{% set page_url = "/" %}
+
+{% block style %}
+<style type="text/css">
+    .c{{spinfield('normal')}} { visibility: normal; }
+    .c{{spinfield('spammer')}} { display: none; } 
+</style>
+{% endblock %}
+
+{% block content %}
+<img id="logo" src="/static/images/logo.png" width="174" height="78" alt="Jottit" />
+
+<form name="page" method="post" action="/" onsubmit="Create.saveCaretPos();">
+<input type="hidden" name="spinner" value="{{spinner}}" />
+<input type="hidden" name="{{spinfield('timestamp')}}" value="{{timestamp}}" />
+<input type="hidden" id="scroll_pos" name="{{spinfield('scroll_pos')}}" value="0" />
+<input type="hidden" id="caret_pos" name="{{spinfield('caret_pos')}}" value="0" />
+<input type="hidden" name="{{spinfield('partner')}}" value="{{partner}}" />
+
+<div id="input">
+    <table>
+    <tr>
+        <td width="33%">&nbsp;</td>
+        <td width="34%">
+            <p><textarea class="c{{spinfield('normal')}}" id="content_text" tabindex="1" name="{{spinfield('content')}}" cols="50" rows="15"></textarea></p>
+            <p><input class="c{{spinfield('spammer')}}" type="text" name="{{spinfield('honeypot_t0')}}" value="" /></p>
+            <p>
+                <input class="c{{spinfield('normal')}}" type="submit" id="submit" value="Create a site" tabindex="2" />
+                <input class="c{{spinfield('spammer')}}" type="submit" name="{{spinfield('honeypot_s0')}}" value="I'm a spammer" />
+            </p>
+        </td>
+        <td width="33%">&nbsp;</td>
+    </tr>
+    </table>
+</div>
+</form>
+
+{% if jt.testing %}
+<script type="text/javascript" src="/javascripts/AJS.js"></script>
+<script type="text/javascript" src="/javascripts/app.js"></script>
+{% else %}
+<script type="text/javascript" src="/static/js-generated.js?{{jstime}}"></script>
+{% endif %}
+<script type="text/javascript">
+    AJS.exportToGlobalScope();
+    $('content_text').focus();
+</script>
+
+{% endblock %}

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+ 
+<title>{{jt.site.title or jt.site.url}}</title>
+<author><name>site authors</name></author>
+<link rel="self" href="{{jt.site.url}}admin/export"/>
+<updated>{{updated}}</updated>
+<id>{{jt.site.url}}</id>
+{% for p in pages %}
+<entry>
+    <title>{{p.name or 'Home'}}</title>
+    <link href="{{p.url}}"/>
+    <id>{{p.url}}</id>
+    <updated>{{p.atom_created}}</updated>
+    <content type="text">{{p.content}}</content>
+</entry>
+{% endfor %}
+</feed>
+

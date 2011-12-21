@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<entry xmlns='http://www.w3.org/2005/Atom' 
+       xmlns:jt='http://schemas.jottit.com/2007/Site'>
+    <id>{{jt.site.url}}</id>
+    <link href="{{jt.site.url}}" rel="self"/>
+    <jt:header_color>{{design.header_color}}</jt:header_color>
+    <jt:title_color>{{design.title_color}}</jt:title_color>
+    <jt:title_font>{{design.title_font}}</jt:title_font>
+    <jt:title_size>{{design.title_size}}</jt:title_size>
+    <jt:subtitle_color>{{design.subtitle_color}}</jt:subtitle_color>
+    <jt:subtitle_font>{{design.subtitle_font}}</jt:subtitle_font>
+    <jt:subtitle_size>{{design.subtitle_size}}</jt:subtitle_size>
+    <jt:content_font>{{design.content_font}}</jt:content_font>
+    <jt:content_size>{{design.content_size}}</jt:content_size>
+    <jt:headings_font>{{design.headings_font}}</jt:headings_font>
+    <jt:headings_size>{{design.headings_size}}</jt:headings_size>
+    <jt:hue>{{design.hue}}</jt:hue>
+    <jt:brightness>{{design.brightness}}</jt:brightness>
+</entry>

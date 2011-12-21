@@ -1,0 +1,197 @@
+Minor fixes
+-----------
+BUG: put restriction on values of secret_url (a-z0-9)
+BUG: in IE "or cancel"s not aligned with button
+STYLE: No link to edit page from "page not found"
+FEATURE: Add an accesskey for publish.
+FEATURE: Add a hidden username next to the password field so that seamonkey's password manager will remember it.
+STYLE: It is painful to view and edit a page from its diff.
+STYLE: If there's no title, at least have a home link
+STYLE: Need white box around create a new page.
+BUG: sanitize should allow YouTube videos thru (+3)
+BUG: view revision: breaks when browser window too narrow
+BUG: if user has disabled cookies, warn about it
+UI: no link from history mode to page under comparison
+BUG: delete first part of any line, is now shown as a replace instead of a delete on diff
+
+Syntax-based edit page
+----------------------
+FEATURE: wiki syntax: _blank links (+1)
+FEATURE: support right-to-left text (+2)
+    FEATURE: support RTL blocks in Markdown (+1)
+STYLE: preview is somewhat unrealistic (+1)
+BUG: Markdown parses inside style tags (+1)
+BUG: no start attribute in Markdown lists
+BUG: ol then ul in showdown doesn't work.
+IDEA: Allow space centering in markdown
+BUG: markdown doesn't parse line breaks as line breaks
+FEATURE: textile support (+4)
+FEATURE: more powerful wiki syntax (+1)
+BUG: Add a cursor to preview
+STYLE: help link isn't clear enough on edit page (+1)
+BUG: put external link syntax on help page (+2)
+BUG: If the page content is long enough, the preview automatically scrolls to the end of the page. (+1)
+In Safari the preview slams to the bottom and can't be raised
+Asterisk without a space doesn't give a list.
+mention [title](url) syntax on help page
+help page: explain diff between internal and external linking
+python-markdown2
+BUG: 3 levels of lists: 2 indents do not work, 3 indents work
+
+Copy
+----
+About page
+Front page
+show edit primer when home is on revision 1
+Export
+Improve form validation error messages (look at 37s for inspiration)
+Explain our use of user emails on claim site page
+badrequest and internalerror
+help links on login, forgot password, etc.
+FEATURE: terms of service (+3)
+    will we charge
+    put ads on
+    who owns content?
+FEATURE: privacy policy (+3)
+    will we share data?
+
+Design
+------
+static pages
+redesign front page
+jottit blog
+forums
+make help link more prominent or change to "formatting help"
+help page
+create new page: make it explicit what the user should type
+
+Next up
+-------
+TEST: Play around with diff and see if it needs improvement.
+SITE: mailing list, announce new features
+STYLE: make edit and history buttons and put them at the top (+1)
+FEATURE: find your site per email, remove sessions (+2)
+FEATURE: Some way to get back to view page when draft is saved
+FEATURE: subsubdomains (+1)
+BUG: subdomains don't work on staging site
+BUG: doesn't work with javascript disabled
+BUG: Can't save drafts of nonexistent pages
+BUG: draft shown to other users
+USABILITY: Live preview of content and headings on the design page.
+FEATURE: Warn people when their claim email bounces
+FEATURE: wysiwyg editor
+FEATURE: sidebar:
+    reorder pages
+    remove pages
+    toggle display of sidebar
+    indents
+        However, it would be nice to be able to build nested page structures. For example, my homepage would have links to pages A, B, and C on the right side. Page A would have links to pages A1, A2 on the right side, and so on.
+STYLE: print page
+FEATURE: stats (+1)
+FEATURE: image uploads (+24)
+    drag and drop images
+    file uploads (+5)
+API (+13)
+FEATURE: fine-grained permissions? (+19) (summing the below)
+    page-level permissions (+7)
+    everyone-owns-their-page (+1)
+    different-password-for-view-and-edit (+5)
+    different-password-for-edit-and-own (+4)
+    accounts (+3)
+USABILITY: not clear that claim your site and password box are connected
+STYLE: "undo the delete" should be a button, not a link
+FEATURE: syntax highlighting for code blocks (+5)
+    http://pygments.org/
+FEATURE: Visually indicate links to non-existent pages.
+    BUG: They should link directly to the edit page (+1)
+REFACTOR: dialog_base for "dialog pages"
+CLEANUP: Have font_family, datestr, etc. return Markup objects.
+STYLE: textarea on page does not exist is too small (+1) (just a button instead?)
+USABILITY: when do we save?
+    people want to save on the settings pages (+1)
+    give users feedback on settings/design changes (+1)
+    people expect the edit page to autopublish
+SECURITY: encode email addresses to fight off spam bots
+FEATURE: rename (move) a page (+10)
+    FEATURE: automatically update markdown links
+    FEATURE: warn about duplicate names
+DOCS: better documentation (+4)
+DOCS: screencasts
+SECURITY: Integrate MT sanitizing tests into sanitize
+    http://code.sixapart.com/svn/movabletype/trunk/t/11-sanitize.t
+SECURITY: Add http://ha.ckers.org/xss.html to sanitize test cases.
+SECURITY: security is open, a user add malicious js, owner makes sites public, malicious js not sanitized
+TEST: Safari 3 (+1)
+TEST: Opera browser 9.50 alpha (+3)
+    navigation bar and create a new page button is missing
+    changed settings are not saved
+FEATURE: Make access keys discoverable.
+    Show them when you hold down Ctrl?
+BUG: Input hardening.
+    example: http://new.jottit.com:8080/zua6/?r=1doks causes crash.
+FEATURE: list of pages you've created should have more information
+INTERNAL: setup automatic testing
+FEATURE: templates
+FEATURE: "someone else started editing this page" notice upon draft save (+1)
+FEATURE: mobile version of Jottit (+1)
+FEATURE: better conflict handling, merge
+STYLE: more font sizes to choose from
+BUG: Change detection should be stronger
+    When "foo" is changed to "a foo bar", only one of the two is noted.
+    Similarly with additions and removals. There should be at least some
+    indication that more was done.
+BUG: blackberry support (+1)
+BUG: treo blazer support (+3)
+FEATURE: ssl on signin and api signin page
+FEATURE: i18n, see translate.wordpress.com
+FEATURE: domains (+6)
+
+Maybes
+------
+FEATURE: twitter-style page showing all the latest public updates.
+FEATURE: find deleted pages (+2)
+STYLE: Merge design and settings.
+FEATURE: randomize button on the design page (+1)
+FEATURE: allow people to pick from our pre-selected colors (+1)
+FEATURE: remember the last color they picked (+2)
+    So the suggestion is: Please consider adding a feature to allow this - a kind of "memory" for selected colors. Simplest would be just remembering one previous color choice, better could be having a stack or list of upto, say, 5 or 10 colors, so the user can go back (and forth) and set any previously selected one as the current "final" color. If they select more than 10 you could "forget" the older ones.
+FEATURE: random site button / find other sites (+9)
+    Have weblogs.com-style page and rss showing all jottit changes
+FEATURE: Allow users to see the changes they've made before clicking publish
+FEATURE: List of pages from within edit view.
+IDEA: put stats on front page: i.e. "x sites with y pages created today"
+FEATURE: template language (i.e. python/php/perl in page content) (+1)
+FEATURE: email notifications of site changes (+3)
+FEATURE: something like blog support (+4)
+FEATURE: siteroll
+FEATURE: comments (+1)
+FEATURE: header background image (+2)
+FEATURE: be able to set the same color scheme for several sites (+1)
+FEATURE: Click on an IP in history to get a page with:
+    1. The geolocation of that IP. (Maxmind has a decent free geolocation DB.)
+    2. The whois data for that IP, in some prettified format.
+    3. A list of all the edits by that IP.
+FEATURE: full-text search (+4)
+FEATURE: let people design templates
+FEATURE: let users create add-ons
+FEATURE: directory of user-created templates and add-ons
+FEATURE: custom CSS (+9)
+FEATURE: margin notes to self (+1)
+FEATURE: change title weights and not just sizes (+1)
+BRAND: jottit store
+FEATURE: Merge repeated recent changes into one line
+FEATURE: Editable descriptions in page history and recent changes
+FEATURE: Possible to remove revisions from the history page
+HACK: change descriptions are written at save-time, which makes it hard to do anything more complicated.
+FEATURE: design: layout: 2 columns, 3 columns, etc.
+FEATURE: spellcheck (+1)
+FEATURE: blame
+FEATURE: smartypants
+FEATURE: import: pdf, doc, odt, etc
+FEATURE: find and replace
+FEATURE: categories (+1)
+FEATURE: real-time collaborative editing
+FEATURE: HTTPS server
+FEATURE: email in and out (+4)
+FEATURE: local install (+6)
+FEATURE: quicksilver support (+1)

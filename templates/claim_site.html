@@ -1,0 +1,86 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+    <meta name="ROBOTS" content="NOINDEX, NOFOLLOW" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <title>Claim this site</title>
+    <link rel="stylesheet" type="text/css" media="screen, projection" href="/static/css-generated.css?{{csstime}}" />
+</head>
+
+<body class="app">
+
+<div id="claim_dialog_wrapper">
+<div id="claim_dialog">
+
+<h1>Claim this site</h1>
+
+{% if f.errors() %}
+{{Markup(f.errors())}}
+{% endif %}
+
+<form action="do-claim" method="post">
+<table id="claim" cellpadding="0" cellspacing="0">
+<tr>
+    <th>Site password</th>
+    <td>{{Markup(f.password.render())}}</td>
+    <td></td>
+</tr>
+
+<tr>
+    <th>Email address</th>
+    <td>{{Markup(f.email.render())}}</td>
+    <td class="explain">Only used to recover forgotten passwords.</td>
+</tr>
+
+<tr>
+    <th>Kind of site</th>
+    <td>
+        <table id="security" cellpadding="0" cellspacing="0">
+            <tr id="private">
+                <td>
+                    <input type="radio" id="private_input" name="security" value="private" tabindex="3" />
+                </td>
+                <td><label for="private_input">Private</label></td>
+                <td class="explain">Require password to view and edit site.</td>
+            </tr>
+            <tr id="public">
+                <td>
+                    <input type="radio" id="public_input" name="security" value="public" checked="checked" tabindex="3" />
+                </td>
+                <td><label for="public_input">Public</label></td>
+                <td class="explain">Require password to edit site.</td>
+            </tr>
+            <tr id="open">
+                <td>
+                    <input type="radio" id="open_input" name="security" value="open" tabindex="3" />
+                </td>
+                <td><label for="open_input">Open</label></td>
+                <td class="explain">Everyone can view and edit.</td>
+            </tr>
+        </table>
+    </td>
+    <td></td>
+</tr>
+</table>
+<div id="buttons">
+ <input tabindex="4" type="submit" id="submit" value="Claim site" /> or <a href="{{Markup(jt.site.url)}}" tabindex="5">Cancel</a>
+</div>
+</form>
+
+</div>
+</div>
+{% if jt.testing %}
+<script type="text/javascript" src="/javascripts/AJS.js"></script>
+<script type="text/javascript" src="/javascripts/app.js"></script>
+{% else %}
+<script type="text/javascript" src="/static/js-generated.js?{{jstime}}"></script>
+{% endif %}
+<script type="text/javascript">
+    AJS.exportToGlobalScope();
+    AEV(window, 'load', ClaimSite.init);
+</script>
+
+</body>
+</html>

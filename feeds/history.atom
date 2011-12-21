@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+<id>{{page.url}}</id>
+<link rel="self" href="{{page.url}}?m=history"/>
+<title>{{page.title}}: Recent changes</title>
+<author><name>site authors</name></author>
+<updated>{{page.atom_updated}}</updated>
+{% for r in revisions %}
+<entry>
+    <id>{{page.url}}?r={{r.revision}}</id>
+    <link>{{page.url}}?r={{r.revision}}</link>
+    {% if r.revision == 1 %}
+    <title>{{r.name or 'Home'}} created</title>
+    {% elif r.deleted %}
+    <title>{{r.name or 'Home'}} deleted</title>
+    {% else %}
+    <title>{{r.name or 'Home'}} updated</title>
+    {% endif %}
+    <updated>{{r.atom_created}}</updated>
+{% if r.content %}
+    <content type="html">{{sanitize(format(r.content))}}</content>
+{% else %} 
+    <content type="html">{{r.changes}}</content>
+{% endif %}
+</entry>
+{% endfor %}
+</feed>
+

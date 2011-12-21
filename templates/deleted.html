@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}{{page.title}} has been deleted{% endblock %}
+
+{% block script %}
+<script type="text/javascript">
+    Page.url= "{{page.url}}";
+</script>
+{% endblock %}
+
+{% block content %}
+
+<h1><span class="page_name">{{page.title}}</span> has been deleted</h1>
+
+{% if not jt.site.password or logged_in or jt.site.security == 'open' %}
+<p>
+    You can <a href="#" onclick="return Page.undelete()">undo the delete</a>, 
+    <a href="{{page.url}}?m=history">view the history</a>, 
+    or create it again:
+</p>
+
+<form name="page" method="post" action="" onsubmit="Create.saveCaretPos();">
+<input type="hidden" name="m" value="create" />
+<input type="hidden" id="scroll_pos" name="scroll_pos" value="0" />
+<input type="hidden" id="caret_pos" name="caret_pos" value="0" />
+<p><textarea id="content_text" tabindex="1" name="content" cols="50" rows="10"></textarea></p>
+<p>
+    <input type="submit" tabindex="2" value="Create page" />
+</p>
+</form>
+
+{% else %}
+<p>
+    <p>But you can <a href="{{jt.site.url}}site/signin?return_to={{page.url}}?m=edit">sign in</a> to create it again.</p>
+</p>
+{% endif %}
+
+{% endblock %}

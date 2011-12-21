@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<entry xmlns='http://www.w3.org/2005/Atom' 
+       xmlns:jt='http://schemas.jottit.com/2007/Site'>
+    <id>{{jt.site.url}}</id>
+    <link href="{{jt.site.url}}" rel="self"/>
+    <title>{{jt.site.title or jt.site.public_url or jt.site.secret_url}}</title>
+    <author><name>site authors</name></author>
+    <updated>{{jt.site.atom_updated}}</updated>
+    {% if jt.site.subtitle %}<summary>{{jt.site.subtitle}}</summary>{% endif %}
+    {% if jt.site.email %}<jt:email>{{jt.site.email}}</jt:email>{% endif %}
+    {% if jt.site.security%}<jt:access>{{jt.site.security}}</jt:access>{% endif %}
+    <jt:deleted>{{str(jt.site.deleted).lower()}}</jt:deleted>
+</entry>

@@ -1,0 +1,47 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+    <title>Site not found</title>
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="stylesheet" type="text/css" media="screen, projection" href="/static/css-generated.css?{{csstime}}" />
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    <meta name="ROBOTS" content="NOINDEX, NOFOLLOW" />
+    <style type="text/css">
+        .c{{spinfield('normal')}} { visibility: normal; }
+        .c{{spinfield('spammer')}} { display: none; } 
+    </style>
+</head>
+
+<body class="site">
+    
+<h1>Site not found</h1>
+
+<p>
+    There's no site with that address. Want to make one? Just type 
+    some text in the space below and press "create".
+</p>
+
+<form name="page" method="post" action="/" onsubmit="Create.saveCaretPos();">
+<input type="hidden" name="spinner" value="{{spinner}}" />
+<input type="hidden" name="{{spinfield('timestamp')}}" value="{{timestamp}}" />
+<input type="hidden" id="scroll_pos" name="{{spinfield('scroll_pos')}}" value="0" />
+<input type="hidden" id="caret_pos" name="{{spinfield('caret_pos')}}" value="0" />
+<input type="hidden" name="{{spinfield('public_url')}}" value="{{public_url}}" />
+<input type="hidden" name="{{spinfield('secret_url')}}" value="{{secret_url}}" />
+
+<p><textarea class="c{{spinfield('normal')}}" id="content_text" tabindex="1" name="{{spinfield('content')}}" cols="50" rows="15"></textarea></p>
+<p><input class="c{{spinfield('spammer')}}" type="text" name="{{spinfield('honeypot_t0')}}" value="" /></p>
+<p>
+    <input class="c{{spinfield('normal')}}" type="submit" id="submit" value="Create a site" tabindex="2" />
+    <input class="c{{spinfield('spammer')}}" type="submit" name="{{spinfield('honeypot_s0')}}" value="I'm a spammer" />
+</p>
+</form>
+
+<script type="text/javascript" src="/static/js-generated.js?{{jstime}}"></script>
+<script type="text/javascript">
+    AJS.exportToGlobalScope();
+</script>
+
+</body>
+</html>

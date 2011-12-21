@@ -1,0 +1,95 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+    <title>The page changed while you were editing</title>
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="ROBOTS" content="NOINDEX, NOFOLLOW" />
+    <link rel="stylesheet" type="text/css" media="screen, projection" href="/static/css-generated.css?{{csstime}}" />
+    <style type="text/css">
+    .c{{spinfield('normal')}} { visibility: normal; }
+    .c{{spinfield('spammer')}} { display: none; }
+    
+    #conflicts { padding: 0 10px 0 20px; }
+    body.edit #input_and_sidebar { border: 0; padding-top: 0; }
+
+    #diff h1,
+    #diff h2,
+    #diff h3,
+    #diff h4,
+    #diff h5,
+    #diff h6 { 
+        font-family: {{Markup(font_family(design.headings_font))}}; 
+        margin: 20px 0 0 0;
+    }
+    #diff h1 { font-size: {{design.headings_size+60}}%; }
+    #diff h2 { font-size: {{design.headings_size+40}}%; }
+    #diff h3 { font-size: {{design.headings_size+20}}%; }
+    #diff h4 { font-size: {{design.headings_size}}%; }
+    #diff h5 { font-size: {{(int(design.subtitle_size) < 15 and [1] or [design.headings_size-15])[0]}}%; }
+    #diff h6 { font-size: {{(int(design.subtitle_size) < 30 and [1] or [design.headings_size-30])[0]}}%; }
+    #diff { 
+        font-family: {{Markup(font_family(design.content_font))}}; 
+        font-size: {{design.content_size}}%; 
+    }
+    </style>
+</head>
+
+<body class="edit">
+
+<form method="post" action="" id="edit_form"> 
+<input type="hidden" name="m" value="edit" />
+<input type="hidden" name="{{spinfield('current_revision')}}" value="{{revision.revision}}" />
+<input type="hidden" name="spinner" value="{{spinner}}" />
+<input type="hidden" name="{{spinfield('timestamp')}}" value="{{timestamp}}" />
+<input type="hidden" id="scroll_pos" name="{{spinfield('scroll_pos')}}" value="{{page.scroll_pos or 0}}" />
+<input type="hidden" id="caret_pos" name="{{spinfield('caret_pos')}}" value="{{page.caret_pos or 0}}" />
+
+<div id="errors">
+    Oops, <strong>someone changed the page</strong> while you were editing it.
+    Your changes are shown below on the right. Please edit them in.
+</div>
+
+<table id="input_and_sidebar" cellpadding="0" cellspacing="0">
+    <tr>
+        <td id="input">
+            <h1>New version</h1>
+            <textarea class="c{{spinfield('normal')}}" id="content_text" style="width: 100%;" name="{{spinfield('content')}}" cols="80" rows="20">{{revision.content}}</textarea><br />
+            <textarea class="c{{spinfield('spammer')}}" id="content_reversed" style="width: 1%;" name="{{spinfield('content_ignore')}}" cols="1" rows="1">{{rot13(content)}}</textarea>
+            <input class="c{{spinfield('spammer')}}" type="text" id="content_body" name="{{spinfield('honeypot_t1')}}" value="" />
+            <div id="buttons">
+                <input class="c{{spinfield('normal')}}" type="submit" name="{{spinfield('save')}}" onclick="return Edit.save();" value="Publish" />
+                <input class="c{{spinfield('spammer')}}" type="submit" name="{{spinfield('honeypot_s0')}}" onclick="return true;" value="I'm a s-p-a-m-m-e-r" />
+                or <a accesskey="g" href="./{{not page.deleted and page.name or ''}}" onclick="return Edit.cancel();">Discard</a>
+            </div>
+        </td>
+        <td id="sidebar">
+            <div id="changes">
+                <h1>Your changes</h1>
+                <div id="diff">
+                    {{Markup(diff)}}
+                </div>
+                <div id="legend">
+                    <h3>Legend:</h3>
+                <dl>
+                    <dt id="l_insert"></dt><dd>added</dd>
+                    <dt id="l_delete"></dt><dd>removed</dd>
+                    <dt id="l_replace"></dt><dd>modified</dd>
+                </dl>
+            </div>
+        </td>
+    </tr>
+</table>
+</form>
+
+<script type="text/javascript" src="/static/js-generated.js?{{jstime}}"></script>
+<script type="text/javascript">
+    AJS.exportToGlobalScope();
+    Site.url = "{{jt.site.url}}";
+    Page.url= "{{page.url}}";
+    AJS.AEV(window, 'load', Edit.conflict_init);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% block title %}Settings{% endblock %}
+
+{% block script %}
+<script type="text/javascript">
+    AEV(window, 'load', Settings.init);
+    AEV(window, 'unload', Settings.save);
+</script>
+{% endblock %}
+
+{% block content %}
+
+<form id="settings_form" action="" method="post">
+{{Markup(f.orig_url.render())}}
+
+<table id="settings" cellpadding="0" cellspacing="0">
+<tr>
+    <th>Title</th>
+    <td>
+        {{Markup(f.title.render())}}
+    </td>
+    <td class="explain">Appears at the top of every page</td>
+</tr>
+
+<tr>
+    <th>Subtitle</th>
+    <td>
+        {{Markup(f.subtitle.render())}}
+    </td>
+    <td class="explain">Appears below the title</td>
+</tr>
+
+<tr>
+    <th>Site address</th>
+    <td id="public_url_container">
+        {% if jt.site.public_url %}
+            http://<strong>{{site.public_url}}</strong>.jottit.com (<a tabindex="3" href="{{jt.site.url}}admin/change-site-address">change</a>)
+        {% else %}
+            <a tabindex="3" href="{{jt.site.url}}admin/change-site-address">Give your site an address</a>
+        {% endif %}
+    </td>
+    <td class="explain">Give your website an address that's easy to remember</td>
+</tr>
+
+{% if jt.site.password %}
+<tr>
+    <th>Password</th>
+    <td>
+        <div id="change_password"><a href="change-password" tabindex="4">Change password</a></div>
+    </td>
+    <td class="explain">With a password you can allow only the people who know it, to change the settings, edit pages or view your site</td>
+</tr>
+
+<tr>
+    <th>Email address</th>
+    <td>{{Markup(f.email.render())}}</td>
+    <td class="explain">If you forget your password, we'll send it to this address</td>
+</tr>
+
+<tr>
+    <th>Kind of site</th>
+    <td>
+        <table id="security" cellpadding="0" cellspacing="0">
+            <tr id="private">
+                <td>
+                    <input type="radio" id="private_input" name="security" value="private" {{jt.site.security == 'private' and 'checked="checked"' or ''}} tabindex="6" />
+                </td>
+                <td><label for="private_input">Private</label></td>
+                <td class="explain">Require password to view and edit site</td>
+            </tr>
+            <tr id="public">
+                <td>
+                    <input type="radio" id="public_input" name="security" value="public" {{jt.site.security == 'public' and 'checked="checked"' or ''}} tabindex="6" />
+                </td>
+                <td><label for="public_input">Public</label></td>
+                <td class="explain">Require password to edit site</td>
+            </tr>
+            <tr id="open">
+                <td>
+                    <input type="radio" id="open_input" name="security" value="open" {{jt.site.security == 'open' and 'checked="checked"' or ''}} tabindex="6" />
+                </td>
+                <td><label for="open_input">Open</label></td>
+                <td class="explain">Everyone can view and edit</td>
+            </tr>
+        </table>
+    </td>
+    <td class="explain"></td>
+</tr>
+
+{% endif %}
+</table>
+</form>
+
+<div id="export_site">
+<h2>Export your content</h2>
+
+<p>
+    <a href="export">Export your content to Atom Syndication Format</a> (only the latest version of your
+    pages is included).
+</p>
+</div>
+
+<div id="delete_site">
+<h2>Delete site</h2>
+
+<p>
+    Deleting this site will <strong>immediately</strong> take it down. <a href="{{Markup(jt.site.url)}}admin/delete" tabindex="7">Delete this site</a>.
+</p>
+
+</div>
+
+{% endblock %}

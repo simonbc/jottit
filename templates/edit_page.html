@@ -1,0 +1,204 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+    <title>{{jt.site.title and jt.site.title+': ' or ''}} Editing {{page_title(page_name)}}</title>
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="ROBOTS" content="NOINDEX, NOFOLLOW" />
+    {% if jt.testing %}
+    <link rel="stylesheet" type="text/css" media="screen, projection" href="/stylesheets/site.css" />
+    <link rel="stylesheet" type="text/css" media="screen, projection" href="/stylesheets/screen.css" />
+    <link rel="stylesheet" type="text/css" media="screen, projection" href="/stylesheets/edit.css" />
+    {% else %}
+    <link rel="stylesheet" type="text/css" media="screen, projection" href="/static/css-generated.css?{{csstime}}" />
+    {% endif %}
+    <style type="text/css">
+    .c{{spinfield('normal')}} { visibility: normal; }
+    .c{{spinfield('spammer')}} { display: none; }
+
+    #preview h1,
+    #preview h2,
+    #preview h3,
+    #preview h4,
+    #preview h5,
+    #preview h6 { 
+        font-family: {{Markup(font_family(design.headings_font))}}; 
+        margin: 20px 0 0 0;
+    }
+    #preview h1 { font-size: {{design.headings_size+70}}%; }
+    #preview h2 { font-size: {{design.headings_size+40}}%; }
+    #preview h3 { font-size: {{design.headings_size+20}}%; }
+    #preview h4 { font-size: {{design.headings_size}}%; }
+    #preview h5 { font-size: {{(int(design.subtitle_size) < 15 and [1] or [design.headings_size-15])[0]}}%; }
+    #preview h6 { font-size: {{(int(design.subtitle_size) < 30 and [1] or [design.headings_size-30])[0]}}%; }
+    #preview { 
+        font-family: {{Markup(font_family(design.content_font))}}; 
+        font-size: {{design.content_size}}%; 
+    }
+    </style>
+</head>
+
+<body class="edit">
+
+<form method="post" action="" id="edit_form"> 
+<input type="hidden" name="m" value="edit" />
+<input type="hidden" id="current_revision" name="{{spinfield('current_revision')}}" value="{{revision.revision}}" />
+<input type="hidden" name="spinner" value="{{spinner}}" />
+<input type="hidden" name="{{spinfield('timestamp')}}" value="{{timestamp}}" />
+<input type="hidden" id="scroll_pos" name="{{spinfield('scroll_pos')}}" value="{{page.scroll_pos or 0}}" />
+<input type="hidden" id="caret_pos" name="{{spinfield('caret_pos')}}" value="{{page.caret_pos or 0}}" />
+
+{% if draft and revision.content.strip() != draft.strip() %}
+<div id="has_draft">
+    <div class="close"><a href="#" onclick="return Edit.hideHasDraft();">x</a></div>
+    Here's your draft back. If you don't want it, 
+    <a href="#" onclick="return Edit.recoverLiveVersion();">revert to the live version</a>
+</div>
+{% endif %}
+
+<div id="tabs">
+    <ul>
+        <li><a href="#" onclick="return Edit.toggle_tabs();" id="show_help">Formatting help</a></li>
+        <li><a href="#" onclick="return Edit.toggle_tabs();" id="show_preview">Return to preview</a></li>
+    </ul>
+</div>
+
+<table id="input_and_sidebar" cellpadding="0" cellspacing="0">
+    <tr>
+        <td id="input">
+            <textarea class="c{{spinfield('normal')}}" id="content_text" style="width: 100%;" name="{{spinfield('content')}}" cols="80" rows="20">{{not page.deleted and content or ''}}</textarea><br />
+            <textarea class="c{{spinfield('spammer')}}" id="content_reversed" style="width: 1%;" name="{{spinfield('content_ignore')}}" cols="1" rows="1">{{not page.deleted and rot13(content) or ''}}</textarea>
+            <input class="c{{spinfield('spammer')}}" type="text" id="content_body" name="{{spinfield('honeypot_t1')}}" value="" />
+            <div id="buttons">
+                <input id="publish" class="c{{spinfield('normal')}}" type="button" name="{{spinfield('save')}}" onclick="Edit.save();" value="Publish" />
+                <input class="c{{spinfield('spammer')}}" type="button" name="{{spinfield('honeypot_s0')}}" onclick="return true;" value="I'm a s-p-a-m-m-e-r" />
+                or <a accesskey="g" href="{{jt.site.url}}{{not page.deleted and page.name or ''}}" onclick="return Edit.cancel();">Cancel</a>
+            </div>
+            <div id="draft_msg">
+                <div id="unsaved" style="display: none;">
+                    unsaved changes (<a href="#" onclick="return Edit.save_draft();">save draft</a>) 
+                </div>
+                <div id="saved" style="display: none;">
+                    draft saved
+                </div>
+            </div>
+        </td>
+        <td id="sidebar">
+            <div id="preview" style="display: none;"></div>
+            <div id="help" style="display: none;">
+            <table cellspacing="0">
+                <tr><th>To get this:</th><th>Type this:</th>
+                <tr class="gray">
+                    <td>I <em>love</em> that.</td>
+                    <td class="src">I _love_ that.</td>
+                </tr>
+                <tr>
+                    <td>Let's go. <strong>Now.</strong></td>
+                    <td class="src">Let's go. **Now.**</td>
+                </tr>
+                <tr class="gray">
+                    <td>See <a href="#about_us" class="internal">About Us</a>.</td>
+                    <td class="src">See [[About Us]].</td>
+                </tr>
+                <tr>
+                    <td><a href="#about_us" class="internal">See more...</a></td>
+                    <td class="src">[[About Us|See more...]]</td>
+                </tr>
+                <tr class="gray">
+                    <td>Visit <a href="http://jottit.com/">Jottit</a>.</td>
+                    <td class="src">Visit [Jottit](http://jottit.com).</td>
+                </tr>
+                <tr>
+                    <td><a href="http://jottit.com">http://jottit.com</a>.</td>
+                    <td class="src">&lt;http://jottit.com&gt;.</td>
+                </tr>
+                <tr class="gray">
+                    <td><h1>Headline</h1></td>
+                    <td class="src"># Headline</td>
+                </tr>
+                <tr>
+                    <td><h2>Smaller headline</h2></td>
+                    <td class="src">## Smaller headline</td>
+                </tr>
+                <tr class="gray">
+                    <td><h6>Smallest headline</h6></td>
+                    <td class="src">###### Smallest headline</td>
+                </tr>
+                <tr>
+                    <td><img src="/static/images/remote.gif" alt="Globe" /></td>
+                    <td class="src">![Globe](http://rurl.org/8dh)</td>
+                </tr>
+                <tr class="gray">
+                    <td>
+                        <ol>
+                            <li>Buy groceries
+                                <ul>
+                                    <li>Eggs</li>
+                                    <li>Milk</li>
+                                    <li>Cereal</li>
+                                </ul>
+                            </li>
+                            <li>Check mail</li>
+                            <li>Do laundry</li>
+                        </ol>
+                    </td>
+                    <td class="src">1. Buy Groceries
+    * Eggs
+    * Milk
+    * Cereal
+2. Check mail 
+3. Do laundry
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <blockquote>
+                            <p>Carpenter writes:</p>
+                            <blockquote>
+                                <p>Everyone dies.</p>
+                            </blockquote>
+                        </blockquote>
+                    </td>
+                    <td class="src">> Carpenter writes:
+> 
+>> Everyone dies.
+                    </td>
+                </tr>
+                <tr class="gray">
+                  <td>
+                    How do I love thee?<br />
+                    Let me count the ways.
+                  </td>
+                  <td>End each line with two spaces.</td>
+                </tr>
+            </table>
+            
+            <p>We use a formatting system called <a href="http://daringfireball.net/projects/markdown/">Markdown</a>. <a href="http://daringfireball.net/projects/markdown/syntax">More details...</a></p>
+            
+            </div>
+        </td>
+    </tr>
+</table>
+</form>
+
+{% if jt.testing %}
+<script type="text/javascript" src="/javascripts/AJS.js"></script>
+<script type="text/javascript" src="/javascripts/showdown.js"></script>
+<script type="text/javascript" src="/javascripts/app.js"></script>
+{% else %}
+<script type="text/javascript" src="/static/js-generated.js?{{jstime}}"></script>
+{% endif %}
+
+<script type="text/javascript">
+    AJS.exportToGlobalScope();
+    Site.url = "{{jt.site.url}}";
+    Site.security = "{{jt.site.security}}";
+    Page.name= "{{page_name}}";
+    Page.url= "{{page_url(page_name)}}";
+    Page.exists = {{page and not page.deleted and 'true' or 'false'}};
+    AJS.AEV(window, 'load', Edit.init);
+</script>
+
+</body>
+</html>

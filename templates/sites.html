@@ -1,0 +1,34 @@
+{% extends "site_base.html" %}
+
+{% set page_title = "find your site" %}
+{% set page_url = "sites" %}
+
+{% block content %}
+
+<div id="input">
+
+<div id="sites">
+
+{%if sites_sent %}
+    <div id="success">
+        {{sites_sent}}
+    </div>
+{% elif f.errors() %}
+{{Markup(f.errors())}}
+{% elif f.validates() and not len(sites) %}
+    <div id="errors">Sorry, there are no sites with that email</div>
+{% endif %}
+
+<p><strong>Enter your email</strong> and we'll send you a message 
+with links to the Jottit sites that were claimed with that email.</p>
+
+<form method="post" action="/sites">
+<input type="text" name="email" value="" size="28" /> 
+<input type="submit" value="Send me my sites!" />
+</form>
+
+</div>
+
+</div>
+
+{% endblock %}

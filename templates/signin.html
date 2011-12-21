@@ -1,0 +1,56 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+    <title>Please enter the password for the site</title>
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="stylesheet" type="text/css" media="screen, projection" href="/static/css-generated.css?{{csstime}}" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="ROBOTS" content="NOINDEX, NOFOLLOW" />
+</head>
+
+<body class="app">
+
+<div id="dialog_wrapper">
+<div id="dialog">
+
+<h1>Please enter the password for the site</h1>
+
+{% if password_sent %}
+<div id="password_sent">
+    We've sent out the secret link. Go check your email! 
+</div>
+{% endif %}
+
+<form id="signin" method="post" action="{{jt.site.url}}site/signin">
+{{Markup(f.site_id.render())}}
+{{Markup(f.return_to.render())}}
+
+{% if f.errors() %}
+{{Markup(f.errors())}}
+{% endif %}
+
+<p>{{Markup(f.password.render())}} (<a style="color: blue;" tabindex="2" href="{{jt.site.url}}site/forgot-password">I forgot the password</a>)</p>
+
+<p>{{Markup(f.remember.render())}} <label for="remember" class="checkbox">Remember me</label></p>
+
+<p><input id="signin_button" type="submit" value="Sign in" tabindex="4" /></p>
+
+</form>
+</div>
+</div>
+
+{% if jt.testing %}
+<script type="text/javascript" src="/javascripts/AJS.js"></script>
+<script type="text/javascript" src="/javascripts/app.js"></script>
+{% else %}
+<script type="text/javascript" src="/static/js-generated.js?{{jstime}}"></script>
+{% endif %}
+<script type="text/javascript">
+    AJS.exportToGlobalScope();
+    $('password').focus();
+    AEV($('signin'), 'submit', function() { $('signin_button').value='Signing in...'; $('signin_button').disabled = true; });
+</script>
+
+</body>
+</html>

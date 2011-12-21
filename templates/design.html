@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %}Design{% endblock %}
+
+{% block script %}
+<script type="text/javascript">
+    AEV(window, 'load', Design.init);
+</script>
+{% endblock %}
+
+{% block content %}
+
+<form id="design" name="design" method="post" action="" enctype="multipart/form-data">
+
+<input type="hidden" id="header_color" name="header_color" value="{{design.header_color}}" />
+<input type="hidden" id="title_color" name="title_color" value="{{design.title_color}}" />
+<input type="hidden" id="subtitle_color" name="subtitle_color" value="{{design.subtitle_color}}" />
+<input type="hidden" id="hue" name="hue" value="{{design.hue}}" />
+<input type="hidden" id="brightness" name="brightness" value="{{design.brightness}}" />
+
+<h2>Color scheme</h2>
+
+<div id="color_sliders">
+    <div id="hue_slider">
+        <div id="hue_handle"><img alt="" src="/static/images/color-handle.gif" /></div> 
+    </div> 
+    <div id="brightness_slider">
+        <div id="brightness_handle"><img alt="" src="/static/images/color-handle.gif" /></div> 
+    </div> 
+</div>
+<div id="show_color_large">
+    <div id="selected_color"></div>
+</div>
+
+<h2>Fonts</h2>
+
+<table id="fonts">
+{% for elm in ['title', 'subtitle', 'headings', 'content'] %}
+    <tr>
+        <th>{{elm.capitalize()}}:</th>
+        <td>
+            <select name="{{elm}}_font" id="{{elm}}_font">
+            {% for f in ['Arial_Black', 'Courier', 'Georgia', 'Helvetica', 'Lucida_Grande', 'Times', 'Verdana'] %}
+                <option class="{{f}}" value="{{f}}" {{getattr(design, elm+'_font') == f and 'selected="selected"' or ''}}>{{f.replace('_', ' ')}}</option>{% endfor %}
+            </select> 
+        </td>
+        <td>
+            <select name="{{elm}}_size" id="{{elm}}_size">
+            {% for s in [80, 100, 120, 140, 160, 180, 200] %}
+                <option value="{{s}}" {{getattr(design, elm+'_size') == s and 'selected="selected"' or ''}}>{{s}}%</option>
+            {% endfor %}
+            </select>
+        </td>
+    </tr>
+{% endfor %}
+</table>
+
+<div id="buttons">
+    <a href="#" onclick="return Design.revert();">Revert changes</a>
+</div>
+</form>
+
+{% endblock %}

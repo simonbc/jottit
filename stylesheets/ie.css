@@ -1,0 +1,42 @@
+* html body.app #content {
+    margin-right: 205px;
+}
+
+* html body.app #sidebar {
+    width: 190px;
+    margin-left: -190px;
+}
+
+* html body.app #header {
+    height: 2em;
+}
+
+* html body.app #sidebar #new_page input {
+    font-size: 10pt;
+    width: 150px;
+}
+
+* + html body.app #sidebar #new_page input {
+    font-size: 10pt;
+    width: 150px;
+}
+
+* html body.app #browse_diffs {
+    right: 227px; 
+}
+
+* html body.app #design #brightness_slider {
+    background-image: none;
+    filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src='/static/images/brightness.png', sizingMethod=\'scale\');
+}
+
+* html #pick_password span {
+    position: relative;
+    top: -0.2em;
+}
+
+* + html #pick_password span {
+    position: relative;
+    top: -0.2em;
+}
+

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+ 
+<title>{{jt.site.title or jt.site.public_url or jt.site.secret_url}}: Recent changes</title>
+<author><name>site authors</name></author>
+<link rel="self" href="{{jt.site.url}}sites/changes"/>
+<updated>{{jt.site.atom_updated}}</updated>
+<id>{{jt.site.url}}</id>
+{% for c in changes %}
+{% if c.name not in names %}
+<entry>
+    <id>{{c.url}}?r={{c.revision}}</id>
+    <link href="{{c.url}}?r={{c.revision}}"/>
+    {% if c.revision == 1 %}
+    <title>{{c.name or 'Home'}} created</title>
+    {% elif c.deleted %}
+    <title>{{c.name or 'Home'}} deleted</title>
+    {% else %}
+    <title>{{c.name or 'Home'}} updated</title>
+    {% endif %}
+    <updated>{{c.atom_created}}</updated>
+{% if c.content %}
+    <content type="html">{{sanitize(format(c.content))}}</content>
+{% else %} 
+    <content type="html">{{c.changes}}</content>
+{% endif %}
+</entry>
+{{ names.append(c.name) }}
+{% endif %}
+{% endfor %}
+</feed>
+

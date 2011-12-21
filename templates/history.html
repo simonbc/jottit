@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}History of {{page.title}}{% endblock %}
+
+{% block script %}
+<script type="text/javascript">
+    Page.url= "{{page.url}}";
+    AJS.AEV(window, 'load', History.init);
+</script>
+{% endblock %}
+
+{% block head %}
+<link rel='alternate' type='application/atom+xml' title='{{jt.site.title or page.url}}' href='{{page.url}}?m=history.atom' />
+{% endblock %}
+
+{% block content %}
+
+<p id="done">You're viewing the history of <strong><a href="{{page.url}}">{{page.title}}</a></strong>.
+
+<form method="get" action="" id="history_form">
+<input type="hidden" name="m" value="diff" />
+<table id="revisions" cellspacing="0">
+{% for r in revisions[(start and start-1 or start):start+10] %}
+    <tr class="{% cycle 'gray', '' %}">
+        <td style="padding: 2px 0 5px 0;">{{Markup((len(revisions) > 1 and '<input type="checkbox" name="r" value="%s" />' % r.revision or ''))}}</td>
+        <td style="white-space: nowrap;"><a href="{{page.url}}?r={{r.revision}}" title="View {{not loop.first and 'revision %s' % r.revision or 'current revision'}}">{{r.revision}}</a></td>
+        <td style="white-space: nowrap;">{{datestr(r.created, None, False)}}</td>
+        <td>{{Markup(r.changes)}}</td>
+    </tr>
+{% endfor %}
+</table>
+{% if len(revisions) > 10 %}
+<div id="pagination">
+{% if start > 0 %}
+<strong><a href="{{page.url}}?m=history&start={{start-10}}">Prev</a></strong>
+{% endif %}
+{% for i in range(pagination_start,pagination_end) %}
+{% if i == ((start+10) / 10) %}
+    {{i}}
+{% else %}
+    <a href="{{page.url}}?m=history&start={{i*10-10}}">{{i}}</a>
+{% endif %}
+{% endfor %}
+{% if start < len(revisions)-10 and len(revisions) > 10 %}
+<strong><a href="{{page.url}}?m=history&start={{start+10}}">Next</a></strong>
+{% endif %}
+</div>
+{% endif %}
+
+{% if len(revisions) > 1 %}
+<p><input type="submit" accesskey="c" value="Compare" /></p>
+{% endif %}
+</form>
+
+{% endblock %}

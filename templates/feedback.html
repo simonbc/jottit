@@ -1,0 +1,27 @@
+{% extends "site_base.html" %}
+
+{% set page_title = "Talk to us" %}
+{% set page_url = "feedback" %}
+
+{% block content %}
+
+<p>We really do love hearing from you. Tell us your thoughts, questions, complaints, and so on:</p>
+
+<div id="input">
+<form id="feedback" method="post" action="">
+    <p>
+        <label for="email">Your email</label>
+        <input type="text" name="email" id="email" tabindex="1" /> 
+    </p>
+    <p>
+        <label for="content">Your message</label>
+        <textarea tabindex="1" id="content" name="content" cols="30" rows="15"></textarea>
+    </p>
+    <p><input type="submit" value="Send" tabindex="3" /></p>
+
+</form>
+</div>
+
+<p>Or write us at <a href="mailto:feedback@jottit.com">feedback@jottit.com</a>. We personally respond to every letter.</p>
+
+{% endblock %}

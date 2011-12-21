@@ -10,6 +10,8 @@ def site_url(site=None):
         domain = 'lh.jottit.com:8080'
     elif host.endswith('jottit'):
         domain = 'jottit:8080'
+    elif host.endswith('jottit.herokuapp.com'):
+        domain = 'jottit.herokuapp.com'
     else:
         domain = 'jottit.com'
     if web.ctx.env.get('HTTPS'): https = 's'

@@ -35,7 +35,8 @@ class feedback(page):
 class test(page):
     def GET(self):
         import dispatcher, threading
-        
+        import os
+        print os.environ
         print len(threading.enumerate()), ":", threading.enumerate()
         print
         print len(dispatcher._jt)

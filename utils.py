@@ -36,6 +36,14 @@ def page_url(name):
     name = quote(name)
     return jt.site.url+name
 
+import os
+if os.environ.get('SENDGRID_USERNAME'):
+    web.config.smtp_server = 'smtp.sendgrid.net'
+    web.config.smtp_port = 587
+    web.config.smtp_username = os.environ['SENDGRID_USERNAME']
+    web.config.smtp_password = os.environ['SENDGRID_PASSWORD']
+    web.config.smtp_starttls = True
+
 def sendmail(frommail, to, subject, body):
     if not jt.testing:
         web.sendmail(frommail, to, subject, body)

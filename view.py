@@ -69,9 +69,7 @@ def wikify(text):
         # don't bother converting; it's all HTML
         return text
 
-    text = markdown.markdown(text)
-    #if len(text) < 50000:
-    #    text = markdown.markdown(text.decode('utf8')).encode('utf8')
+    text = markdown.markdown(text.decode('utf8')).encode('utf8')
 
     #@@ needs to not replace in <pre> and so on
     #@@ probably should convert url spaces to _s and stuff like that

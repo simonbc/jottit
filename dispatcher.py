@@ -33,6 +33,9 @@ del pages['page']
 def dispatch(path):
     _jt[threading.currentThread()] = web.Storage()
     
+    if web.ctx.env.get('HTTP_X_FORWARDED_FOR'):
+        web.ctx.ip = web.ctx.env['HTTP_X_FORWARDED_FOR'].split(',')[0]
+    
     try:
         jt.starttime = time.time()
         jt.thepath = web.ctx.home + web.ctx.fullpath

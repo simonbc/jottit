@@ -44,6 +44,7 @@ if os.environ.get('SENDGRID_USERNAME'):
     web.config.smtp_password = os.environ['SENDGRID_PASSWORD']
     web.config.smtp_starttls = True
 
+import sendmail
 def sendmail(frommail, to, subject, body):
     if not jt.testing:
-        web.sendmail(frommail, to, subject, body)
+        sendmail.sendmail(frommail, to, subject, body)

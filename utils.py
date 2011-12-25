@@ -14,8 +14,10 @@ def site_url(site=None):
         domain = 'jottit.herokuapp.com'
     else:
         domain = 'jottit.com'
-    if web.ctx.env.get('HTTPS'): https = 's'
-    else: https = ''
+    if web.ctx.env.get('HTTPS') or web.ctx.env.get('HTTP_X_FORWARDED_PROTO')=='https':
+        https = 's'
+    else:
+        https = ''
     site = site or jt.site
     if site.public_url:
         return 'http%s://%s.%s/' % (https, site.public_url, domain)

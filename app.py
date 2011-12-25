@@ -370,6 +370,7 @@ reply to this email (or email feedback@jottit.com).
         f.fill(secret_url=jt.site.secret_url, return_to=return_to)
         password_sent = web.cookies().has_key('password_sent')
         web.setcookie('password_sent', '', expires=-1)
+        web.header('Pragma', 'no-cache')
         render('signin', vars=locals())
 
     def POST_signin(self):

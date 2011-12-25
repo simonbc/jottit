@@ -571,6 +571,6 @@ if __name__ == "__main__":
     else:
         web.webapi.internalerror = web.debugerror
 
-    web.config.db_parameters = dict(dbn='postgres', user='jottit', pw='?Qcq:xPH7ZSzr]x)yyEfA&i!38[loO', db='jottit', host='jottit.com', maxcached=20, maxconnections=80, blocking=True)
+    web.config.db_parameters = dict(dbn='postgres', user='jottit', pw='QcqxPH7ZSzrxyyEfAi38loO', db='jottit', host='jottit.com', maxcached=20, maxconnections=80, blocking=True)
     web.config.db_printing = True
     web.run(urls, globals())

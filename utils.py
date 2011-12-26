@@ -50,3 +50,44 @@ import sendmail as sendmailmod
 def sendmail(frommail, to, subject, body):
     if not jt.testing:
         sendmailmod.sendmail(frommail, to, subject, body)
+
+def emailerrors(email_address, olderror):
+    """
+    Wraps the old `internalerror` handler (pass as `olderror`) to 
+    additionally email all errors to `email_address`, to aid in 
+    debugging production websites.
+    
+    Emails contain a normal text traceback as well as an
+    attachment containing the nice `debugerror` page.
+    """
+    def emailerrors_internal():
+        olderror()
+        tb = sys.exc_info()
+        error_name = tb[0]
+        error_value = tb[1]
+        tb_txt = ''.join(traceback.format_exception(*tb))
+        path = web.ctx.path
+        request = web.ctx.method+' '+web.ctx.home+web.ctx.fullpath
+        eaddr = email_address
+        text = ("""\
+------here----
+Content-Type: text/plain
+Content-Disposition: inline
+
+%(request)s
+
+%(tb_txt)s
+
+------here----
+Content-Type: text/html; name="bug.html"
+Content-Disposition: attachment; filename="bug.html"
+
+""" % locals()) + str(web.djangoerror())
+        sendmail(
+          "your buggy site <%s>" % eaddr,
+          "the bugfixer <%s>" % eaddr,
+          "bug: %(error_name)s: %(error_value)s (%(path)s)" % locals(),
+          text, 
+          headers={'Content-Type': 'multipart/mixed; boundary="----here----"'})
+    
+    return emailerrors_internal

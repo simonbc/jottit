@@ -32,7 +32,7 @@ del pages['page']
 
 def dispatch(path):
     _jt[threading.currentThread()] = web.Storage()
-    
+    web.header('Strict-Transport-Security', 'max-age=16070400; includeSubDomains')
     if web.ctx.env.get('HTTP_X_FORWARDED_FOR'):
         web.ctx.ip = web.ctx.env['HTTP_X_FORWARDED_FOR'].split(',')[0]
     

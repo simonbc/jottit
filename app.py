@@ -34,6 +34,8 @@ class feedback(page):
 
 class test(page):
     def GET(self):
+        i = web.input()
+        if i.get('crash'): crash
         import dispatcher, threading
         import os
         print web.ctx.environ
@@ -565,11 +567,8 @@ class disp:
     GET = POST = lambda self, path: dispatch(path)
 
 if __name__ == "__main__":
-    import sys
-    if 'fastcgi' in sys.argv: # proxy for debugmode
-        pass #web.webapi.internalerror = web.emailerrors('feedback@jottit.com', web.webapi.internalerror)
-    else:
-        web.webapi.internalerror = web.debugerror
+    web.sendmail = sendmail
+    web.webapi.internalerror = web.emailerrors('me@aaronsw.com', web.webapi.internalerror)
 
     web.config.db_parameters = dict(dbn='postgres', user='u6oil71cps8c9p', pw='pspl9af55q0hdb020j6q0c64kn', db='ds0sc5fk8iv8g', host='ec2-107-21-107-108.compute-1.amazonaws.com', maxcached=20, maxconnections=80, blocking=True)
     web.config.db_printing = True

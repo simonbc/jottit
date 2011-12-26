@@ -97,7 +97,7 @@ def unspuninput(page_name, *args, **kwargs):
             if k.startswith('honeypot_t'):
                 assert newi[k] == ""
                 del newi[k]
-    except IOError: # should be: AssertionError -- changed temporarily for debugging live site
+    except AssertionError:
         web.badrequest()
         raise StopIteration
 

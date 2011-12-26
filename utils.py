@@ -1,4 +1,4 @@
-import web, re
+import web, re, sys, traceback
 from dispatcher import jt, modes
 from urllib import quote, unquote
 

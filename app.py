@@ -200,10 +200,11 @@ class page(mode):
         if not page:
             return web.seeother(jt.site.url+page_name)
 
-        revisions = list(db.get_revisions(page.id))
         try: start = int(web.input(start=0).start)
         except: start = 0
-        pagination_end = min(11+start/10, int(math.ceil((len(revisions)+10)/10.0)))
+        max_revision = db.get_max_revisions(page_id)
+        revisions = list(db.get_revisions(page.id, start=max_revision-start))
+        pagination_end = min(11+start/10, int(math.ceil((max_revision+10)/10.0)))
         pagination_start = (pagination_end < 21 and 1 or pagination_end-20)
 
         latest = db.get_revision(page.id)

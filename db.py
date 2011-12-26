@@ -334,17 +334,24 @@ def set_caret_pos(page_id, caret_pos, scroll_pos):
     scroll_pos, caret_pos = web.intget(scroll_pos, 0), web.intget(caret_pos, 0)
     web.update('pages', where='id=$page_id', caret_pos=caret_pos, scroll_pos=scroll_pos, vars=locals())
 
-def get_revisions(page_id):
+def get_revisions(page_id, start=None):
     query = """
         SELECT   r.*,
                  to_char(r.created, 'YYYY-MM-DD"T"HH24:MI:SSZ') as atom_created
         FROM     revisions r
         WHERE    r.page_id = $page_id
         AND      r.revision > 0
+    """
+    if start:
+        query += "    AND r.revision < $start"
+    query += """
         ORDER BY revision DESC
         LIMIT 20
     """
     return web.query(query, vars=locals())
+
+def get_max_revisions(page_id):
+    return web.query("select max(revision) as c from revisions where page_id = $page_id", vars=locals())[0].c
 
 def get_revision(page_id, revision=None):
     if revision is not None:

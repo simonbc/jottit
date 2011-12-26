@@ -342,6 +342,7 @@ def get_revisions(page_id):
         WHERE    r.page_id = $page_id
         AND      r.revision > 0
         ORDER BY revision DESC
+        LIMIT 20
     """
     return web.query(query, vars=locals())
 

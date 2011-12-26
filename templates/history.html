@@ -20,7 +20,7 @@
 <form method="get" action="" id="history_form">
 <input type="hidden" name="m" value="diff" />
 <table id="revisions" cellspacing="0">
-{% for r in revisions[(start and start-1 or start):start+10] %}
+{% for r in revisions[:10] %}
     <tr class="{% cycle 'gray', '' %}">
         <td style="padding: 2px 0 5px 0;">{{Markup((len(revisions) > 1 and '<input type="checkbox" name="r" value="%s" />' % r.revision or ''))}}</td>
         <td style="white-space: nowrap;"><a href="{{page.url}}?r={{r.revision}}" title="View {{not loop.first and 'revision %s' % r.revision or 'current revision'}}">{{r.revision}}</a></td>
@@ -32,17 +32,17 @@
 {% if len(revisions) > 10 %}
 <div id="pagination">
 {% if start > 0 %}
-<strong><a href="{{page.url}}?m=history&start={{start-10}}">Prev</a></strong>
+<strong><a href="{{page.url}}?m=history&amp;start={{start-10}}">Prev</a></strong>
 {% endif %}
 {% for i in range(pagination_start,pagination_end) %}
 {% if i == ((start+10) / 10) %}
     {{i}}
 {% else %}
-    <a href="{{page.url}}?m=history&start={{i*10-10}}">{{i}}</a>
+    <a href="{{page.url}}?m=history&amp;start={{i*10-10}}">{{i}}</a>
 {% endif %}
 {% endfor %}
 {% if start < len(revisions)-10 and len(revisions) > 10 %}
-<strong><a href="{{page.url}}?m=history&start={{start+10}}">Next</a></strong>
+<strong><a href="{{page.url}}?m=history&amp;start={{start+10}}">Next</a></strong>
 {% endif %}
 </div>
 {% endif %}

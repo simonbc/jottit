@@ -402,6 +402,7 @@ def get_changes():
         AND      p.id = r.page_id
         AND      r.revision > 0
         ORDER BY created DESC
+        LIMIT 20
     """
     changes = web.query(query, vars=locals())
 

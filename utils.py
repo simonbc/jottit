@@ -47,9 +47,9 @@ if os.environ.get('SENDGRID_USERNAME'):
     web.config.smtp_starttls = True
 
 import sendmail as sendmailmod
-def sendmail(frommail, to, subject, body):
+def sendmail(frommail, to, subject, body, headers=None):
     if not jt.testing:
-        sendmailmod.sendmail(frommail, to, subject, body)
+        sendmailmod.sendmail(frommail, to, subject, body, headers=headers)
 
 def emailerrors(email_address, olderror):
     """

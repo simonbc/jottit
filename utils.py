@@ -13,7 +13,7 @@ def site_url(site=None):
     elif host.endswith('jottit.herokuapp.com'):
         domain = 'jottit.herokuapp.com'
     else:
-        domain = 'jottit.com'
+        domain = 'www.jottit.com'
     if web.ctx.env.get('HTTPS') or web.ctx.env.get('HTTP_X_FORWARDED_PROTO')=='https':
         https = 's'
     else:

@@ -242,8 +242,7 @@ def get_page(page_name):
     site_id = jt.site.id
     query1 = """SELECT   p.*
                FROM     pages p,
-                        sites s,
-                        revisions r
+                        sites s
                WHERE    s.id = $site_id
                AND      p.site_id = s.id
                AND      lower(p.name) = $page_name

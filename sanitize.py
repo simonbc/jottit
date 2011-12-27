@@ -6,7 +6,7 @@ __author__ = ["Mark Pilgrim <http://diveintomark.org/>",
               "Aaron Swartz <http://www.aaronsw.com/>"]
 __contributors__ = ["Sam Ruby <http://intertwingly.net/>"]
 __license__ = "BSD"
-__version__ = "0.32"
+__version__ = "0.32 hacked"
 
 _debug = 0
 
@@ -229,9 +229,10 @@ class _HTMLSanitizer(_BaseHTMLProcessor):
                      ('q', 'cite'),
                      ('script', 'src')]
 
-    def __init__(self, baseuri, encoding):
+    def __init__(self, baseuri, encoding, nofollow=True):
         _BaseHTMLProcessor.__init__(self, encoding)
         self.baseuri = baseuri
+        self.nofollow = nofollow
         # urlparse caches URL parsing for some reason
         # and its cache doesn't distinguish between Unicode and non-unicode
         # so it caches the Unicode version feedparser sends it
@@ -270,6 +271,7 @@ class _HTMLSanitizer(_BaseHTMLProcessor):
             attrs = self.normalize_attrs(attrs)
             attrs = [(key, value) for key, value in attrs if key in self.acceptable_attributes]
             attrs = [(key, ((tag, key) in self.relative_uris) and self.resolveURI(value) or value) for key, value in attrs]
+            if tag == 'a' and self.nofollow: attrs.append(('rel', 'nofollow'))
 
             if tag not in self.elements_no_end_tag:
                 self.tag_stack.append(tag)
@@ -306,8 +308,8 @@ class _HTMLSanitizer(_BaseHTMLProcessor):
             text = text.replace('<', '')
             _BaseHTMLProcessor.handle_data(self, text)
 
-def HTML(htmlSource, encoding='utf8', baseuri=None):
-    p = _HTMLSanitizer(baseuri, encoding)
+def HTML(htmlSource, encoding='utf8', baseuri=None, nofollow=True):
+    p = _HTMLSanitizer(baseuri, encoding, nofollow)
     p.feed(htmlSource)
     data = p.output()
     if TIDY_MARKUP:

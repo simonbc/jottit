@@ -130,20 +130,20 @@ class page(mode):
         render('edit_page', vars=locals())
 
     def POST_edit(self, page_name=''):
-        i = web.input('spinner')
-        spinner = i.spinner
+        i = web.input('spinner', recaptcha=False)
+        spinner, recaptcha_p = i.spinner, i.recaptcha
         error_to_use = None
-        if i.get('recaptcha'):
+        if recaptcha_p:
             c = recaptcha.submit(i.recaptcha_challenge_field, i.recaptcha_response_field, os.environ['RECAPTCHA_PRIVKEY'], web.ctx.ip)
             if not c.is_valid: error_to_use = c.error_code
-        if not i.get('recaptcha') or error_to_use:
-            captcha = recaptcha.displayhtml(os.environ['RECAPTCHA_PUBKEY'], use_ssl=True, error=error_to_use)
-            timestamp, spinner, spinfield = auth.spinner(page_name)
-            return render('captcha', vars=locals())
         i = auth.unspuninput(page_name, 'content', 'scroll_pos', 'caret_pos',
           'current_revision', save=False, delete=False)
         page = db.get_page(page_name)
         content = re.sub(r'(\r\n|\r)', '\n', i.content)
+        if (jt.site.security=='open' and not auth.logged_in()) and (not recaptcha_p or error_to_use):
+            captcha = recaptcha.displayhtml(os.environ['RECAPTCHA_PUBKEY'], use_ssl=True, error=error_to_use)
+            timestamp, spinner, spinfield = auth.spinner(page_name)
+            return render('captcha', vars=locals())
         if not page:
             db.new_page(page_name, content, i.scroll_pos, i.caret_pos)
             page = db.get_page(page_name)

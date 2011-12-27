@@ -77,11 +77,11 @@ def get_site(**vars):
     web.query("SET statement_timeout = 6000")
     if vars is None: vars = {}
     vars = dict([(c, str(v)) for (c, v) in vars.items()])
-    if vars.has_key('id'):
-        vars['s.id'] = vars['id']
-        del(vars['id'])
-        
-    where_clause = ' AND '.join('%s = $%s' % (k, k) for k in vars.keys())
+    def pfix(s):
+        if s == 'id': return 's.id'
+        else: return s
+    
+    where_clause = ' AND '.join('%s = $%s' % (pfix(k), k) for k in vars.keys())
 
     query = """SELECT   s.*,
                         to_char(s.updated, 'YYYY-MM-DD"T"HH24:MI:SSZ') as atom_updated

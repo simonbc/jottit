@@ -359,10 +359,11 @@ def get_max_revisions(page_id):
     return web.query("select max(revision) as c from revisions where page_id = $page_id", vars=locals())[0].c
 
 def get_revision(page_id, revision=None):
-    try:
-        revision = int(revision)
-    except ValueError:
-        return None
+    if revision:
+        try:
+            revision = int(revision)
+        except ValueError:
+            return None
     if revision is not None:
         d = web.select('revisions', where='page_id=$page_id AND revision=$revision', limit=1, vars=locals())
     else:

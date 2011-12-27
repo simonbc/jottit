@@ -78,6 +78,20 @@ def wikify(text):
 
     return text
 
+import markdown.inlinepatterns
+old_sanitize_url = markdown.inlinepatterns.sanitize_url
+def safe_sanitize_url(*a, **kw):
+    """
+    urlparse crashes on urls of the form `http://opengov.es]` because it 
+    thinks the closing square bracket is an IPv6 URL. We catch crashes
+    like this and return nothing so at leas the site doesn't fall over.
+    """
+    try:
+        return old_sanitize_url(*a, **kw)
+    except ValueError:
+        return ''
+markdown.inlinepatterns.sanitize_url = safe_sanitize_url
+
 def serialize_json(**vars):
     _escapes = {'\n': '\\n', '\r': '\\r', '"':'\\"', "'":"\\'", ":":"\:"}
     def encode(value):

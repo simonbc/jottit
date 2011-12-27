@@ -386,6 +386,7 @@ def get_draft(page_id):
     return (d and d[0]) or None
 
 def get_changes():
+    return [] # impossible query
     site_id = jt.site.id
     query = """
         SELECT   p.name,

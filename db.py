@@ -80,14 +80,16 @@ def get_site(**vars):
     if vars.has_key('id'):
         vars['s.id'] = vars['id']
         del(vars['id'])
+        
+    where_clause = ' AND '.join('%s = $%s' % (k, k) for k in vars.keys())
 
     query = """SELECT   s.*,
                         to_char(s.updated, 'YYYY-MM-DD"T"HH24:MI:SSZ') as atom_updated
                FROM     sites s
-               WHERE    %(where)s
+               WHERE    %s
                LIMIT 1
-            """ % dict(where=web.db.sqlwhere(vars, ', '))
-    d = web.query(query, vars=locals())
+            """ % where_clause
+    d = web.query(query, vars=vars)
     d = (d and d[0]) or None
     if d:
         d.url = utils.site_url(d)

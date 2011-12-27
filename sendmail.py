@@ -1,4 +1,4 @@
-import os
+import os, subprocess
 from web import webapi, dictadd
 
 def safestr(obj, encoding='utf-8'):

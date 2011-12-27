@@ -1,4 +1,5 @@
-import web, re, time
+import web, re, time, os
+import recaptcha.client.captcha as recaptcha
 import db, forms, auth
 from dispatcher import *
 from diff import *
@@ -129,7 +130,16 @@ class page(mode):
         render('edit_page', vars=locals())
 
     def POST_edit(self, page_name=''):
-        spinner = web.input('spinner').spinner
+        i = web.input('spinner')
+        spinner = i.spinner
+        error_to_use = None
+        if i.get('recaptcha'):
+            c = recaptcha.submit(i.recaptcha_challenge_field, i.recaptcha_response_field, os.environ['RECAPTCHA_PRIVKEY'], web.ctx.ip)
+            if not c.is_valid: error_to_use = c.error_code
+        if not i.get('recaptcha') or error_to_use:
+            captcha = recaptcha.displayhtml(os.environ['RECAPTCHA_PUBKEY'], use_ssl=True, error=error_to_use)
+            timestamp, spinner, spinfield = auth.spinner(page_name)
+            return render('captcha', vars=locals())
         i = auth.unspuninput(page_name, 'content', 'scroll_pos', 'caret_pos',
           'current_revision', save=False, delete=False)
         page = db.get_page(page_name)

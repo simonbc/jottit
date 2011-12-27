@@ -90,7 +90,7 @@ def safe_sanitize_url(self, url):
         return old_sanitize_url(self, url)
     except ValueError:
         return ''
-markdown.inlinepatterns.sanitize_url = safe_sanitize_url
+markdown.inlinepatterns.LinkPattern.sanitize_url = safe_sanitize_url
 
 def serialize_json(**vars):
     _escapes = {'\n': '\\n', '\r': '\\r', '"':'\\"', "'":"\\'", ":":"\:"}

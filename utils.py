@@ -19,8 +19,12 @@ def site_url(site=None):
     else:
         https = ''
     site = site or jt.site
+    if domain == 'www.jottit.com':
+        littledomain = 'jottit.com'
+    else:
+        littledomain = domain
     if site.public_url:
-        return 'http%s://%s.%s/' % (https, site.public_url, domain)
+        return 'http%s://%s.%s/' % (https, site.public_url, littledomain)
     else:
         return 'http%s://%s/%s/' % (https, domain, site.secret_url)
 

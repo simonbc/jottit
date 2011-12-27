@@ -241,6 +241,10 @@ def get_draft(page_id):
 
 def get_page(page_name):
     page_name = page_name.lower()
+    try:
+        page_name.decode('utf8')
+    except UnicodeDecodeError:
+        return None
     site_id = jt.site.id
     query1 = """SELECT   p.*
                FROM     pages p,

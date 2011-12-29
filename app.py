@@ -261,7 +261,10 @@ class page(mode):
             else: ib = ia - 1
         elif len(i.r) == 2:
             ia, ib = i.r
-            ia, ib = int(ia), int(ib)
+            try:
+                ia, ib = int(ia), int(ib)
+            except ValueError:
+                return web.badrequest()
         else:
             return web.badrequest()
 

@@ -550,6 +550,7 @@ class admin(mode):
         web.seeother('settings')
 
     def GET_export(self):
+        return web.badrequest()
         updated = time.strftime('%Y-%m-%dT%H:%M:%SZ')
         pages = db.get_page_export()
         web.ctx.headers = [('Content-Type', 'application/force-download')]

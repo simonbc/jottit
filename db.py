@@ -184,6 +184,7 @@ def get_page_export():
         AND    p.deleted = false
         AND    r.revision > 0
         GROUP BY p.id, p.name
+        LIMIT 30
     """
     pages = web.query(query, vars=locals())
     pages_list = []

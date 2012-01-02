@@ -219,7 +219,7 @@ def hide_primer():
 def get_num_revisions(page_name):
     page_name = page_name.lower()
     site_id = jt.site.id
-    query = """SELECT count(*)
+    query = """SELECT max(r.revision)
                FROM   revisions r,
 	              pages p,
 		      sites s
@@ -229,7 +229,7 @@ def get_num_revisions(page_name):
                AND    r.revision > 0
                AND    lower(p.name) = $page_name"""
     d = web.query(query, vars=locals())
-    return d[0].count
+    return d[0].max
 
 def get_draft(page_id):
      query = """SELECT   content

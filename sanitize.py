@@ -309,9 +309,12 @@ class _HTMLSanitizer(_BaseHTMLProcessor):
             _BaseHTMLProcessor.handle_data(self, text)
 
 def HTML(htmlSource, encoding='utf8', baseuri=None, nofollow=True):
-    p = _HTMLSanitizer(baseuri, encoding, nofollow)
-    p.feed(htmlSource)
-    data = p.output()
+    try:
+        p = _HTMLSanitizer(baseuri, encoding, nofollow)
+        p.feed(htmlSource)
+        data = p.output()
+    except:
+        data = '' # SGML crash
     if TIDY_MARKUP:
         # loop through list of preferred Tidy interfaces looking for one that's installed,
         # then set up a common _tidy function to wrap the interface-specific API.

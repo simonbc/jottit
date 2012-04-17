@@ -217,7 +217,7 @@ def hide_primer():
     web.update('sites', where="id=$site_id", show_primer="f", vars=locals())
 
 def get_num_revisions(page_name):
-    page_name = page_name.lower()
+    #page_name = page_name.lower()
     site_id = jt.site.id
     query = """SELECT max(r.revision)
                FROM   revisions r,
@@ -241,7 +241,7 @@ def get_draft(page_id):
      return (d and d[0]) or None
 
 def get_page(page_name):
-    page_name = page_name.lower()
+    #page_name = page_name.lower()
     try:
         page_name.decode('utf8')
     except UnicodeDecodeError:
@@ -252,7 +252,7 @@ def get_page(page_name):
                         sites s
                WHERE    s.id = $site_id
                AND      p.site_id = s.id
-               AND      lower(p.name) = $page_name
+               AND      lower(p.name) = lower($page_name)
                LIMIT 1"""
     d1 = web.query(query1, vars=locals())
     d1 = (d1 and d1[0]) or None

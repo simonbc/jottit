@@ -584,5 +584,7 @@ class disp:
 if __name__ == "__main__":
     web.webapi.internalerror = emailerrors('feedback@jottit.com', web.webapi.internalerror)
     #web.webapi.internalerror = web.debugerror
-    web.config.db_parameters = dburl2dict(os.environ['DATABASE_URL']) + dict(maxcached=20, maxconnections=80, blocking=True)
+    db = dburl2dict(os.environ['DATABASE_URL'])
+    db.update(dict(maxcached=20, maxconnections=80, blocking=True))
+    web.config.db_parameters = db
     web.run(urls, globals())

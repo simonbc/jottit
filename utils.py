@@ -94,3 +94,12 @@ Content-Disposition: attachment; filename="bug.html"
           headers={'Content-Type': 'multipart/mixed; boundary="----here----"'})
     
     return emailerrors_internal
+
+def dburl2dict(url):
+    dbn, rest = url.split('://', 1)
+    user, rest = rest.split(':', 1)
+    pw, rest = rest.split('@', 1)
+    host, rest = rest.split(':', 1)
+    port, rest = rest.split('/', 1)
+    db = rest
+    return dict(dbn=dbn, user=user, pw=pw, db=db, host=host)

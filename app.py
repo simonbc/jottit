@@ -582,7 +582,7 @@ class disp:
     GET = POST = lambda self, path: dispatch(path)
 
 if __name__ == "__main__":
-    web.webapi.internalerror = emailerrors('feedback@jottit.com', web.webapi.internalerror)
+    #web.webapi.internalerror = emailerrors('feedback@jottit.com', web.webapi.internalerror)
     #web.webapi.internalerror = web.debugerror
     tmpdb = dburl2dict(os.environ['DATABASE_URL'])
     tmpdb.update(dict(maxcached=20, maxconnections=80, blocking=True))

@@ -72,9 +72,6 @@ def new_site(content, scroll_pos, caret_pos, secret_url, public_url, partner):
     jt.site = get_site(id=site_id)
 
 def get_site(**vars):
-    try: web.query("COMMIT")
-    except: pass
-    web.query("SET statement_timeout = 6000")
     if vars is None: vars = {}
     vars = dict([(c, str(v)) for (c, v) in vars.items()])
     def pfix(s):

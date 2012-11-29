@@ -551,6 +551,7 @@ class admin(mode):
 
     def GET_export(self):
         return web.badrequest()
+    def GET_export_ks9a8usijo(self):
         updated = time.strftime('%Y-%m-%dT%H:%M:%SZ')
         pages = db.get_page_export()
         web.ctx.headers = [('Content-Type', 'application/force-download')]

@@ -2,7 +2,7 @@ import web, time, datetime, hmac, urllib, itertools, random
 import db, forms, view
 from dispatcher import jt
 
-SECRET = "83me802jd7o88"
+SECRET = "83me802jd7o88fdf"
 
 def auth(method):
     if not jt.site.password:

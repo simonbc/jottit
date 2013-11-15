@@ -1,4 +1,0 @@
-psycopg2==2.0.6
-DBUtils==0.9.4
-markdown2==1.0.1.19
-recaptcha-client==1.0.6

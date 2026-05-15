@@ -27,9 +27,7 @@ def _seed_site(db_engine: Engine, *, secret_url: str, public_url: str | None = N
 # ---- GET edit form ----
 
 
-def test_get_edit_renders_form_with_current_content(
-    client: FlaskClient, db_engine: Engine
-) -> None:
+def test_get_edit_renders_form_with_current_content(client: FlaskClient, db_engine: Engine) -> None:
     _seed_site(db_engine, secret_url="e1", public_url="alpha")
 
     response = client.get("/?m=edit", base_url="http://alpha.jottit.test/")

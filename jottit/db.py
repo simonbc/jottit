@@ -417,9 +417,7 @@ def delete_draft(conn: Connection, *, page_id: int) -> None:
 
 
 def get_draft(conn: Connection, *, page_id: int) -> Row | None:
-    return conn.execute(
-        select(drafts).where(drafts.c.page_id == page_id).limit(1)
-    ).first()
+    return conn.execute(select(drafts).where(drafts.c.page_id == page_id).limit(1)).first()
 
 
 def new_draft(conn: Connection, *, page_id: int, content: str) -> None:
@@ -429,9 +427,7 @@ def new_draft(conn: Connection, *, page_id: int, content: str) -> None:
     on idle; subsequent saves replace the prior content instead of
     accumulating drafts.
     """
-    existing = conn.execute(
-        select(drafts.c.id).where(drafts.c.page_id == page_id)
-    ).first()
+    existing = conn.execute(select(drafts.c.id).where(drafts.c.page_id == page_id)).first()
     if existing is None:
         conn.execute(insert(drafts).values(page_id=page_id, content=content))
     else:

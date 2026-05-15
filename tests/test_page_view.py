@@ -136,9 +136,7 @@ def test_home_via_secret_url_renders(client: FlaskClient, db_engine: Engine) -> 
     assert "secret hello" in response.data.decode()
 
 
-def test_wikilinks_resolve_against_secret_site_root(
-    client: FlaskClient, db_engine: Engine
-) -> None:
+def test_wikilinks_resolve_against_secret_site_root(client: FlaskClient, db_engine: Engine) -> None:
     _seed_site(db_engine, secret_url="abc34", content="see [[Notes]]")
 
     response = client.get("/abc34/", base_url=APEX)
@@ -147,9 +145,7 @@ def test_wikilinks_resolve_against_secret_site_root(
     assert 'href="/abc34/notes"' in response.data.decode()
 
 
-def test_wikilinks_resolve_against_subdomain_root(
-    client: FlaskClient, db_engine: Engine
-) -> None:
+def test_wikilinks_resolve_against_subdomain_root(client: FlaskClient, db_engine: Engine) -> None:
     _seed_site(db_engine, secret_url="s8", public_url="omega", content="see [[Notes]]")
 
     response = client.get("/", base_url="http://omega.jottit.test/")

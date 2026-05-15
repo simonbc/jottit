@@ -14,7 +14,8 @@ from jottit.db import (
     undelete_page,
     update_page,
 )
-from jottit.render import format_content, page_slug
+from jottit.render import format_content
+from jottit.urls import page_slug, site_root
 
 
 def home(site_slug: str) -> ResponseReturnValue:
@@ -55,7 +56,7 @@ def _render_view(conn: Connection, page_name: str) -> ResponseReturnValue:
     if revision is None:
         abort(404)
 
-    rendered = format_content(revision.content, site_root=_site_root())
+    rendered = format_content(revision.content, site_root=site_root())
     return render_template(
         "view_page.html",
         page_name=page_name,
@@ -143,10 +144,4 @@ def _normalize_line_endings(text: str) -> str:
 
 
 def _redirect_to(page_name: str) -> ResponseReturnValue:
-    return redirect(_site_root() + page_slug(page_name), code=303)
-
-
-def _site_root() -> str:
-    if request.blueprint == "secret":
-        return f"/{g.site_slug}/"
-    return "/"
+    return redirect(site_root() + page_slug(page_name), code=303)

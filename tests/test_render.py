@@ -1,17 +1,6 @@
 from __future__ import annotations
 
-from jottit.render import format_content, page_slug
-
-# ---- page_slug ----
-
-
-def test_page_slug_lowercases_and_underscores_spaces() -> None:
-    assert page_slug("About Us") == "about_us"
-
-
-def test_page_slug_percent_encodes_unsafe_chars() -> None:
-    assert page_slug("café") == "caf%C3%A9"
-
+from jottit.render import format_content
 
 # ---- markdown ----
 

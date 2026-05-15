@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 import re
-from urllib.parse import quote
 
 import mistune
 import nh3
+
+from jottit.urls import page_slug
 
 # Backreference avoids matching escaped brackets: `\[[not a link]]`.
 _WIKILINK_RE = re.compile(r"(?<!\\)\[\[(.*?)(?:\|(.*?))?\]\]")
@@ -13,11 +14,6 @@ _WIKILINK_RE = re.compile(r"(?<!\\)\[\[(.*?)(?:\|(.*?))?\]\]")
 # markdown2's `markdown-in-html` extra). nh3 cleans the output before it
 # reaches the browser, so unsafe tags don't survive.
 _markdown = mistune.create_markdown(escape=False)
-
-
-def page_slug(name: str) -> str:
-    """URL slug for a page name: lowercased, spaces → underscores, percent-encoded."""
-    return quote(name.lower().replace(" ", "_"))
 
 
 def _wikify(html: str, *, site_root: str) -> str:

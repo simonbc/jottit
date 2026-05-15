@@ -316,8 +316,9 @@ def get_request_conn() -> Connection | None:
     """Return the connection scoped to the current request, opening one if needed.
 
     Reuses `g.db_conn` if already present (e.g. set by a test fixture);
-    otherwise opens a fresh connection from the app's engine and marks it
-    for closing at teardown. Returns `None` if no engine is configured.
+    otherwise opens a fresh connection from the app's engine, begins a
+    transaction, and marks it for closing at teardown. Returns `None` if
+    no engine is configured.
     """
     if "db_conn" in g:
         return g.db_conn
@@ -327,11 +328,22 @@ def get_request_conn() -> Connection | None:
         return None
 
     g.db_conn = engine.connect()
+    g._db_txn = g.db_conn.begin()
     g._db_conn_owned = True
     return g.db_conn
 
 
 def close_request_conn(exc: BaseException | None) -> None:
-    """teardown_request hook: close the connection if we opened it ourselves."""
-    if g.get("_db_conn_owned", False):
+    """teardown_request hook: commit or roll back the connection we opened."""
+    if not g.get("_db_conn_owned", False):
+        return
+
+    txn = g._db_txn
+    try:
+        if txn.is_active:
+            if exc is None:
+                txn.commit()
+            else:
+                txn.rollback()
+    finally:
         g.db_conn.close()

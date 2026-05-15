@@ -1,30 +1,13 @@
 from __future__ import annotations
 
-from flask import Blueprint, request
+from flask import Blueprint
+
+from jottit.views import root as views
 
 root_bp = Blueprint("root", __name__)
 
-
-@root_bp.route("/", methods=["GET", "POST"])
-def index() -> str:
-    return f"jottit:index {request.method} (TODO)"
-
-
-@root_bp.route("/sites", methods=["GET", "POST"])
-def sites() -> str:
-    return f"jottit:sites {request.method} (TODO)"
-
-
-@root_bp.route("/about")
-def about() -> str:
-    return "jottit:about (TODO)"
-
-
-@root_bp.route("/help")
-def help_page() -> str:
-    return "jottit:help (TODO)"
-
-
-@root_bp.route("/feedback", methods=["GET", "POST"])
-def feedback() -> str:
-    return f"jottit:feedback {request.method} (TODO)"
+root_bp.add_url_rule("/", view_func=views.index, methods=["GET", "POST"])
+root_bp.add_url_rule("/sites", view_func=views.sites, methods=["GET", "POST"])
+root_bp.add_url_rule("/about", view_func=views.about)
+root_bp.add_url_rule("/help", view_func=views.help_page)
+root_bp.add_url_rule("/feedback", view_func=views.feedback, methods=["GET", "POST"])

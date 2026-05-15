@@ -7,8 +7,6 @@ from flask.testing import FlaskClient
 @pytest.mark.parametrize(
     ("method", "path", "stub_prefix"),
     [
-        ("GET", "/", b"jottit:index"),
-        ("POST", "/", b"jottit:index"),
         ("GET", "/about", b"jottit:about"),
         ("GET", "/help", b"jottit:help"),
         ("GET", "/sites", b"jottit:sites"),

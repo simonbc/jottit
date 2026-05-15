@@ -14,6 +14,7 @@ from jottit.db import (
     get_revisions,
     get_revisions_count,
     new_page,
+    new_revision,
     undelete_page,
     update_page,
 )
@@ -42,6 +43,10 @@ def view(site_slug: str, page_name: str) -> ResponseReturnValue:
     if request.method == "POST":
         if mode == "current_revision":
             return _current_revision(conn, page_name)
+        if mode == "revert":
+            return _revert(conn, page_name)
+        if mode == "undelete":
+            return _undelete(conn, page_name)
         return _save_edit(conn, page_name)
 
     if mode == "edit":
@@ -121,9 +126,7 @@ def _render_diff(conn: Connection, page_name: str) -> ResponseReturnValue:
     )
 
 
-def _resolve_diff_revisions(
-    conn: Connection, *, page_id: int
-) -> tuple[Row | None, Row | None]:
+def _resolve_diff_revisions(conn: Connection, *, page_id: int) -> tuple[Row | None, Row | None]:
     """Pick the (older, newer) revisions to diff based on the `r` query params."""
     rs = request.args.getlist("r")
     if len(rs) > 2:
@@ -197,6 +200,62 @@ def _render_edit_form(conn: Connection, page_name: str) -> ResponseReturnValue:
         content=content,
         current_revision=revision.revision if revision else 0,
     )
+
+
+def _revert(conn: Connection, page_name: str) -> ResponseReturnValue:
+    """Restore a page's content to an earlier revision (recorded as a new revision)."""
+    page = get_page(conn, site_id=g.site.id, page_name=page_name)
+    if page is None:
+        abort(400)
+
+    target_revision = request.form.get("r", type=int)
+    if target_revision is None:
+        abort(400)
+    target = get_revision(conn, page_id=page.id, revision=target_revision)
+    if target is None:
+        abort(400)
+
+    # Undelete first so update_page sees a live page; update_page then
+    # records the revert as a normal revision with its own diff summary.
+    if page.deleted:
+        undelete_page(conn, page_id=page.id, name=page_name)
+    latest = get_revision(conn, page_id=page.id)
+    if latest is not None and latest.content != target.content:
+        update_page(conn, page_id=page.id, content=target.content, ip=request.remote_addr)
+
+    return _redirect_to(page_name)
+
+
+def _undelete(conn: Connection, page_name: str) -> ResponseReturnValue:
+    """Restore a deleted page and append an "undeleted" revision.
+
+    The previous revision (before the delete sentinel) had the real
+    content; we re-record it so the page's latest revision shows the
+    live body again.
+    """
+    page = get_page(conn, site_id=g.site.id, page_name=page_name)
+    if page is None:
+        abort(400)
+
+    undelete_page(conn, page_id=page.id, name=page_name)
+    latest = get_revision(conn, page_id=page.id)
+    if latest is None:
+        return _redirect_to(page_name)
+
+    # The "deleted" sentinel is the latest revision; the one before holds
+    # the last real content. Restore that.
+    pre_delete = get_revision(conn, page_id=page.id, revision=max(latest.revision - 1, 1))
+    if pre_delete is not None:
+        new_revision(
+            conn,
+            page_id=page.id,
+            revision=latest.revision + 1,
+            content=pre_delete.content,
+            changes="<em>Delete undone.</em>",
+            ip=request.remote_addr,
+        )
+
+    return _redirect_to(page_name)
 
 
 def _current_revision(conn: Connection, page_name: str) -> ResponseReturnValue:

@@ -13,10 +13,13 @@ from jottit.db import (
     delete_site,
     designs,
     drafts,
+    get_changes,
     get_design,
     get_page,
     get_pages_for_export,
     get_revision,
+    get_revisions,
+    get_revisions_count,
     get_site,
     is_public_url_available,
     new_page,
@@ -655,3 +658,110 @@ def test_get_pages_for_export_scoped_to_site(db_conn: Connection) -> None:
 
     names = [r.page_name for r in rows]
     assert "b-page" not in names
+
+
+# ---- get_revisions / get_revisions_count ----
+
+
+def test_get_revisions_returns_newest_first(db_conn: Connection) -> None:
+    site_id = new_site(db_conn, content="v1", secret_url="gr1")
+    page = get_page(db_conn, site_id=site_id, page_name="")
+    assert page is not None
+    update_page(db_conn, page_id=page.id, content="v2")
+    update_page(db_conn, page_id=page.id, content="v3")
+
+    rows = get_revisions(db_conn, page_id=page.id)
+
+    assert [r.revision for r in rows] == [3, 2, 1]
+    assert rows[0].content == "v3"
+
+
+def test_get_revisions_limit_caps_results(db_conn: Connection) -> None:
+    site_id = new_site(db_conn, content="r1", secret_url="gr2")
+    page = get_page(db_conn, site_id=site_id, page_name="")
+    assert page is not None
+    for n in range(2, 6):
+        update_page(db_conn, page_id=page.id, content=f"r{n}")
+
+    rows = get_revisions(db_conn, page_id=page.id, limit=2)
+
+    assert len(rows) == 2
+    assert [r.revision for r in rows] == [5, 4]
+
+
+def test_get_revisions_before_pages_through_history(db_conn: Connection) -> None:
+    site_id = new_site(db_conn, content="r1", secret_url="gr3")
+    page = get_page(db_conn, site_id=site_id, page_name="")
+    assert page is not None
+    for n in range(2, 6):
+        update_page(db_conn, page_id=page.id, content=f"r{n}")
+
+    page_one = get_revisions(db_conn, page_id=page.id, limit=2)
+    page_two = get_revisions(db_conn, page_id=page.id, before=page_one[-1].revision, limit=2)
+
+    assert [r.revision for r in page_one] == [5, 4]
+    assert [r.revision for r in page_two] == [3, 2]
+
+
+def test_get_revisions_count_counts_non_sentinel_revisions(db_conn: Connection) -> None:
+    site_id = new_site(db_conn, content="r1", secret_url="gr4")
+    page = get_page(db_conn, site_id=site_id, page_name="")
+    assert page is not None
+    update_page(db_conn, page_id=page.id, content="r2")
+    update_page(db_conn, page_id=page.id, content="r3")
+
+    assert get_revisions_count(db_conn, page_id=page.id) == 3
+
+
+# ---- get_changes ----
+
+
+def test_get_changes_returns_revisions_across_all_pages(db_conn: Connection) -> None:
+    site_id = new_site(db_conn, content="home v1", secret_url="ch1")
+    new_page(db_conn, site_id=site_id, name="notes", content="notes v1")
+
+    rows = get_changes(db_conn, site_id=site_id)
+
+    by_page = {(r.page_name, r.revision): r for r in rows}
+    assert ("", 1) in by_page
+    assert ("notes", 1) in by_page
+
+
+def test_get_changes_orders_by_created_desc(db_conn: Connection) -> None:
+    site_id = new_site(db_conn, content="home v1", secret_url="ch2")
+    home = get_page(db_conn, site_id=site_id, page_name="")
+    assert home is not None
+    update_page(db_conn, page_id=home.id, content="home v2")
+    new_page(db_conn, site_id=site_id, name="late", content="late v1")
+
+    rows = get_changes(db_conn, site_id=site_id)
+
+    # Newest created first; the just-inserted "late" page leads.
+    assert rows[0].page_name == "late"
+
+
+def test_get_changes_limit_and_before_paginate(db_conn: Connection) -> None:
+    site_id = new_site(db_conn, content="home v1", secret_url="ch3")
+    home = get_page(db_conn, site_id=site_id, page_name="")
+    assert home is not None
+    for n in range(2, 6):
+        update_page(db_conn, page_id=home.id, content=f"home v{n}")
+
+    page_one = get_changes(db_conn, site_id=site_id, limit=2)
+    page_two = get_changes(db_conn, site_id=site_id, before=page_one[-1].id, limit=2)
+
+    assert len(page_one) == 2
+    assert len(page_two) == 2
+    page_one_ids = {r.id for r in page_one}
+    page_two_ids = {r.id for r in page_two}
+    assert not (page_one_ids & page_two_ids)
+
+
+def test_get_changes_scoped_to_site(db_conn: Connection) -> None:
+    site_a = new_site(db_conn, content="a", secret_url="ch4a")
+    site_b = new_site(db_conn, content="b", secret_url="ch4b")
+    new_page(db_conn, site_id=site_b, name="b-page", content="b-only")
+
+    rows = get_changes(db_conn, site_id=site_a)
+
+    assert all(r.page_name != "b-page" for r in rows)

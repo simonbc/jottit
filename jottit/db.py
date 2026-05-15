@@ -255,6 +255,74 @@ def get_revision(
     return conn.execute(stmt.limit(1)).first()
 
 
+def get_revisions(
+    conn: Connection,
+    *,
+    page_id: int,
+    before: int | None = None,
+    limit: int = 20,
+) -> list[Row]:
+    """List revisions for a page in newest-first order.
+
+    `before` filters to revisions strictly less than the given revision
+    number — used to page back through history (the original called this
+    `start`). `limit` is per-page; the default of 20 matches the 2007 UI.
+    """
+    stmt = (
+        select(revisions)
+        .where(revisions.c.page_id == page_id, revisions.c.revision > 0)
+        .order_by(revisions.c.revision.desc())
+        .limit(limit)
+    )
+    if before is not None:
+        stmt = stmt.where(revisions.c.revision < before)
+    return list(conn.execute(stmt).all())
+
+
+def get_revisions_count(conn: Connection, *, page_id: int) -> int:
+    """Count of non-sentinel revisions for a page; used for history pagination."""
+    return conn.execute(
+        select(func.count())
+        .select_from(revisions)
+        .where(revisions.c.page_id == page_id, revisions.c.revision > 0)
+    ).scalar_one()
+
+
+def get_changes(
+    conn: Connection,
+    *,
+    site_id: int,
+    before: int | None = None,
+    limit: int = 20,
+) -> list[Row]:
+    """Site-wide activity feed: every revision across every page, newest first.
+
+    Each row carries `page_name`, `page_deleted`, the revision fields, and
+    `id` of the revision (for the `before=` cursor). The 2007 implementation
+    of this was stubbed out with `return []` and a comment marking the query
+    as impossible at the time; modern Postgres handles it without issue.
+    """
+    stmt = (
+        select(
+            revisions.c.id,
+            revisions.c.revision,
+            revisions.c.content,
+            revisions.c.changes,
+            revisions.c.ip,
+            revisions.c.created,
+            pages.c.name.label("page_name"),
+            pages.c.deleted.label("page_deleted"),
+        )
+        .select_from(revisions.join(pages, revisions.c.page_id == pages.c.id))
+        .where(pages.c.site_id == site_id, revisions.c.revision > 0)
+        .order_by(revisions.c.created.desc(), revisions.c.id.desc())
+        .limit(limit)
+    )
+    if before is not None:
+        stmt = stmt.where(revisions.c.id < before)
+    return list(conn.execute(stmt).all())
+
+
 def new_page(
     conn: Connection,
     *,

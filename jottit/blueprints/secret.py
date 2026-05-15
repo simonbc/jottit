@@ -9,7 +9,9 @@ from jottit.views import site as site_views
 secret_bp = Blueprint("secret", __name__, url_prefix="/<site_slug>")
 
 # Page
-secret_bp.add_url_rule("/", endpoint="page_home", view_func=page_views.home)
+secret_bp.add_url_rule(
+    "/", endpoint="page_home", view_func=page_views.home, methods=["GET", "POST"]
+)
 secret_bp.add_url_rule(
     "/<page_name>",
     endpoint="page_view",

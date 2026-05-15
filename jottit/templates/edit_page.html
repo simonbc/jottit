@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Edit: {{ page_name or "Home" }}</title>
+</head>
+<body>
+  <h1>Edit: {{ page_name or "Home" }}</h1>
+  <form method="post">
+    <input type="hidden" name="current_revision" value="{{ current_revision }}">
+    <p><textarea name="content" rows="20" cols="80">{{ content }}</textarea></p>
+    <p>
+      <button type="submit">Save</button>
+      {% if page_name %}<button type="submit" name="delete" value="1">Delete</button>{% endif %}
+    </p>
+  </form>
+</body>
+</html>

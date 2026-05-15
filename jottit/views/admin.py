@@ -11,6 +11,7 @@ from jottit.db import (
     change_public_url,
     get_request_conn,
     is_public_url_available,
+    set_password,
     update_site,
 )
 from jottit.urls import site_root
@@ -164,8 +165,36 @@ def _conn() -> Connection:
     return conn
 
 
-def change_password(site_slug: str) -> str:
-    return f"admin:{site_slug} admin/change-password {request.method} (TODO)"
+def change_password(site_slug: str) -> ResponseReturnValue:
+    """Change the site password while signed in.
+
+    Distinct from the token-based recovery flow in /site/change-password —
+    this path requires the current password to be supplied and re-typed.
+    """
+    if (response := _gate_admin()) is not None:
+        return response
+
+    if request.method == "GET":
+        return render_template("admin_change_password.html", error=None)
+
+    current_password = request.form.get("current_password", "")
+    new_password = request.form.get("new_password", "")
+
+    if not auth.verify_password(current_password, g.site.password):
+        return render_template(
+            "admin_change_password.html",
+            error="That isn't your current password.",
+        ), 401
+
+    if not new_password:
+        return render_template(
+            "admin_change_password.html",
+            error="Please enter a new password.",
+        ), 400
+
+    conn = _conn()
+    set_password(conn, site_id=g.site.id, password_hash=auth.hash_password(new_password))
+    return redirect(f"{site_root()}admin/settings", code=303)
 
 
 def export(site_slug: str) -> str:

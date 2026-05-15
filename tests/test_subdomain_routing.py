@@ -38,8 +38,8 @@ def test_site_blueprint(
         # end-to-end in tests/test_admin_change_site_address.py.
         ("GET", "/admin/delete", "admin/delete GET"),
         ("POST", "/admin/delete", "admin/delete POST"),
-        ("GET", "/admin/change-password", "admin/change-password GET"),
-        ("POST", "/admin/change-password", "admin/change-password POST"),
+        # /admin/change-password is exercised end-to-end in
+        # tests/test_admin_change_password.py.
         ("GET", "/admin/export", "admin/export GET"),
     ],
 )

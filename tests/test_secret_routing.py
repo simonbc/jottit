@@ -38,8 +38,8 @@ def test_secret_site_routes(
         # end-to-end in tests/test_admin_change_site_address.py.
         ("GET", "/abc123/admin/delete", "admin/delete GET"),
         ("POST", "/abc123/admin/delete", "admin/delete POST"),
-        ("GET", "/abc123/admin/change-password", "admin/change-password GET"),
-        ("POST", "/abc123/admin/change-password", "admin/change-password POST"),
+        # /admin/change-password is exercised end-to-end in
+        # tests/test_admin_change_password.py.
         ("GET", "/abc123/admin/export", "admin/export GET"),
     ],
 )

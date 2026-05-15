@@ -18,6 +18,11 @@ jobs:
       - name: Install dependencies
         run: uv sync --frozen
 
+      - name: Start Postgres
+        run: |
+          sudo systemctl start postgresql.service
+          sudo -u postgres psql -c "CREATE USER runner SUPERUSER"
+
       - name: Ruff lint
         run: uv run ruff check jottit tests
 

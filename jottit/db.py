@@ -18,6 +18,7 @@ from sqlalchemy import (
     Text,
     UniqueConstraint,
     create_engine,
+    func,
     insert,
     or_,
     select,
@@ -209,6 +210,44 @@ def get_site(
         raise ValueError("get_site requires at least one of secret_url, public_url, site_id")
 
     return conn.execute(select(sites).where(*conditions)).first()
+
+
+def get_page(
+    conn: Connection,
+    *,
+    site_id: int,
+    page_name: str,
+) -> Row | None:
+    """Look up a page within a site by name (case-insensitive)."""
+    stmt = (
+        select(pages)
+        .where(
+            pages.c.site_id == site_id,
+            func.lower(pages.c.name) == page_name.lower(),
+        )
+        .limit(1)
+    )
+    return conn.execute(stmt).first()
+
+
+def get_revision(
+    conn: Connection,
+    *,
+    page_id: int,
+    revision: int | None = None,
+) -> Row | None:
+    """Return a specific revision (when `revision` is given) or the latest one.
+
+    Always filters to `revision > 0` for the latest case (mirrors the original;
+    revision 0 was reserved as a sentinel that's never actually inserted, but
+    the filter is kept for fidelity).
+    """
+    stmt = select(revisions).where(revisions.c.page_id == page_id)
+    if revision is not None:
+        stmt = stmt.where(revisions.c.revision == revision)
+    else:
+        stmt = stmt.where(revisions.c.revision > 0).order_by(revisions.c.revision.desc())
+    return conn.execute(stmt.limit(1)).first()
 
 
 def new_page(

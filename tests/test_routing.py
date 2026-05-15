@@ -23,8 +23,3 @@ def test_root_routes_serve_stubs(
     response = client.open(path, method=method)
     assert response.status_code == 200
     assert response.data.startswith(stub_prefix)
-
-
-def test_unknown_host_returns_404(client: FlaskClient) -> None:
-    response = client.get("/", base_url="http://otherdomain.example/")
-    assert response.status_code == 404

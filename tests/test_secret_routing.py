@@ -9,10 +9,8 @@ APEX = "http://jottit.test/"
 @pytest.mark.parametrize(
     ("method", "path", "expected_substring"),
     [
-        # /site/claim is exercised end-to-end in tests/test_claim.py.
-        ("GET", "/abc123/site/signin", "site/signin GET"),
-        ("POST", "/abc123/site/signin", "site/signin POST"),
-        ("POST", "/abc123/site/signout", "site/signout POST"),
+        # /site/claim, /site/signin, /site/signout are exercised end-to-end
+        # in tests/test_claim.py and tests/test_signin.py.
         ("GET", "/abc123/site/forgot-password", "site/forgot-password GET"),
         ("POST", "/abc123/site/forgot-password", "site/forgot-password POST"),
         ("GET", "/abc123/site/change-password", "site/change-password GET"),
@@ -67,7 +65,6 @@ def test_secret_admin_routes(
 @pytest.mark.parametrize(
     ("secret_path", "subdomain_path"),
     [
-        ("/abc123/site/signin", "/site/signin"),
         ("/abc123/admin/settings", "/admin/settings"),
         ("/abc123/admin/design", "/admin/design"),
     ],

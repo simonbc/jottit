@@ -9,10 +9,8 @@ SITE_BASE = "http://mysite.jottit.test/"
 @pytest.mark.parametrize(
     ("method", "path", "expected_substring"),
     [
-        # /site/claim is exercised end-to-end in tests/test_claim.py.
-        ("GET", "/site/signin", "site/signin GET"),
-        ("POST", "/site/signin", "site/signin POST"),
-        ("POST", "/site/signout", "site/signout POST"),
+        # /site/claim, /site/signin, /site/signout are exercised end-to-end
+        # in tests/test_claim.py and tests/test_signin.py.
         ("GET", "/site/forgot-password", "site/forgot-password GET"),
         ("POST", "/site/forgot-password", "site/forgot-password POST"),
         ("GET", "/site/change-password", "site/change-password GET"),

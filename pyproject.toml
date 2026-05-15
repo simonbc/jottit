@@ -1,0 +1,37 @@
+[project]
+name = "jottit"
+version = "0.1.0"
+description = "Jottit makes getting a website as easy as filling out a textbox"
+requires-python = ">=3.12"
+dependencies = [
+    "flask>=3.0",
+    "sqlalchemy>=2.0",
+    "alembic>=1.13",
+    "psycopg[binary]>=3.1",
+    "mistune>=3.0",
+    "nh3>=0.2",
+    "markupsafe>=2.1",
+    "python-dotenv>=1.0",
+    "requests>=2.31",
+    "gunicorn>=21.2",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.6",
+    "pyright>=1.1",
+    "pytest>=8.0",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+ignore = ["E501"]
+
+[tool.pyright]
+pythonVersion = "3.12"
+typeCheckingMode = "standard"
+include = ["jottit"]

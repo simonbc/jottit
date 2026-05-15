@@ -11,6 +11,8 @@ from jottit.db import (
     get_page,
     get_request_conn,
     get_revision,
+    get_revisions,
+    get_revisions_count,
     new_page,
     undelete_page,
     update_page,
@@ -44,6 +46,9 @@ def view(site_slug: str, page_name: str) -> ResponseReturnValue:
     if mode == "edit":
         return _render_edit_form(conn, page_name)
 
+    if mode == "history":
+        return _render_history(conn, page_name)
+
     return _render_view(conn, page_name)
 
 
@@ -56,9 +61,10 @@ def _action_for(mode: str) -> str:
         return "edit"
     if mode == "edit":
         return "edit"
-    # GET ?r=N exposes an old revision, which is gated more tightly than
-    # the latest one on `public` sites — see is_action_allowed.
-    if request.args.get("r") is not None:
+    # Old revisions, history listings, and diffs all expose pre-current
+    # content; on public sites that's gated more tightly than the latest
+    # revision. See is_action_allowed.
+    if mode == "history" or request.args.get("r") is not None:
         return "view_revision"
     return "view"
 
@@ -82,6 +88,30 @@ def _render_view(conn: Connection, page_name: str) -> ResponseReturnValue:
         page_name=page_name,
         revision=revision,
         content_html=rendered,
+    )
+
+
+def _render_history(conn: Connection, page_name: str) -> ResponseReturnValue:
+    page = get_page(conn, site_id=g.site.id, page_name=page_name)
+    if page is None:
+        return render_template("notfound.html", page_name=page_name), 404
+
+    total = get_revisions_count(conn, page_id=page.id)
+    if total == 0:
+        # Nothing to show — drop the user back at the page itself.
+        return redirect(site_root() + page_slug(page_name), code=303)
+
+    before = request.args.get("before", type=int)
+    revisions_page = get_revisions(conn, page_id=page.id, before=before, limit=20)
+    older_before = revisions_page[-1].revision if len(revisions_page) == 20 else None
+
+    return render_template(
+        "history.html",
+        page_name=page_name,
+        revisions=revisions_page,
+        total=total,
+        older_before=older_before,
+        site_root_path=site_root(),
     )
 
 

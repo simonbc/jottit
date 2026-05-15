@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>History: {{ page_name or "Home" }}</title>
+</head>
+<body>
+  <h1>History: {{ page_name or "Home" }}</h1>
+  <p>{{ total }} revision{{ "s" if total != 1 }}.</p>
+  <ul>
+    {% for r in revisions %}
+      <li>
+        <a href="{{ site_root_path }}{{ page_name }}?r={{ r.revision }}">Revision {{ r.revision }}</a>
+        <small>{{ r.created.strftime("%Y-%m-%d %H:%M") }} UTC</small>
+        {% if r.changes %}<span class="changes">{{ r.changes|safe }}</span>{% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+  {% if older_before %}
+    <p><a href="?m=history&amp;before={{ older_before }}">Older &rarr;</a></p>
+  {% endif %}
+  <p><a href="{{ site_root_path }}{{ page_name }}">Back to page</a></p>
+</body>
+</html>

@@ -1,18 +1,26 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>Edit: {{ page_name or "Home" }}</title>
-</head>
-<body>
-  <h1>Edit: {{ page_name or "Home" }}</h1>
-  <form method="post">
-    <input type="hidden" name="current_revision" value="{{ current_revision }}">
-    <p><textarea name="content" rows="20" cols="80">{{ content }}</textarea></p>
-    <p>
-      <button type="submit">Save</button>
-      {% if page_name %}<button type="submit" name="delete" value="1">Delete</button>{% endif %}
-    </p>
-  </form>
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block title %}Edit: {{ page_name or "Home" }}{% if site and site.title %} — {{ site.title }}{% endif %}{% endblock %}
+
+{% block content %}
+  <article class="edit">
+    <header><h1>Edit: {{ page_name or "Home" }}</h1></header>
+
+    <form method="post" class="edit-form">
+      <input type="hidden" name="current_revision" value="{{ current_revision }}">
+      <p>
+        <label>
+          <span class="visually-hidden">Page content (Markdown)</span>
+          <textarea name="content" rows="20" cols="80" autofocus>{{ content }}</textarea>
+        </label>
+      </p>
+      <p class="actions">
+        <button type="submit">Save</button>
+        <a class="cancel" href="{{ site_root_path }}{{ page_slug(page_name) }}">Cancel</a>
+        {% if page_name %}
+          <button type="submit" name="delete" value="1" class="destructive">Delete</button>
+        {% endif %}
+      </p>
+    </form>
+  </article>
+{% endblock %}

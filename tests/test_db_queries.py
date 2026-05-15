@@ -84,7 +84,7 @@ def test_new_site_creates_design_row_with_random_scheme(db_conn: Connection) -> 
     site_id = new_site(db_conn, content="hi", secret_url="d1")
 
     design = db_conn.execute(select(designs).where(designs.c.site_id == site_id)).one()
-    assert design.title_font == "Lucida_Grande"
+    assert design.title_font == "system-ui, sans-serif"
     assert design.header_color.startswith("#")
     assert design.title_color.startswith("#")
     assert design.subtitle_color.startswith("#")
@@ -574,7 +574,7 @@ def test_get_design_returns_row_created_by_new_site(db_conn: Connection) -> None
 
     assert design is not None
     assert design.site_id == site_id
-    assert design.title_font == "Lucida_Grande"
+    assert design.title_font == "system-ui, sans-serif"
 
 
 def test_update_design_patches_provided_fields(db_conn: Connection) -> None:

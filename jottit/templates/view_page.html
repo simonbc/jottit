@@ -1,13 +1,59 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>{{ page_name or "Home" }}</title>
-</head>
-<body>
-  <article>{{ content_html|safe }}</article>
-  <footer>
-    <small>revision {{ revision.revision }}</small>
-  </footer>
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block title %}{{ page_name or "Home" }}{% if site and site.title %} — {{ site.title }}{% endif %}{% endblock %}
+
+{% block head %}
+  <link rel="alternate" type="application/rss+xml"
+        title="{{ page_name or 'Home' }} history"
+        href="{{ site_root_path }}{{ page_slug(page_name) }}?m=history_rss">
+  <link rel="alternate" type="application/feed+json"
+        title="{{ page_name or 'Home' }} history (JSON)"
+        href="{{ site_root_path }}{{ page_slug(page_name) }}?m=history_json">
+  <link rel="alternate" type="application/rss+xml"
+        title="{{ site.title or 'Site' }} recent changes"
+        href="{{ site_root_path }}site/changes.rss">
+{% endblock %}
+
+{% block content %}
+  <article class="page">
+    <header>
+      <h1>{{ page_name or "Home" }}</h1>
+      {% if is_old_revision %}
+        <p class="revision-banner">
+          Viewing revision <strong>{{ revision.revision }}</strong>
+          of {{ latest_revision_number }}.
+          <a href="{{ site_root_path }}{{ page_slug(page_name) }}">Latest</a>
+          {% if revision.revision > 1 %}
+            · <a href="?r={{ revision.revision - 1 }}">prev</a>
+          {% endif %}
+          {% if revision.revision < latest_revision_number %}
+            · <a href="?r={{ revision.revision + 1 }}">next</a>
+          {% endif %}
+        </p>
+
+        {% if is_signed_in or is_unclaimed %}
+          <form action="" method="post" class="revert">
+            <input type="hidden" name="m" value="revert">
+            <input type="hidden" name="r" value="{{ revision.revision }}">
+            <button type="submit">Revert page to this revision</button>
+          </form>
+        {% endif %}
+      {% endif %}
+    </header>
+
+    <div class="content">
+      {{ content_html|safe }}
+    </div>
+
+    <footer class="page-meta">
+      <p>
+        Revision {{ revision.revision }} &middot;
+        <time datetime="{{ revision.created.isoformat() }}Z">{{ revision.created.strftime("%Y-%m-%d %H:%M") }} UTC</time>
+        {% if is_signed_in or is_unclaimed %}
+          &middot; <a href="?m=edit">edit</a>
+          &middot; <a href="?m=history">history</a>
+        {% endif %}
+      </p>
+    </footer>
+  </article>
+{% endblock %}

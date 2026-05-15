@@ -717,13 +717,17 @@ def new_site(
         .returning(sites.c.id)
     ).scalar_one()
 
+    # `system-ui` resolves to whatever the visitor's OS uses for UI text
+    # (San Francisco on macOS, Segoe UI on Windows, etc); `sans-serif` is
+    # the fallback. Replaces the 2007 default of "Lucida_Grande".
+    default_font = "system-ui, sans-serif"
     conn.execute(
         insert(designs).values(
             site_id=site_id,
-            title_font="Lucida_Grande",
-            subtitle_font="Lucida_Grande",
-            headings_font="Lucida_Grande",
-            content_font="Lucida_Grande",
+            title_font=default_font,
+            subtitle_font=default_font,
+            headings_font=default_font,
+            content_font=default_font,
             header_color=scheme.header_color,
             title_color=scheme.title_color,
             subtitle_color=scheme.subtitle_color,

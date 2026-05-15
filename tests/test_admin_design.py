@@ -85,9 +85,9 @@ def test_get_renders_form_with_current_design(client: FlaskClient, db_engine: En
 
     assert response.status_code == 200
     body = response.data.decode()
-    # new_site populates the design row from a random ColorScheme; the
-    # title font default is Lucida_Grande.
-    assert "Lucida_Grande" in body
+    # new_site seeds the design row with "system-ui, sans-serif" so the
+    # site resolves to the visitor's OS font without shipping a webfont.
+    assert "system-ui, sans-serif" in body
 
 
 # ---- POST: happy path ----

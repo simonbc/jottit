@@ -1,18 +1,27 @@
 from __future__ import annotations
 
+import random
+from dataclasses import dataclass
+
 from sqlalchemy import (
     Boolean,
     Column,
+    Connection,
     DateTime,
     Engine,
     ForeignKey,
     Integer,
     MetaData,
+    Row,
     Table,
     Text,
     UniqueConstraint,
     create_engine,
+    insert,
+    or_,
+    select,
     text,
+    update,
 )
 
 metadata = MetaData()
@@ -104,3 +113,196 @@ def _normalize_postgres_url(url: str) -> str:
     if url.startswith("postgresql://") and "+psycopg" not in url:
         url = url.replace("postgresql://", "postgresql+psycopg://", 1)
     return url
+
+
+# ---- Color schemes for new-site design defaults ----
+
+_AMBIGUOUS_CHARS = "0o1li"  # characters omitted from generated secret URLs
+
+
+@dataclass(frozen=True)
+class ColorScheme:
+    header_color: str
+    title_color: str
+    subtitle_color: str
+    hue: str
+    brightness: str
+
+
+COLOR_SCHEMES: list[ColorScheme] = [
+    ColorScheme("#520000", "#fff", "#ffbfbf", "0", "214"),
+    ColorScheme("#523000", "#fff", "#ffe5bf", "25", "214"),
+    ColorScheme("#515200", "#fff", "#feffbf", "43", "214"),
+    ColorScheme("#2c5200", "#fff", "#e2ffbf", "62", "214"),
+    ColorScheme("#003452", "#fff", "#bfe8ff", "143", "214"),
+    ColorScheme("#001152", "#fff", "#bfcdff", "161", "214"),
+    ColorScheme("#4d0052", "#fff", "#fbbfff", "210", "214"),
+    ColorScheme("#520036", "#fff", "#ffbfe9", "227", "214"),
+    ColorScheme("#760000", "#fff", "#ffbfbf", "0", "196"),
+    ColorScheme("#764000", "#fff", "#ffe2bf", "23", "196"),
+    ColorScheme("#087600", "#fff", "#c4ffbf", "82", "196"),
+    ColorScheme("#004876", "#fff", "#bfe6ff", "144", "196"),
+    ColorScheme("#760043", "#fff", "#ffbfe3", "231", "196"),
+    ColorScheme("#92e600", "#000", "#3a5c00", "58", "140"),
+    ColorScheme("#d7ecff", "#000", "#003566", "148", "20"),
+    ColorScheme("#d8ffd7", "#000", "#026600", "84", "20"),
+    ColorScheme("#fcd7ff", "#000", "#5e0066", "209", "20"),
+    ColorScheme("#ffffd7", "#000", "#656600", "43", "20"),
+    ColorScheme("#ffd7d7", "#000", "#660000", "0", "20"),
+    ColorScheme("#d7fff9", "#000", "#006656", "121", "20"),
+    ColorScheme("#d7d7ff", "#000", "#000066", "170", "20"),
+]
+
+
+def _to_base36(n: int) -> str:
+    if n == 0:
+        return "0"
+    alphabet = "0123456789abcdefghijklmnopqrstuvwxyz"
+    out: list[str] = []
+    while n:
+        n, r = divmod(n, 36)
+        out.append(alphabet[r])
+    return "".join(reversed(out))
+
+
+def _generate_secret_url_candidate() -> str:
+    """Random base36 slug, retrying until none of `_AMBIGUOUS_CHARS` appears."""
+    while True:
+        s = _to_base36(random.randrange(50000, 60000000))
+        if not any(c in _AMBIGUOUS_CHARS for c in s):
+            return s
+
+
+def _generate_unique_secret_url(conn: Connection) -> str:
+    while True:
+        candidate = _generate_secret_url_candidate()
+        existing = conn.execute(
+            select(sites.c.id).where(
+                or_(sites.c.secret_url == candidate, sites.c.public_url == candidate)
+            )
+        ).first()
+        if existing is None:
+            return candidate
+
+
+# ---- Query helpers ----
+
+
+def get_site(
+    conn: Connection,
+    *,
+    secret_url: str | None = None,
+    public_url: str | None = None,
+    site_id: int | None = None,
+) -> Row | None:
+    """Look up a site by one or more of the provided criteria (AND'd)."""
+    conditions = []
+    if secret_url is not None:
+        conditions.append(sites.c.secret_url == secret_url)
+    if public_url is not None:
+        conditions.append(sites.c.public_url == public_url)
+    if site_id is not None:
+        conditions.append(sites.c.id == site_id)
+
+    if not conditions:
+        raise ValueError("get_site requires at least one of secret_url, public_url, site_id")
+
+    return conn.execute(select(sites).where(*conditions)).first()
+
+
+def new_page(
+    conn: Connection,
+    *,
+    site_id: int,
+    name: str,
+    content: str,
+    ip: str | None = None,
+    scroll_pos: int = 0,
+    caret_pos: int = 0,
+) -> int:
+    """Insert a page row plus its first revision (revision=1). Returns page_id.
+
+    Also updates `sites.updated` to the revision's created timestamp — Jottit
+    denormalizes "last activity" onto the site row to avoid joining to revisions
+    when listing sites by recency.
+    """
+    page_id = conn.execute(
+        insert(pages)
+        .values(site_id=site_id, name=name, scroll_pos=scroll_pos, caret_pos=caret_pos)
+        .returning(pages.c.id)
+    ).scalar_one()
+
+    revision_row = conn.execute(
+        insert(revisions)
+        .values(
+            page_id=page_id,
+            revision=1,
+            content=content,
+            changes="<em>Created page</em>",
+            ip=ip,
+        )
+        .returning(revisions.c.created)
+    ).one()
+
+    conn.execute(update(sites).where(sites.c.id == site_id).values(updated=revision_row.created))
+
+    return page_id
+
+
+def new_site(
+    conn: Connection,
+    *,
+    content: str,
+    ip: str | None = None,
+    secret_url: str | None = None,
+    public_url: str | None = None,
+    partner: str | None = None,
+    scroll_pos: int = 0,
+    caret_pos: int = 0,
+) -> int:
+    """Create a site with one home page. Returns site_id.
+
+    Picks a random `ColorScheme` for the design defaults; generates a unique
+    `secret_url` if one isn't supplied. Caller manages the transaction boundary.
+    """
+    if not secret_url:
+        secret_url = _generate_unique_secret_url(conn)
+
+    scheme = random.choice(COLOR_SCHEMES)
+
+    site_id = conn.execute(
+        insert(sites)
+        .values(
+            secret_url=secret_url,
+            public_url=public_url or None,
+            partner=partner or None,
+        )
+        .returning(sites.c.id)
+    ).scalar_one()
+
+    conn.execute(
+        insert(designs).values(
+            site_id=site_id,
+            title_font="Lucida_Grande",
+            subtitle_font="Lucida_Grande",
+            headings_font="Lucida_Grande",
+            content_font="Lucida_Grande",
+            header_color=scheme.header_color,
+            title_color=scheme.title_color,
+            subtitle_color=scheme.subtitle_color,
+            hue=scheme.hue,
+            brightness=scheme.brightness,
+        )
+    )
+
+    new_page(
+        conn,
+        site_id=site_id,
+        name="",
+        content=content,
+        ip=ip,
+        scroll_pos=scroll_pos,
+        caret_pos=caret_pos,
+    )
+
+    return site_id

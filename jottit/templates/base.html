@@ -8,6 +8,11 @@
     <meta name="robots" content="noindex, nofollow">
   {% endif %}
   <link rel="icon" href="/favicon.ico">
+  <link rel="stylesheet" href="{{ url_for('static', filename='tokens.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='reset.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='base.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='components.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='utilities.css') }}">
   {% block head %}{% endblock %}
   {% if design %}
     {% include "partials/design_style.html" %}

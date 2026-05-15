@@ -1,0 +1,40 @@
+:root {
+  --hue: 210;
+  --brightness: 100;
+
+  --header-color: hsl(var(--hue) 60% calc(var(--brightness) * 0.22%));
+  --title-color: #fff;
+  --subtitle-color: #bfe8ff;
+
+  --bg: hsl(var(--hue) 30% calc(var(--brightness) * 0.99%));
+  --fg: #222;
+  --muted: #666;
+  --link: #06c;
+  --link-visited: #639;
+  --border: #ddd;
+  --surface: #fff;
+  --surface-alt: #f7f7f7;
+  --danger: #b00020;
+  --danger-bg: #fdecea;
+
+  --title-font: system-ui, sans-serif;
+  --subtitle-font: system-ui, sans-serif;
+  --headings-font: system-ui, sans-serif;
+  --content-font: system-ui, sans-serif;
+
+  --title-size: 200%;
+  --subtitle-size: 100%;
+  --headings-size: 150%;
+  --content-size: 100%;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-8: 3rem;
+
+  --radius: 4px;
+  --measure: 38rem;
+}

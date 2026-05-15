@@ -1,0 +1,104 @@
+html {
+  font-family: var(--content-font);
+  font-size: var(--content-size);
+  line-height: 1.5;
+  color: var(--fg);
+  background: var(--bg);
+}
+
+body {
+  min-height: 100vh;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--headings-font);
+  line-height: 1.2;
+  margin-top: var(--space-5);
+  margin-bottom: var(--space-3);
+}
+
+h1 { font-size: var(--headings-size); }
+h2 { font-size: calc(var(--headings-size) * 0.85); }
+h3 { font-size: calc(var(--headings-size) * 0.72); }
+
+p, ul, ol, dl, blockquote, pre, table, figure {
+  margin-top: 0;
+  margin-bottom: var(--space-4);
+}
+
+ol, ul {
+  padding-left: var(--space-5);
+  list-style: revert;
+}
+
+a {
+  color: var(--link);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+a:visited { color: var(--link-visited); }
+a:hover, a:focus { text-decoration-thickness: 2px; }
+
+button {
+  cursor: pointer;
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+button:hover { background: var(--surface-alt); }
+
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="number"],
+textarea {
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+textarea { font-family: var(--content-font); resize: vertical; min-height: 12rem; }
+
+label { display: block; }
+
+fieldset {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+legend { padding: 0 var(--space-2); font-weight: 600; }
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--border);
+  margin: var(--space-5) 0;
+}
+
+code, pre, kbd, samp {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.95em;
+}
+
+pre {
+  padding: var(--space-3);
+  background: var(--surface-alt);
+  border-radius: var(--radius);
+  overflow-x: auto;
+}
+
+blockquote {
+  border-left: 3px solid var(--border);
+  padding-left: var(--space-4);
+  color: var(--muted);
+}
+
+small { color: var(--muted); }
+
+time { color: var(--muted); }

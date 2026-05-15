@@ -10,10 +10,8 @@ SITE_BASE = "http://mysite.jottit.test/"
     ("method", "path", "expected_substring"),
     [
         # /site/claim, /site/signin, /site/signout, /site/forgot-password,
-        # and /site/change-password are exercised end-to-end in
-        # tests/test_claim.py, tests/test_signin.py, and
-        # tests/test_password_recovery.py.
-        ("GET", "/site/changes", "site/changes GET"),
+        # /site/change-password, and /site/changes are exercised end-to-end
+        # in their respective test files.
         ("GET", "/site/changes.atom", "site/changes.atom GET"),
         ("POST", "/site/hide-primer", "site/hide-primer POST"),
     ],

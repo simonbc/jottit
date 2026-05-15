@@ -6,8 +6,14 @@ from flask import abort, g, redirect, render_template, request
 from flask.typing import ResponseReturnValue
 
 from jottit import auth, mail
-from jottit.db import claim_site, get_request_conn, recover_password, set_change_pwd_token
-from jottit.urls import site_root
+from jottit.db import (
+    claim_site,
+    get_changes,
+    get_request_conn,
+    recover_password,
+    set_change_pwd_token,
+)
+from jottit.urls import page_slug, site_root
 
 _ALLOWED_SECURITY_LEVELS = {"private", "public", "open"}
 
@@ -204,8 +210,28 @@ def _send_recovery_email(*, to: str, token: str) -> None:
     )
 
 
-def changes(site_slug: str) -> str:
-    return f"site:{site_slug} site/changes GET (TODO)"
+def changes(site_slug: str) -> ResponseReturnValue:
+    """Site-wide activity feed: recent revisions across all pages."""
+    if g.site is None:
+        abort(404)
+    if (response := auth.gate("view_revision")) is not None:
+        return response
+
+    conn = get_request_conn()
+    if conn is None:
+        abort(500)
+
+    before = request.args.get("before", type=int)
+    rows = get_changes(conn, site_id=g.site.id, before=before, limit=20)
+    older_before = rows[-1].id if len(rows) == 20 else None
+
+    return render_template(
+        "changes.html",
+        changes=rows,
+        older_before=older_before,
+        site_root_path=site_root(),
+        page_slug=page_slug,
+    )
 
 
 def changes_atom(site_slug: str) -> str:

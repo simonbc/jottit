@@ -113,10 +113,10 @@ def _render_history_rss(conn: Connection, page_name: str) -> ResponseReturnValue
     if page is None:
         abort(404)
     revisions_page = get_revisions(conn, page_id=page.id, limit=20)
+    items = [_feed_item(r, page_name=page_name) for r in revisions_page]
     body = render_template(
         "feeds/history.rss.xml",
-        page_name=page_name,
-        revisions=revisions_page,
+        items=items,
         page_url=_page_absolute_url(page_name),
         feed_url=_page_absolute_url(page_name, "m=history_rss"),
         site_title=(g.site.title or g.site.public_url or g.site.secret_url),
@@ -132,6 +132,7 @@ def _render_history_json(conn: Connection, page_name: str) -> ResponseReturnValu
     if page is None:
         abort(404)
     revisions_page = get_revisions(conn, page_id=page.id, limit=20)
+    items = [_feed_item(r, page_name=page_name) for r in revisions_page]
     payload = {
         "version": "https://jsonfeed.org/version/1.1",
         "title": (g.site.title or g.site.public_url or g.site.secret_url)
@@ -140,18 +141,40 @@ def _render_history_json(conn: Connection, page_name: str) -> ResponseReturnValu
         "feed_url": _page_absolute_url(page_name, "m=history_json"),
         "items": [
             {
-                "id": _page_absolute_url(page_name, f"r={r.revision}"),
-                "url": _page_absolute_url(page_name, f"r={r.revision}"),
-                "title": f"Revision {r.revision}",
-                "content_html": r.changes or "",
-                "date_published": r.created.isoformat() + "Z",
+                "id": item["url"],
+                "url": item["url"],
+                "title": f"Revision {item['revision']}",
+                "content_html": item["content_html"],
+                "content_text": item["content_markdown"],
+                "date_published": item["created_iso"],
             }
-            for r in revisions_page
+            for item in items
         ],
     }
     response = jsonify(payload)
     response.headers["Content-Type"] = "application/feed+json"
     return response
+
+
+def _feed_item(revision_row: Row, *, page_name: str) -> dict[str, object]:
+    """Render a revision into the shape both the RSS template and JSON Feed want.
+
+    `content_html` is the page content rendered to HTML (what feed readers
+    display); `content_markdown` is the raw markdown source carried in
+    source:markdown for the RSS extension. Wikilinks are resolved against
+    an absolute site root so links survive being read outside the browser
+    context.
+    """
+    absolute_root = f"{request.scheme}://{request.host}{site_root()}"
+    return {
+        "revision": revision_row.revision,
+        "created": revision_row.created,
+        "created_iso": revision_row.created.isoformat() + "Z",
+        "created_rfc822": revision_row.created.strftime("%a, %d %b %Y %H:%M:%S GMT"),
+        "url": _page_absolute_url(page_name, f"r={revision_row.revision}"),
+        "content_markdown": revision_row.content,
+        "content_html": format_content(revision_row.content, site_root=absolute_root),
+    }
 
 
 def _page_absolute_url(page_name: str, query: str = "") -> str:

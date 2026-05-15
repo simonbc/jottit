@@ -13,6 +13,7 @@ from jottit.db import (
     recover_password,
     set_change_pwd_token,
 )
+from jottit.render import format_content
 from jottit.urls import page_slug, site_root
 
 _ALLOWED_SECURITY_LEVELS = {"private", "public", "open"}
@@ -240,16 +241,13 @@ def changes_rss(site_slug: str) -> ResponseReturnValue:
         abort(404)
     if (response := auth.gate("view")) is not None:
         return response
-    rows = _recent_changes()
+    items = _changes_feed_items()
     body = render_template(
         "feeds/changes.rss.xml",
-        changes=rows,
+        items=items,
         site_title=g.site.title or g.site.public_url or g.site.secret_url,
         feed_url=_absolute_url("site/changes.rss"),
         site_url=_absolute_url(""),
-        site_root_path=site_root(),
-        page_slug=page_slug,
-        absolute_url=_absolute_url,
     )
     return body, 200, {"Content-Type": "application/rss+xml; charset=utf-8"}
 
@@ -260,7 +258,7 @@ def changes_json(site_slug: str) -> ResponseReturnValue:
         abort(404)
     if (response := auth.gate("view")) is not None:
         return response
-    rows = _recent_changes()
+    items = _changes_feed_items()
     payload = {
         "version": "https://jsonfeed.org/version/1.1",
         "title": (g.site.title or g.site.public_url or g.site.secret_url) + " — changes",
@@ -268,13 +266,14 @@ def changes_json(site_slug: str) -> ResponseReturnValue:
         "feed_url": _absolute_url("site/changes.json"),
         "items": [
             {
-                "id": _absolute_url(f"{page_slug(c.page_name)}?r={c.revision}"),
-                "url": _absolute_url(f"{page_slug(c.page_name)}?r={c.revision}"),
-                "title": (c.page_name or "Home") + f" — revision {c.revision}",
-                "content_html": c.changes or "",
-                "date_published": c.created.isoformat() + "Z",
+                "id": item["url"],
+                "url": item["url"],
+                "title": item["title"],
+                "content_html": item["content_html"],
+                "content_text": item["content_markdown"],
+                "date_published": item["created_iso"],
             }
-            for c in rows
+            for item in items
         ],
     }
     from flask import jsonify
@@ -282,6 +281,31 @@ def changes_json(site_slug: str) -> ResponseReturnValue:
     response = jsonify(payload)
     response.headers["Content-Type"] = "application/feed+json"
     return response
+
+
+def _changes_feed_items() -> list[dict[str, object]]:
+    """Render every recent revision into the shape both feed formats want.
+
+    Each entry carries the page content as both rendered HTML (the
+    description / content_html) and raw markdown (source:markdown /
+    content_text). Wikilinks are resolved against the absolute site root
+    so they survive being read in an external reader.
+    """
+    rows = _recent_changes()
+    absolute_root = _absolute_url("")
+    items: list[dict[str, object]] = []
+    for c in rows:
+        items.append(
+            {
+                "url": _absolute_url(f"{page_slug(c.page_name)}?r={c.revision}"),
+                "title": (c.page_name or "Home") + f" — revision {c.revision}",
+                "created_rfc822": c.created.strftime("%a, %d %b %Y %H:%M:%S GMT"),
+                "created_iso": c.created.isoformat() + "Z",
+                "content_markdown": c.content,
+                "content_html": format_content(c.content, site_root=absolute_root),
+            }
+        )
+    return items
 
 
 def _recent_changes():

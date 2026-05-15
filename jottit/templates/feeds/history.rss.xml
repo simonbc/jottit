@@ -1,17 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<rss version="2.0"
+     xmlns:atom="http://www.w3.org/2005/Atom"
+     xmlns:source="https://source.scripting.com/">
   <channel>
     <title>{{ site_title|e }} — {{ page_label|e }} history</title>
     <link>{{ page_url|e }}</link>
     <atom:link href="{{ feed_url|e }}" rel="self" type="application/rss+xml" />
     <description>Revision history for {{ page_label|e }}.</description>
-    {% for r in revisions %}
+    {% for item in items %}
     <item>
-      <title>Revision {{ r.revision }}</title>
-      <link>{{ page_url|e }}?r={{ r.revision }}</link>
-      <guid isPermaLink="true">{{ page_url|e }}?r={{ r.revision }}</guid>
-      <pubDate>{{ r.created.strftime("%a, %d %b %Y %H:%M:%S GMT") }}</pubDate>
-      {% if r.changes %}<description><![CDATA[{{ r.changes }}]]></description>{% endif %}
+      <title>Revision {{ item.revision }}</title>
+      <link>{{ item.url|e }}</link>
+      <guid isPermaLink="true">{{ item.url|e }}</guid>
+      <pubDate>{{ item.created_rfc822 }}</pubDate>
+      <description><![CDATA[{{ item.content_html|safe }}]]></description>
+      <source:markdown>{{ item.content_markdown|e }}</source:markdown>
     </item>
     {% endfor %}
   </channel>

@@ -64,6 +64,25 @@ def test_history_rss_returns_rss(client: FlaskClient, db_engine: Engine) -> None
     assert "?m=history_rss" in body
 
 
+def test_history_rss_includes_source_markdown(client: FlaskClient, db_engine: Engine) -> None:
+    """source:markdown carries the raw markdown alongside the rendered description."""
+    site_id = _seed_site(db_engine, secret_url="hf1a", public_url="alpha2")
+    with db_engine.begin() as conn:
+        page = get_page(conn, site_id=site_id, page_name="")
+        assert page is not None
+        update_page(conn, page_id=page.id, content="**bold body**")
+
+    response = client.get("/?m=history_rss", base_url="http://alpha2.jottit.test/")
+
+    body = response.data.decode()
+    # Namespace declared on the rss element.
+    assert 'xmlns:source="https://source.scripting.com/"' in body
+    # Raw markdown verbatim inside source:markdown (XML-escaped).
+    assert "<source:markdown>**bold body**</source:markdown>" in body
+    # And the description carries the rendered HTML.
+    assert "<strong>bold body</strong>" in body
+
+
 # ---- /<page>?m=history_json ----
 
 
@@ -72,7 +91,7 @@ def test_history_json_returns_jsonfeed(client: FlaskClient, db_engine: Engine) -
     with db_engine.begin() as conn:
         page = get_page(conn, site_id=site_id, page_name="")
         assert page is not None
-        update_page(conn, page_id=page.id, content="v2")
+        update_page(conn, page_id=page.id, content="**v2 body**")
 
     response = client.get("/?m=history_json", base_url="http://beta.jottit.test/")
 
@@ -84,6 +103,9 @@ def test_history_json_returns_jsonfeed(client: FlaskClient, db_engine: Engine) -
     assert payload["items"][0]["title"] == "Revision 2"
     assert payload["items"][1]["title"] == "Revision 1"
     assert payload["items"][0]["url"].endswith("?r=2")
+    # Latest entry: content_html is rendered, content_text is the raw markdown.
+    assert "<strong>v2 body</strong>" in payload["items"][0]["content_html"]
+    assert payload["items"][0]["content_text"] == "**v2 body**"
 
 
 # ---- /site/changes.rss ----
@@ -103,13 +125,27 @@ def test_site_changes_rss(client: FlaskClient, db_engine: Engine) -> None:
     assert "notes" in body
 
 
+def test_site_changes_rss_includes_source_markdown(client: FlaskClient, db_engine: Engine) -> None:
+    site_id = _seed_site(db_engine, secret_url="cf1a", public_url="gamma2")
+    with db_engine.begin() as conn:
+        new_page(conn, site_id=site_id, name="post", content="raw *italic* source")
+
+    response = client.get("/site/changes.rss", base_url="http://gamma2.jottit.test/")
+
+    body = response.data.decode()
+    assert 'xmlns:source="https://source.scripting.com/"' in body
+    assert "<source:markdown>raw *italic* source</source:markdown>" in body
+    # Description carries the rendered HTML.
+    assert "<em>italic</em>" in body
+
+
 # ---- /site/changes.json ----
 
 
 def test_site_changes_json(client: FlaskClient, db_engine: Engine) -> None:
     site_id = _seed_site(db_engine, secret_url="cf2", public_url="delta")
     with db_engine.begin() as conn:
-        new_page(conn, site_id=site_id, name="notes", content="notes body")
+        new_page(conn, site_id=site_id, name="notes", content="# heading\n\nbody")
 
     response = client.get("/site/changes.json", base_url="http://delta.jottit.test/")
 
@@ -119,6 +155,9 @@ def test_site_changes_json(client: FlaskClient, db_engine: Engine) -> None:
     assert payload["version"].startswith("https://jsonfeed.org/version/")
     item_urls = [item["url"] for item in payload["items"]]
     assert any("notes" in url for url in item_urls)
+    notes_item = next(item for item in payload["items"] if "notes" in item["url"])
+    assert "<h1>heading</h1>" in notes_item["content_html"]
+    assert notes_item["content_text"] == "# heading\n\nbody"
 
 
 # ---- Auth: private gates feeds; public/open allow them ----

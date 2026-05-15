@@ -1,11 +1,18 @@
 from __future__ import annotations
 
 import secrets
+from typing import Any
 
 from argon2 import PasswordHasher
 from argon2.exceptions import InvalidHashError, VerifyMismatchError
+from flask import session
 
 _hasher = PasswordHasher()
+
+_SESSION_KEY = "signed_in_sites"
+
+
+# ---- Password hashing ----
 
 
 def hash_password(password: str) -> str:
@@ -29,3 +36,64 @@ def verify_password(password: str, stored_hash: str) -> bool:
 def generate_change_password_token() -> str:
     """One-time URL-safe token emailed for the password-reset flow."""
     return secrets.token_urlsafe(32)
+
+
+# ---- Multi-site session state ----
+
+
+def sign_in(site_id: int) -> None:
+    """Mark the current visitor as signed in to `site_id`.
+
+    A single Flask cookie holds the list of all sites the visitor is
+    currently signed in to — so going from site A to site B doesn't sign
+    you out of A.
+    """
+    signed_in = _signed_in_sites()
+    if site_id not in signed_in:
+        session[_SESSION_KEY] = [*signed_in, site_id]
+
+
+def sign_out(site_id: int) -> None:
+    signed_in = _signed_in_sites()
+    if site_id in signed_in:
+        session[_SESSION_KEY] = [s for s in signed_in if s != site_id]
+
+
+def is_signed_in_to(site_id: int) -> bool:
+    return site_id in _signed_in_sites()
+
+
+def _signed_in_sites() -> list[int]:
+    return list(session.get(_SESSION_KEY, []))
+
+
+# ---- Permission matrix ----
+
+
+def is_action_allowed(*, site: Any, action: str) -> bool:
+    """Return True if the current visitor can perform `action` on `site`.
+
+    Actions: "view" (read latest revision), "view_revision" (read an old
+    revision), "edit" (write a page, including draft endpoints), "admin"
+    (settings/design/delete/export/change-password while signed in).
+
+    Mirrors the matrix from the 2007 auth module:
+    - unclaimed sites are wide open
+    - private sites (the default) require a signed-in user for everything
+    - public sites expose the latest revision but lock down history / edits
+    - open sites expose view + edit but still gate admin behind a login
+    """
+    if site is None:
+        return False
+    if site.password is None:
+        return True
+
+    if is_signed_in_to(site.id):
+        return True
+
+    security = site.security or "private"
+    if security == "open":
+        return action != "admin"
+    if security == "public":
+        return action == "view"
+    return False

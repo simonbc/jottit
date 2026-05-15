@@ -17,6 +17,7 @@ from jottit.site_resolver import resolve_site
 def create_app() -> Flask:
     app = Flask(__name__, subdomain_matching=True)
     app.config["SERVER_NAME"] = os.environ.get("JOTTIT_DOMAIN", "localhost:5000")
+    app.config["SECRET_KEY"] = os.environ["SECRET_KEY"]
     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)  # type: ignore[method-assign]
 
     database_url = os.environ.get("DATABASE_URL")

@@ -9,12 +9,10 @@ APEX = "http://jottit.test/"
 @pytest.mark.parametrize(
     ("method", "path", "expected_substring"),
     [
-        # /site/claim, /site/signin, /site/signout are exercised end-to-end
-        # in tests/test_claim.py and tests/test_signin.py.
-        ("GET", "/abc123/site/forgot-password", "site/forgot-password GET"),
-        ("POST", "/abc123/site/forgot-password", "site/forgot-password POST"),
-        ("GET", "/abc123/site/change-password", "site/change-password GET"),
-        ("POST", "/abc123/site/change-password", "site/change-password POST"),
+        # /site/claim, /site/signin, /site/signout, /site/forgot-password,
+        # and /site/change-password are exercised end-to-end in
+        # tests/test_claim.py, tests/test_signin.py, and
+        # tests/test_password_recovery.py.
         ("GET", "/abc123/site/changes", "site/changes GET"),
         ("GET", "/abc123/site/changes.atom", "site/changes.atom GET"),
         ("POST", "/abc123/site/hide-primer", "site/hide-primer POST"),

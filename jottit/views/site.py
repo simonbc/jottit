@@ -6,7 +6,7 @@ from flask import abort, g, redirect, render_template, request
 from flask.typing import ResponseReturnValue
 
 from jottit import auth, mail
-from jottit.db import claim_site, get_request_conn
+from jottit.db import claim_site, get_request_conn, recover_password, set_change_pwd_token
 from jottit.urls import site_root
 
 _ALLOWED_SECURITY_LEVELS = {"private", "public", "open"}
@@ -135,12 +135,73 @@ def _safe_return_to(value: str) -> str:
     return value.lstrip("/")
 
 
-def forgot_password(site_slug: str) -> str:
-    return f"site:{site_slug} site/forgot-password {request.method} (TODO)"
+def forgot_password(site_slug: str) -> ResponseReturnValue:
+    if g.site is None:
+        abort(404)
+    if g.site.password is None:
+        # Nothing to recover on an unclaimed site.
+        return redirect(site_root(), code=303)
+
+    if request.method == "GET":
+        return render_template("forgot_password.html", sent=False)
+
+    conn = get_request_conn()
+    if conn is None:
+        abort(500)
+
+    token = auth.generate_change_password_token()
+    set_change_pwd_token(conn, site_id=g.site.id, token=token)
+    _send_recovery_email(to=g.site.email, token=token)
+    return render_template("forgot_password.html", sent=True)
 
 
-def change_password(site_slug: str) -> str:
-    return f"site:{site_slug} site/change-password {request.method} (TODO)"
+def change_password(site_slug: str) -> ResponseReturnValue:
+    if g.site is None:
+        abort(404)
+    if g.site.password is None:
+        return redirect(site_root(), code=303)
+
+    token = request.values.get("d", "")
+    stored = g.site.change_pwd_token
+    # Both `not stored` and `token != stored` collapse to "no valid token".
+    # Treat them identically to avoid leaking which one failed.
+    if not stored or token != stored:
+        return redirect(site_root(), code=303)
+
+    if request.method == "GET":
+        return render_template("change_password.html", token=token, error=None)
+
+    new_password = request.form.get("new_password", "")
+    if not new_password:
+        return render_template(
+            "change_password.html",
+            token=token,
+            error="Please enter a new password.",
+        ), 400
+
+    conn = get_request_conn()
+    if conn is None:
+        abort(500)
+
+    recover_password(conn, site_id=g.site.id, password_hash=auth.hash_password(new_password))
+    auth.sign_in(g.site.id)
+    return redirect(site_root(), code=303)
+
+
+def _send_recovery_email(*, to: str, token: str) -> None:
+    change_url = f"https://{request.host}{site_root()}site/change-password?d={token}"
+    forgot_url = f"https://{request.host}{site_root()}site/forgot-password"
+    mail.send(
+        to=to,
+        subject="Password reset for your Jottit site",
+        body=(
+            "Someone asked to reset the password on your Jottit site. If it "
+            "wasn't you, you can ignore this email.\n\n"
+            f"To set a new password, visit:\n{change_url}\n\n"
+            "This link works once. If you need another, visit:\n"
+            f"{forgot_url}\n"
+        ),
+    )
 
 
 def changes(site_slug: str) -> str:

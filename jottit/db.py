@@ -416,6 +416,28 @@ def delete_draft(conn: Connection, *, page_id: int) -> None:
     conn.execute(sql_delete(drafts).where(drafts.c.page_id == page_id))
 
 
+def get_draft(conn: Connection, *, page_id: int) -> Row | None:
+    return conn.execute(
+        select(drafts).where(drafts.c.page_id == page_id).limit(1)
+    ).first()
+
+
+def new_draft(conn: Connection, *, page_id: int, content: str) -> None:
+    """Upsert the single draft row for a page.
+
+    Each page has at most one in-flight draft — the editor JS autosaves
+    on idle; subsequent saves replace the prior content instead of
+    accumulating drafts.
+    """
+    existing = conn.execute(
+        select(drafts.c.id).where(drafts.c.page_id == page_id)
+    ).first()
+    if existing is None:
+        conn.execute(insert(drafts).values(page_id=page_id, content=content))
+    else:
+        conn.execute(update(drafts).where(drafts.c.page_id == page_id).values(content=content))
+
+
 def new_site(
     conn: Connection,
     *,

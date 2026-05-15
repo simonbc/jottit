@@ -1,11 +1,12 @@
 from __future__ import annotations
 
-from flask import abort, g, redirect, render_template, request
+from flask import abort, g, jsonify, redirect, render_template, request
 from flask.typing import ResponseReturnValue
 from sqlalchemy import Connection
 
 from jottit.db import (
     delete_page,
+    get_draft,
     get_page,
     get_request_conn,
     get_revision,
@@ -28,10 +29,14 @@ def view(site_slug: str, page_name: str) -> ResponseReturnValue:
     if conn is None:
         abort(500)
 
+    mode = request.args.get("m", "view")
+
     if request.method == "POST":
+        if mode == "current_revision":
+            return _current_revision(conn, page_name)
         return _save_edit(conn, page_name)
 
-    if request.args.get("m") == "edit":
+    if mode == "edit":
         return _render_edit_form(conn, page_name)
 
     return _render_view(conn, page_name)
@@ -70,12 +75,25 @@ def _render_edit_form(conn: Connection, page_name: str) -> ResponseReturnValue:
         )
 
     revision = get_revision(conn, page_id=page.id)
+    draft = get_draft(conn, page_id=page.id)
+    # A draft (autosaved from a prior edit session) takes precedence — that's
+    # the user's in-flight work that hasn't been published yet.
+    content = draft.content if draft is not None else (revision.content if revision else "")
     return render_template(
         "edit_page.html",
         page_name=page_name,
-        content=revision.content if revision else "",
+        content=content,
         current_revision=revision.revision if revision else 0,
     )
+
+
+def _current_revision(conn: Connection, page_name: str) -> ResponseReturnValue:
+    """JSON endpoint used by the editor to poll for concurrent edits."""
+    page = get_page(conn, site_id=g.site.id, page_name=page_name)
+    if page is None:
+        return jsonify(revision=None)
+    revision = get_revision(conn, page_id=page.id)
+    return jsonify(revision=revision.revision if revision is not None else None)
 
 
 def _save_edit(conn: Connection, page_name: str) -> ResponseReturnValue:

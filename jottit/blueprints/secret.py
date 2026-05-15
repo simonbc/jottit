@@ -3,6 +3,7 @@ from __future__ import annotations
 from flask import Blueprint
 
 from jottit.views import admin as admin_views
+from jottit.views import draft as draft_views
 from jottit.views import page as page_views
 from jottit.views import site as site_views
 
@@ -11,6 +12,24 @@ secret_bp = Blueprint("secret", __name__, url_prefix="/<site_slug>")
 # Page
 secret_bp.add_url_rule(
     "/", endpoint="page_home", view_func=page_views.home, methods=["GET", "POST"]
+)
+secret_bp.add_url_rule(
+    "/draft/save",
+    endpoint="draft_save",
+    view_func=draft_views.save,
+    methods=["POST"],
+)
+secret_bp.add_url_rule(
+    "/draft/cancel",
+    endpoint="draft_cancel",
+    view_func=draft_views.cancel,
+    methods=["POST"],
+)
+secret_bp.add_url_rule(
+    "/draft/recover-live-version",
+    endpoint="draft_recover_live_version",
+    view_func=draft_views.recover_live_version,
+    methods=["POST"],
 )
 secret_bp.add_url_rule(
     "/<page_name>",

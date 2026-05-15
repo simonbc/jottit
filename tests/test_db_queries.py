@@ -5,14 +5,20 @@ from sqlalchemy import Connection, select
 
 from jottit.db import (
     _AMBIGUOUS_CHARS,
+    RESERVED_PUBLIC_URLS,
+    change_public_url,
     claim_site,
     delete_draft,
     delete_page,
+    delete_site,
     designs,
     drafts,
+    get_design,
     get_page,
+    get_pages_for_export,
     get_revision,
     get_site,
+    is_public_url_available,
     new_page,
     new_site,
     pages,
@@ -22,6 +28,7 @@ from jottit.db import (
     set_password,
     undelete_page,
     update_caret_pos,
+    update_design,
     update_page,
     update_site,
 )
@@ -472,3 +479,179 @@ def test_update_site_can_change_security_level(db_conn: Connection) -> None:
     row = get_site(db_conn, site_id=site_id)
     assert row is not None
     assert row.security == "open"
+
+
+# ---- change_public_url ----
+
+
+def test_change_public_url_sets_value(db_conn: Connection) -> None:
+    site_id = new_site(db_conn, content="hi", secret_url="cp1")
+
+    change_public_url(db_conn, site_id=site_id, public_url="myblog")
+
+    row = get_site(db_conn, site_id=site_id)
+    assert row is not None
+    assert row.public_url == "myblog"
+
+
+def test_change_public_url_empty_string_clears_value(db_conn: Connection) -> None:
+    site_id = new_site(db_conn, content="hi", secret_url="cp2", public_url="orig")
+
+    change_public_url(db_conn, site_id=site_id, public_url="")
+
+    row = get_site(db_conn, site_id=site_id)
+    assert row is not None
+    assert row.public_url is None
+
+
+def test_change_public_url_none_clears_value(db_conn: Connection) -> None:
+    site_id = new_site(db_conn, content="hi", secret_url="cp3", public_url="orig")
+
+    change_public_url(db_conn, site_id=site_id, public_url=None)
+
+    row = get_site(db_conn, site_id=site_id)
+    assert row is not None
+    assert row.public_url is None
+
+
+# ---- is_public_url_available ----
+
+
+def test_is_public_url_available_true_for_unused_slug(db_conn: Connection) -> None:
+    assert is_public_url_available(db_conn, public_url="brand-new") is True
+
+
+def test_is_public_url_available_false_when_taken(db_conn: Connection) -> None:
+    new_site(db_conn, content="hi", secret_url="av1", public_url="takenslug")
+
+    assert is_public_url_available(db_conn, public_url="takenslug") is False
+
+
+def test_is_public_url_available_false_for_reserved(db_conn: Connection) -> None:
+    for reserved in RESERVED_PUBLIC_URLS:
+        assert is_public_url_available(db_conn, public_url=reserved) is False
+
+
+# ---- delete_site ----
+
+
+def test_delete_site_marks_deleted_and_frees_public_url(db_conn: Connection) -> None:
+    site_id = new_site(db_conn, content="hi", secret_url="ds1", public_url="goinggone")
+
+    delete_site(db_conn, site_id=site_id)
+
+    row = get_site(db_conn, site_id=site_id)
+    assert row is not None
+    assert row.deleted is True
+    assert row.public_url is None
+    # The slug should now be available for someone else.
+    assert is_public_url_available(db_conn, public_url="goinggone") is True
+
+
+def test_delete_site_does_not_drop_pages_or_revisions(db_conn: Connection) -> None:
+    site_id = new_site(db_conn, content="surviving content", secret_url="ds2")
+
+    delete_site(db_conn, site_id=site_id)
+
+    # Pages and revisions still queryable for a potential restore path.
+    page = get_page(db_conn, site_id=site_id, page_name="")
+    assert page is not None
+    rev = get_revision(db_conn, page_id=page.id)
+    assert rev is not None
+    assert rev.content == "surviving content"
+
+
+# ---- get_design / update_design ----
+
+
+def test_get_design_returns_row_created_by_new_site(db_conn: Connection) -> None:
+    site_id = new_site(db_conn, content="hi", secret_url="gd1")
+
+    design = get_design(db_conn, site_id=site_id)
+
+    assert design is not None
+    assert design.site_id == site_id
+    assert design.title_font == "Lucida_Grande"
+
+
+def test_update_design_patches_provided_fields(db_conn: Connection) -> None:
+    site_id = new_site(db_conn, content="hi", secret_url="ud1")
+    original = get_design(db_conn, site_id=site_id)
+    assert original is not None
+    original_subtitle_font = original.subtitle_font
+
+    update_design(
+        db_conn,
+        site_id=site_id,
+        title_font="Georgia",
+        header_color="#abcdef",
+        title_size=140,
+    )
+
+    updated = get_design(db_conn, site_id=site_id)
+    assert updated is not None
+    assert updated.title_font == "Georgia"
+    assert updated.header_color == "#abcdef"
+    assert updated.title_size == 140
+    # Unprovided field untouched.
+    assert updated.subtitle_font == original_subtitle_font
+
+
+def test_update_design_ignores_unknown_fields(db_conn: Connection) -> None:
+    site_id = new_site(db_conn, content="hi", secret_url="ud2")
+
+    update_design(db_conn, site_id=site_id, evil_column="payload", title_font="Helvetica")
+
+    design = get_design(db_conn, site_id=site_id)
+    assert design is not None
+    assert design.title_font == "Helvetica"
+
+
+def test_update_design_no_provided_fields_is_noop(db_conn: Connection) -> None:
+    site_id = new_site(db_conn, content="hi", secret_url="ud3")
+
+    update_design(db_conn, site_id=site_id)  # should not raise
+
+
+# ---- get_pages_for_export ----
+
+
+def test_get_pages_for_export_returns_latest_revisions(db_conn: Connection) -> None:
+    site_id = new_site(db_conn, content="home v1", secret_url="ex1")
+    home = get_page(db_conn, site_id=site_id, page_name="")
+    assert home is not None
+    # New revision on home; export should show v2.
+    update_page(db_conn, page_id=home.id, content="home v2")
+
+    new_page(db_conn, site_id=site_id, name="notes", content="notes body")
+
+    rows = get_pages_for_export(db_conn, site_id=site_id)
+
+    by_name = {r.page_name: r for r in rows}
+    assert by_name[""].content == "home v2"
+    assert by_name["notes"].content == "notes body"
+
+
+def test_get_pages_for_export_skips_deleted_pages(db_conn: Connection) -> None:
+    site_id = new_site(db_conn, content="home", secret_url="ex2")
+    new_page(db_conn, site_id=site_id, name="gone", content="bye")
+    page = get_page(db_conn, site_id=site_id, page_name="gone")
+    assert page is not None
+    delete_page(db_conn, page_id=page.id)
+
+    rows = get_pages_for_export(db_conn, site_id=site_id)
+
+    names = [r.page_name for r in rows]
+    assert "gone" not in names
+    assert "" in names
+
+
+def test_get_pages_for_export_scoped_to_site(db_conn: Connection) -> None:
+    site_a = new_site(db_conn, content="a-home", secret_url="ex3a")
+    site_b = new_site(db_conn, content="b-home", secret_url="ex3b")
+    new_page(db_conn, site_id=site_b, name="b-page", content="b-only")
+
+    rows = get_pages_for_export(db_conn, site_id=site_a)
+
+    names = [r.page_name for r in rows]
+    assert "b-page" not in names

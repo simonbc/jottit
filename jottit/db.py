@@ -500,6 +500,111 @@ def update_site(
     conn.execute(update(sites).where(sites.c.id == site_id).values(**values))
 
 
+def change_public_url(conn: Connection, *, site_id: int, public_url: str | None) -> None:
+    """Set (or clear, with `None`) the public subdomain slug for a site.
+
+    The `sites.public_url` column has an index but no uniqueness constraint —
+    callers (admin views) are responsible for checking availability first.
+    """
+    conn.execute(update(sites).where(sites.c.id == site_id).values(public_url=public_url or None))
+
+
+def is_public_url_available(conn: Connection, *, public_url: str) -> bool:
+    """True if `public_url` is free to claim as a subdomain slug.
+
+    Reserved names (`www`, `signin`, etc.) and existing site rows both make
+    a slug unavailable; the admin's "is this URL available?" probe and the
+    settings POST both fan in here.
+    """
+    if public_url in RESERVED_PUBLIC_URLS:
+        return False
+    existing = conn.execute(select(sites.c.id).where(sites.c.public_url == public_url)).first()
+    return existing is None
+
+
+def delete_site(conn: Connection, *, site_id: int) -> None:
+    """Soft-delete: marks the site `deleted=true` and frees its public_url.
+
+    Pages, revisions, and drafts are left intact so a future admin path
+    could revive the site. Clearing public_url so the subdomain slug can
+    be re-claimed mirrors the original behavior.
+    """
+    conn.execute(update(sites).where(sites.c.id == site_id).values(deleted=True, public_url=None))
+
+
+# ---- Design ----
+
+
+def get_design(conn: Connection, *, site_id: int) -> Row | None:
+    return conn.execute(select(designs).where(designs.c.site_id == site_id).limit(1)).first()
+
+
+_DESIGN_FIELDS = (
+    "title_font",
+    "subtitle_font",
+    "headings_font",
+    "content_font",
+    "header_color",
+    "title_color",
+    "subtitle_color",
+    "title_size",
+    "subtitle_size",
+    "headings_size",
+    "content_size",
+    "hue",
+    "brightness",
+)
+
+
+def update_design(conn: Connection, *, site_id: int, **fields: object) -> None:
+    """Patch the design row for a site. Unknown keys are ignored."""
+    values = {k: v for k, v in fields.items() if k in _DESIGN_FIELDS and v is not None}
+    if not values:
+        return
+    conn.execute(update(designs).where(designs.c.site_id == site_id).values(**values))
+
+
+# ---- Export ----
+
+
+def get_pages_for_export(conn: Connection, *, site_id: int) -> list[Row]:
+    """Latest non-deleted pages with their latest revision content, for export.
+
+    Returns rows shaped like (page_name, content, updated). Used by the
+    /admin/export endpoint to build the markdown bundle.
+    """
+    latest_revision = (
+        select(
+            revisions.c.page_id,
+            func.max(revisions.c.revision).label("max_revision"),
+        )
+        .group_by(revisions.c.page_id)
+        .subquery()
+    )
+    stmt = (
+        select(
+            pages.c.name.label("page_name"),
+            revisions.c.content,
+            revisions.c.created.label("updated"),
+        )
+        .select_from(
+            pages.join(latest_revision, latest_revision.c.page_id == pages.c.id).join(
+                revisions,
+                (revisions.c.page_id == pages.c.id)
+                & (revisions.c.revision == latest_revision.c.max_revision),
+            )
+        )
+        .where(pages.c.site_id == site_id, pages.c.deleted.is_(False))
+        .order_by(pages.c.name)
+    )
+    return list(conn.execute(stmt).all())
+
+
+# Reserved slugs that can't be used as subdomain public_urls (would shadow
+# apex routes or are otherwise sensitive). Mirrors the 2007 list.
+RESERVED_PUBLIC_URLS = frozenset({"www", "internal", "new", "signin"})
+
+
 def new_site(
     conn: Connection,
     *,

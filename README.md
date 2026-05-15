@@ -27,7 +27,7 @@ uv run --env-file .env python -c "from jottit.db import make_engine, metadata; i
 uv run flask --app jottit run --port 5000
 ```
 
-Open <http://lvh.me:5000>. The default `JOTTIT_DOMAIN=lvh.me:5000` uses [lvh.me](https://lvh.me) — `*.lvh.me` resolves to `127.0.0.1` — so subdomain routing works without any `/etc/hosts` edits.
+Open <http://localtest.me:5000>. The default `JOTTIT_DOMAIN=localtest.me:5000` uses [localtest.me](http://readme.localtest.me/) — `*.localtest.me` resolves to `127.0.0.1` — so subdomain routing works without any `/etc/hosts` edits.
 
 ## Tests
 

@@ -34,11 +34,10 @@ def test_site_blueprint(
         # /admin/settings is exercised end-to-end in tests/test_admin_settings.py.
         ("GET", "/admin/design", "admin/design GET"),
         ("POST", "/admin/design", "admin/design POST"),
-        ("POST", "/admin/url-available", "admin/url-available POST"),
+        # /admin/url-available and /admin/change-site-address are exercised
+        # end-to-end in tests/test_admin_change_site_address.py.
         ("GET", "/admin/delete", "admin/delete GET"),
         ("POST", "/admin/delete", "admin/delete POST"),
-        ("GET", "/admin/change-site-address", "admin/change-site-address GET"),
-        ("POST", "/admin/change-site-address", "admin/change-site-address POST"),
         ("GET", "/admin/change-password", "admin/change-password GET"),
         ("POST", "/admin/change-password", "admin/change-password POST"),
         ("GET", "/admin/export", "admin/export GET"),

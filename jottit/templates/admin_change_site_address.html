@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Change site address</title>
+</head>
+<body>
+  <h1>Change site address</h1>
+  {% if error %}<p class="error">{{ error }}</p>{% endif %}
+  <form method="post">
+    <p>
+      <label>Site address<br>
+        <input type="text" name="public_url" value="{{ public_url }}" autofocus>
+      </label>
+      <small>Letters, numbers, and dashes. Leave blank to remove the subdomain.</small>
+    </p>
+    <p><button type="submit">Save</button></p>
+  </form>
+  <p><a href="settings">Back to settings</a></p>
+</body>
+</html>

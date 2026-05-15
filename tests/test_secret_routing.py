@@ -34,11 +34,10 @@ def test_secret_site_routes(
         # /admin/settings is exercised end-to-end in tests/test_admin_settings.py.
         ("GET", "/abc123/admin/design", "admin/design GET"),
         ("POST", "/abc123/admin/design", "admin/design POST"),
-        ("POST", "/abc123/admin/url-available", "admin/url-available POST"),
+        # /admin/url-available and /admin/change-site-address are exercised
+        # end-to-end in tests/test_admin_change_site_address.py.
         ("GET", "/abc123/admin/delete", "admin/delete GET"),
         ("POST", "/abc123/admin/delete", "admin/delete POST"),
-        ("GET", "/abc123/admin/change-site-address", "admin/change-site-address GET"),
-        ("POST", "/abc123/admin/change-site-address", "admin/change-site-address POST"),
         ("GET", "/abc123/admin/change-password", "admin/change-password GET"),
         ("POST", "/abc123/admin/change-password", "admin/change-password POST"),
         ("GET", "/abc123/admin/export", "admin/export GET"),

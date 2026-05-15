@@ -31,8 +31,7 @@ def test_site_blueprint(
 @pytest.mark.parametrize(
     ("method", "path", "expected_substring"),
     [
-        ("GET", "/admin/settings", "admin/settings GET"),
-        ("POST", "/admin/settings", "admin/settings POST"),
+        # /admin/settings is exercised end-to-end in tests/test_admin_settings.py.
         ("GET", "/admin/design", "admin/design GET"),
         ("POST", "/admin/design", "admin/design POST"),
         ("POST", "/admin/url-available", "admin/url-available POST"),

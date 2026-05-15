@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Settings</title>
+</head>
+<body>
+  <h1>Settings</h1>
+  {% if error %}<p class="error">{{ error }}</p>{% endif %}
+  <form method="post">
+    <p>
+      <label>Title<br>
+        <input type="text" name="title" value="{{ title }}">
+      </label>
+    </p>
+    <p>
+      <label>Subtitle<br>
+        <input type="text" name="subtitle" value="{{ subtitle }}">
+      </label>
+    </p>
+    <p>
+      <label>Email<br>
+        <input type="email" name="email" value="{{ email }}">
+      </label>
+    </p>
+    <fieldset>
+      <legend>Security</legend>
+      <p><label><input type="radio" name="security" value="private" {% if security == "private" %}checked{% endif %}> Private — only you can view or edit</label></p>
+      <p><label><input type="radio" name="security" value="public" {% if security == "public" %}checked{% endif %}> Public — anyone can view, only you can edit</label></p>
+      <p><label><input type="radio" name="security" value="open" {% if security == "open" %}checked{% endif %}> Open — anyone can view or edit</label></p>
+    </fieldset>
+    <p><button type="submit">Save settings</button></p>
+  </form>
+  <p><a href="change-site-address">Site address: {{ public_url or "(none)" }}</a></p>
+  <p><a href="change-password">Change password</a></p>
+</body>
+</html>

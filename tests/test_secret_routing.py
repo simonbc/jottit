@@ -31,8 +31,7 @@ def test_secret_site_routes(
 @pytest.mark.parametrize(
     ("method", "path", "expected_substring"),
     [
-        ("GET", "/abc123/admin/settings", "admin/settings GET"),
-        ("POST", "/abc123/admin/settings", "admin/settings POST"),
+        # /admin/settings is exercised end-to-end in tests/test_admin_settings.py.
         ("GET", "/abc123/admin/design", "admin/design GET"),
         ("POST", "/abc123/admin/design", "admin/design POST"),
         ("POST", "/abc123/admin/url-available", "admin/url-available POST"),
@@ -63,7 +62,6 @@ def test_secret_admin_routes(
 @pytest.mark.parametrize(
     ("secret_path", "subdomain_path"),
     [
-        ("/abc123/admin/settings", "/admin/settings"),
         ("/abc123/admin/design", "/admin/design"),
     ],
 )

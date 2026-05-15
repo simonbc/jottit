@@ -1,15 +1,32 @@
 from __future__ import annotations
 
 from collections.abc import Iterator
+from contextlib import contextmanager
 
 import pytest
-from flask import Flask
+from flask import Flask, g
 from flask.testing import FlaskClient
 from sqlalchemy import Connection, Engine
 from testcontainers.postgres import PostgresContainer
 
 from jottit import create_app
 from jottit.db import make_engine, metadata
+
+
+@contextmanager
+def request_under_test(
+    app: Flask, path: str, *, base_url: str, db_conn: Connection
+) -> Iterator[None]:
+    """Push a request context with `g.db_conn` pre-set so the resolver sees
+    the test's transaction-wrapped data, run preprocess hooks, then trigger
+    teardown when the block exits."""
+    with app.test_request_context(path, base_url=base_url):
+        g.db_conn = db_conn
+        try:
+            app.preprocess_request()
+            yield
+        finally:
+            app.do_teardown_request(None)
 
 
 @pytest.fixture(scope="session")

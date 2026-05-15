@@ -3,6 +3,7 @@ from __future__ import annotations
 import random
 from dataclasses import dataclass
 
+from flask import current_app, g
 from sqlalchemy import (
     Boolean,
     Column,
@@ -306,3 +307,31 @@ def new_site(
     )
 
     return site_id
+
+
+# ---- Request-scoped connection management ----
+
+
+def get_request_conn() -> Connection | None:
+    """Return the connection scoped to the current request, opening one if needed.
+
+    Reuses `g.db_conn` if already present (e.g. set by a test fixture);
+    otherwise opens a fresh connection from the app's engine and marks it
+    for closing at teardown. Returns `None` if no engine is configured.
+    """
+    if "db_conn" in g:
+        return g.db_conn
+
+    engine = current_app.extensions.get("db_engine")
+    if engine is None:
+        return None
+
+    g.db_conn = engine.connect()
+    g._db_conn_owned = True
+    return g.db_conn
+
+
+def close_request_conn(exc: BaseException | None) -> None:
+    """teardown_request hook: close the connection if we opened it ourselves."""
+    if g.get("_db_conn_owned", False):
+        g.db_conn.close()

@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from flask import g, request
 
+from jottit.db import get_request_conn, get_site
+
 
 def resolve_site() -> None:
     """Stash site context on `flask.g` for the current request.
@@ -9,8 +11,22 @@ def resolve_site() -> None:
     `g.site_slug` is the URL slug captured from a subdomain or path prefix,
     or `None` on apex-domain routes.
 
-    `g.site` is the resolved site row, or `None`. The DB lookup is wired
-    once the engine is bound to the app.
+    `g.site` is the resolved sites row (a SQLAlchemy Row) or `None` —
+    looked up by `public_url` for subdomain routes, by `secret_url` for
+    secret-path routes. `None` if the slug doesn't match any site, or if
+    no DB engine is configured.
     """
     g.site_slug = (request.view_args or {}).get("site_slug")
     g.site = None
+
+    if g.site_slug is None:
+        return
+
+    conn = get_request_conn()
+    if conn is None:
+        return
+
+    if request.blueprint == "secret":
+        g.site = get_site(conn, secret_url=g.site_slug)
+    else:
+        g.site = get_site(conn, public_url=g.site_slug)

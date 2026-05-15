@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from flask import abort, g, jsonify, redirect, render_template, request
 from flask.typing import ResponseReturnValue
-from sqlalchemy import Connection
+from sqlalchemy import Connection, Row
 
 from jottit import auth
 from jottit.db import (
@@ -17,6 +17,7 @@ from jottit.db import (
     undelete_page,
     update_page,
 )
+from jottit.diff import better_diff
 from jottit.render import format_content
 from jottit.urls import page_slug, site_root
 
@@ -49,6 +50,9 @@ def view(site_slug: str, page_name: str) -> ResponseReturnValue:
     if mode == "history":
         return _render_history(conn, page_name)
 
+    if mode == "diff":
+        return _render_diff(conn, page_name)
+
     return _render_view(conn, page_name)
 
 
@@ -64,7 +68,7 @@ def _action_for(mode: str) -> str:
     # Old revisions, history listings, and diffs all expose pre-current
     # content; on public sites that's gated more tightly than the latest
     # revision. See is_action_allowed.
-    if mode == "history" or request.args.get("r") is not None:
+    if mode in ("history", "diff") or request.args.get("r") is not None:
         return "view_revision"
     return "view"
 
@@ -89,6 +93,63 @@ def _render_view(conn: Connection, page_name: str) -> ResponseReturnValue:
         revision=revision,
         content_html=rendered,
     )
+
+
+def _render_diff(conn: Connection, page_name: str) -> ResponseReturnValue:
+    """Render the diff between two revisions.
+
+    URL shapes (matches the original):
+    - `?m=diff` → latest vs previous
+    - `?m=diff&r=N` → revision N vs N-1
+    - `?m=diff&r=A&r=B` → between A and B (ordering normalized)
+    """
+    page = get_page(conn, site_id=g.site.id, page_name=page_name)
+    if page is None:
+        return render_template("notfound.html", page_name=page_name), 404
+
+    a_rev, b_rev = _resolve_diff_revisions(conn, page_id=page.id)
+    if a_rev is None or b_rev is None:
+        abort(400)
+
+    return render_template(
+        "diff.html",
+        page_name=page_name,
+        a=a_rev,
+        b=b_rev,
+        diff_html=better_diff(a_rev.content, b_rev.content),
+        site_root_path=site_root(),
+    )
+
+
+def _resolve_diff_revisions(
+    conn: Connection, *, page_id: int
+) -> tuple[Row | None, Row | None]:
+    """Pick the (older, newer) revisions to diff based on the `r` query params."""
+    rs = request.args.getlist("r")
+    if len(rs) > 2:
+        return None, None
+    try:
+        ints = sorted({int(r) for r in rs})
+    except ValueError:
+        return None, None
+
+    if not ints:
+        # No params: latest vs previous.
+        latest = get_revision(conn, page_id=page_id)
+        if latest is None:
+            return None, None
+        prev = get_revision(conn, page_id=page_id, revision=max(latest.revision - 1, 1))
+        return prev, latest
+
+    if len(ints) == 1:
+        n = ints[0]
+        b = get_revision(conn, page_id=page_id, revision=n)
+        a = get_revision(conn, page_id=page_id, revision=max(n - 1, 1))
+        return a, b
+
+    a = get_revision(conn, page_id=page_id, revision=ints[0])
+    b = get_revision(conn, page_id=page_id, revision=ints[1])
+    return a, b
 
 
 def _render_history(conn: Connection, page_name: str) -> ResponseReturnValue:

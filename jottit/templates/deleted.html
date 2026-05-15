@@ -1,11 +1,14 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>Deleted</title>
-</head>
-<body>
-  <h1>This page has been deleted</h1>
-  <p>&ldquo;{{ page_name }}&rdquo; is gone. Append <code>?r=N</code> to view a specific revision.</p>
-</body>
-</html>
+{% extends "base.html" %}
+{% block title %}Deleted{% endblock %}
+{% block content %}
+  <article>
+    <header><h1>This page has been deleted</h1></header>
+    <p>&ldquo;{{ page_name }}&rdquo; is gone. Append <code>?r=<var>N</var></code> to view a specific revision, or restore it from the page's history.</p>
+    {% if is_signed_in or is_unclaimed %}
+      <form action="{{ site_root_path }}{{ page_slug(page_name) }}" method="post" class="undelete">
+        <input type="hidden" name="m" value="undelete">
+        <button type="submit">Undelete this page</button>
+      </form>
+    {% endif %}
+  </article>
+{% endblock %}

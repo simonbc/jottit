@@ -10,6 +10,7 @@ from jottit.blueprints.page import page_bp
 from jottit.blueprints.root import root_bp
 from jottit.blueprints.secret import secret_bp
 from jottit.blueprints.site import site_bp
+from jottit.chrome import chrome_context
 from jottit.db import close_request_conn, make_engine
 from jottit.site_resolver import resolve_site
 
@@ -32,5 +33,6 @@ def create_app() -> Flask:
 
     app.before_request(resolve_site)
     app.teardown_request(close_request_conn)
+    app.context_processor(chrome_context)
 
     return app

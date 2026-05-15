@@ -1,11 +1,11 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>Not found</title>
-</head>
-<body>
-  <h1>Not found</h1>
-  <p>There's no page named &ldquo;{{ page_name }}&rdquo; on this site.</p>
-</body>
-</html>
+{% extends "base.html" %}
+{% block title %}Not found{% endblock %}
+{% block content %}
+  <article>
+    <header><h1>Not found</h1></header>
+    <p>There's no page named &ldquo;{{ page_name }}&rdquo; on this site.</p>
+    {% if is_signed_in or is_unclaimed %}
+      <p><a href="{{ site_root_path }}{{ page_slug(page_name) }}?m=edit">Create this page</a></p>
+    {% endif %}
+  </article>
+{% endblock %}

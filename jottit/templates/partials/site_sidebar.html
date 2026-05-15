@@ -1,0 +1,32 @@
+{# Page list for the current site. Hidden when the site has only the
+   home page — it's noise on a fresh site. The "new page" form is a
+   plain link to the edit URL; M10 will replace the inline form with
+   a JS-driven inline create. #}
+{% if pages|length > 1 or is_signed_in %}
+<aside class="site-sidebar" aria-label="Pages on this site">
+  <h2 class="visually-hidden">Pages</h2>
+  <ul class="page-list">
+    {% for p in pages %}
+      {% set label = p.name or "Home" %}
+      {% set href = site_root_path + page_slug(p.name) %}
+      <li>
+        {% if current_path == href %}
+          <strong>{{ label }}</strong>
+        {% else %}
+          <a href="{{ href }}">{{ label }}</a>
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+  {% if is_signed_in or is_unclaimed %}
+    <form action="{{ site_root_path }}" method="get" class="new-page">
+      <label>
+        <span class="visually-hidden">New page name</span>
+        <input type="text" name="m" value="edit" hidden>
+        <input type="text" name="name" placeholder="New page name" required>
+      </label>
+      <button type="submit">Create</button>
+    </form>
+  {% endif %}
+</aside>
+{% endif %}

@@ -1,0 +1,3 @@
+{# Inline form error. Hidden when no error message is set, so callers can
+   include this unconditionally above their form fields. #}
+{% if error %}<p class="form-error" role="alert">{{ error }}</p>{% endif %}

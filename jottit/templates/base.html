@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{% if site and site.title %}{{ site.title }}{% else %}Jottit{% endif %}{% endblock %}</title>
+  {% if site and (site.security == "private" or not site.public_url) %}
+    <meta name="robots" content="noindex, nofollow">
+  {% endif %}
+  <link rel="icon" href="/favicon.ico">
+  {% block head %}{% endblock %}
+  {% if design %}
+    {% include "partials/design_style.html" %}
+  {% endif %}
+</head>
+<body>
+  <div class="page">
+    {% if site %}
+      {% include "partials/site_header.html" %}
+    {% endif %}
+
+    <main>
+      {% block content %}{% endblock %}
+    </main>
+
+    {% if site %}
+      {% include "partials/site_sidebar.html" %}
+    {% endif %}
+
+    <footer class="site-footer">
+      <p>Powered by <a href="https://jottit.org/">Jottit</a>.</p>
+    </footer>
+  </div>
+</body>
+</html>

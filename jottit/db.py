@@ -635,6 +635,19 @@ def update_design(conn: Connection, *, site_id: int, **fields: object) -> None:
 # ---- Export ----
 
 
+def list_pages(conn: Connection, *, site_id: int) -> list[Row]:
+    """List a site's non-deleted pages, alphabetically by name.
+
+    Used by the chrome sidebar to render a navigation list. Home (the
+    empty-name page) sorts first.
+    """
+    rows = conn.execute(
+        select(pages.c.name).where(pages.c.site_id == site_id, pages.c.deleted.is_(False))
+    ).all()
+    # Empty-name (home) goes to the top; remaining pages sort case-insensitively.
+    return sorted(rows, key=lambda r: (r.name != "", r.name.lower()))
+
+
 def get_pages_for_export(conn: Connection, *, site_id: int) -> list[Row]:
     """Latest non-deleted pages with their latest revision content, for export.
 

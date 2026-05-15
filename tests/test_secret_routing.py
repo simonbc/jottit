@@ -10,9 +10,9 @@ APEX = "http://jottit.test/"
     ("method", "path", "expected_substring"),
     [
         # /site/claim, /site/signin, /site/signout, /site/forgot-password,
-        # /site/change-password, and /site/changes are exercised end-to-end
-        # in their respective test files.
-        ("GET", "/abc123/site/changes.atom", "site/changes.atom GET"),
+        # /site/change-password, /site/changes, /site/changes.rss, and
+        # /site/changes.json are exercised end-to-end in their respective
+        # test files.
         ("POST", "/abc123/site/hide-primer", "site/hide-primer POST"),
     ],
 )

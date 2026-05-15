@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from flask import abort, g, jsonify, redirect, render_template, request
+from flask import abort, g, jsonify, make_response, redirect, render_template, request
 from flask.typing import ResponseReturnValue
 from sqlalchemy import Connection, Row
 
@@ -55,6 +55,12 @@ def view(site_slug: str, page_name: str) -> ResponseReturnValue:
     if mode == "history":
         return _render_history(conn, page_name)
 
+    if mode == "history_rss":
+        return _render_history_rss(conn, page_name)
+
+    if mode == "history_json":
+        return _render_history_json(conn, page_name)
+
     if mode == "diff":
         return _render_diff(conn, page_name)
 
@@ -75,6 +81,8 @@ def _action_for(mode: str) -> str:
     # revision. See is_action_allowed.
     if mode in ("history", "diff") or request.args.get("r") is not None:
         return "view_revision"
+    # RSS / JSON Feed readers don't typically auth, so feeds use the same
+    # loose "view" check public sites use for the latest revision.
     return "view"
 
 
@@ -98,6 +106,57 @@ def _render_view(conn: Connection, page_name: str) -> ResponseReturnValue:
         revision=revision,
         content_html=rendered,
     )
+
+
+def _render_history_rss(conn: Connection, page_name: str) -> ResponseReturnValue:
+    page = get_page(conn, site_id=g.site.id, page_name=page_name)
+    if page is None:
+        abort(404)
+    revisions_page = get_revisions(conn, page_id=page.id, limit=20)
+    body = render_template(
+        "feeds/history.rss.xml",
+        page_name=page_name,
+        revisions=revisions_page,
+        page_url=_page_absolute_url(page_name),
+        feed_url=_page_absolute_url(page_name, "m=history_rss"),
+        site_title=(g.site.title or g.site.public_url or g.site.secret_url),
+        page_label=page_name or "Home",
+    )
+    response = make_response(body)
+    response.headers["Content-Type"] = "application/rss+xml; charset=utf-8"
+    return response
+
+
+def _render_history_json(conn: Connection, page_name: str) -> ResponseReturnValue:
+    page = get_page(conn, site_id=g.site.id, page_name=page_name)
+    if page is None:
+        abort(404)
+    revisions_page = get_revisions(conn, page_id=page.id, limit=20)
+    payload = {
+        "version": "https://jsonfeed.org/version/1.1",
+        "title": (g.site.title or g.site.public_url or g.site.secret_url)
+        + f" — {page_name or 'Home'} history",
+        "home_page_url": _page_absolute_url(page_name),
+        "feed_url": _page_absolute_url(page_name, "m=history_json"),
+        "items": [
+            {
+                "id": _page_absolute_url(page_name, f"r={r.revision}"),
+                "url": _page_absolute_url(page_name, f"r={r.revision}"),
+                "title": f"Revision {r.revision}",
+                "content_html": r.changes or "",
+                "date_published": r.created.isoformat() + "Z",
+            }
+            for r in revisions_page
+        ],
+    }
+    response = jsonify(payload)
+    response.headers["Content-Type"] = "application/feed+json"
+    return response
+
+
+def _page_absolute_url(page_name: str, query: str = "") -> str:
+    base = f"{request.scheme}://{request.host}{site_root()}{page_slug(page_name)}"
+    return f"{base}?{query}" if query else base
 
 
 def _render_diff(conn: Connection, page_name: str) -> ResponseReturnValue:

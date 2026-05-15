@@ -234,8 +234,66 @@ def changes(site_slug: str) -> ResponseReturnValue:
     )
 
 
-def changes_atom(site_slug: str) -> str:
-    return f"site:{site_slug} site/changes.atom GET (TODO)"
+def changes_rss(site_slug: str) -> ResponseReturnValue:
+    """RSS 2.0 site-wide changes feed."""
+    if g.site is None:
+        abort(404)
+    if (response := auth.gate("view")) is not None:
+        return response
+    rows = _recent_changes()
+    body = render_template(
+        "feeds/changes.rss.xml",
+        changes=rows,
+        site_title=g.site.title or g.site.public_url or g.site.secret_url,
+        feed_url=_absolute_url("site/changes.rss"),
+        site_url=_absolute_url(""),
+        site_root_path=site_root(),
+        page_slug=page_slug,
+        absolute_url=_absolute_url,
+    )
+    return body, 200, {"Content-Type": "application/rss+xml; charset=utf-8"}
+
+
+def changes_json(site_slug: str) -> ResponseReturnValue:
+    """JSON Feed (jsonfeed.org) site-wide changes feed."""
+    if g.site is None:
+        abort(404)
+    if (response := auth.gate("view")) is not None:
+        return response
+    rows = _recent_changes()
+    payload = {
+        "version": "https://jsonfeed.org/version/1.1",
+        "title": (g.site.title or g.site.public_url or g.site.secret_url) + " — changes",
+        "home_page_url": _absolute_url(""),
+        "feed_url": _absolute_url("site/changes.json"),
+        "items": [
+            {
+                "id": _absolute_url(f"{page_slug(c.page_name)}?r={c.revision}"),
+                "url": _absolute_url(f"{page_slug(c.page_name)}?r={c.revision}"),
+                "title": (c.page_name or "Home") + f" — revision {c.revision}",
+                "content_html": c.changes or "",
+                "date_published": c.created.isoformat() + "Z",
+            }
+            for c in rows
+        ],
+    }
+    from flask import jsonify
+
+    response = jsonify(payload)
+    response.headers["Content-Type"] = "application/feed+json"
+    return response
+
+
+def _recent_changes():
+    conn = get_request_conn()
+    if conn is None:
+        abort(500)
+    return get_changes(conn, site_id=g.site.id, limit=20)
+
+
+def _absolute_url(path: str) -> str:
+    """Build an absolute URL inside this site for a feed entry."""
+    return f"{request.scheme}://{request.host}{site_root()}{path}"
 
 
 def hide_primer(site_slug: str) -> str:

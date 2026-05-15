@@ -10,9 +10,9 @@ SITE_BASE = "http://mysite.jottit.test/"
     ("method", "path", "expected_substring"),
     [
         # /site/claim, /site/signin, /site/signout, /site/forgot-password,
-        # /site/change-password, and /site/changes are exercised end-to-end
-        # in their respective test files.
-        ("GET", "/site/changes.atom", "site/changes.atom GET"),
+        # /site/change-password, /site/changes, /site/changes.rss, and
+        # /site/changes.json are exercised end-to-end in their respective
+        # test files.
         ("POST", "/site/hide-primer", "site/hide-primer POST"),
     ],
 )

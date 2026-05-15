@@ -62,9 +62,14 @@ secret_bp.add_url_rule(
 )
 secret_bp.add_url_rule("/site/changes", endpoint="site_changes", view_func=site_views.changes)
 secret_bp.add_url_rule(
-    "/site/changes.atom",
-    endpoint="site_changes_atom",
-    view_func=site_views.changes_atom,
+    "/site/changes.rss",
+    endpoint="site_changes_rss",
+    view_func=site_views.changes_rss,
+)
+secret_bp.add_url_rule(
+    "/site/changes.json",
+    endpoint="site_changes_json",
+    view_func=site_views.changes_json,
 )
 secret_bp.add_url_rule(
     "/site/hide-primer",

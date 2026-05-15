@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Claim this site</title>
+</head>
+<body>
+  <h1>Claim this site</h1>
+  {% if error %}<p class="error">{{ error }}</p>{% endif %}
+  <form method="post">
+    <p>
+      <label>Password<br>
+        <input type="password" name="password" value="{{ password }}" required>
+      </label>
+    </p>
+    <p>
+      <label>Email<br>
+        <input type="email" name="email" value="{{ email }}" required>
+      </label>
+    </p>
+    <fieldset>
+      <legend>Security</legend>
+      <p><label><input type="radio" name="security" value="private" {% if security == "private" %}checked{% endif %}> Private — only you can view or edit</label></p>
+      <p><label><input type="radio" name="security" value="public" {% if security == "public" %}checked{% endif %}> Public — anyone can view, only you can edit</label></p>
+      <p><label><input type="radio" name="security" value="open" {% if security == "open" %}checked{% endif %}> Open — anyone can view or edit</label></p>
+    </fieldset>
+    <p><button type="submit">Claim site</button></p>
+  </form>
+</body>
+</html>

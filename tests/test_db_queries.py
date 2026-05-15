@@ -5,7 +5,10 @@ from sqlalchemy import Connection, select
 
 from jottit.db import (
     _AMBIGUOUS_CHARS,
+    delete_draft,
+    delete_page,
     designs,
+    drafts,
     get_page,
     get_revision,
     get_site,
@@ -13,6 +16,9 @@ from jottit.db import (
     new_site,
     pages,
     revisions,
+    undelete_page,
+    update_caret_pos,
+    update_page,
 )
 
 
@@ -194,3 +200,152 @@ def test_get_revision_no_revisions_returns_none(db_conn: Connection) -> None:
     ).scalar_one()
 
     assert get_revision(db_conn, page_id=page_id) is None
+
+
+# ---- update_caret_pos ----
+
+
+def test_update_caret_pos_persists_values(db_conn: Connection) -> None:
+    site_id = new_site(db_conn, content="hi", secret_url="uc1")
+    page = get_page(db_conn, site_id=site_id, page_name="")
+    assert page is not None
+
+    update_caret_pos(db_conn, page_id=page.id, scroll_pos=120, caret_pos=45)
+
+    refreshed = get_page(db_conn, site_id=site_id, page_name="")
+    assert refreshed is not None
+    assert refreshed.scroll_pos == 120
+    assert refreshed.caret_pos == 45
+
+
+# ---- update_page ----
+
+
+def test_update_page_creates_new_revision_when_content_changes(db_conn: Connection) -> None:
+    site_id = new_site(db_conn, content="<p>hello</p>", secret_url="up1")
+    page = get_page(db_conn, site_id=site_id, page_name="")
+    assert page is not None
+
+    update_page(db_conn, page_id=page.id, content="<p>hello world</p>")
+
+    latest = get_revision(db_conn, page_id=page.id)
+    assert latest is not None
+    assert latest.revision == 2
+    assert latest.content == "<p>hello world</p>"
+    assert latest.changes is not None
+    assert "Added" in latest.changes
+    assert "world" in latest.changes
+
+
+def test_update_page_noop_when_content_unchanged(db_conn: Connection) -> None:
+    site_id = new_site(db_conn, content="same", secret_url="up2")
+    page = get_page(db_conn, site_id=site_id, page_name="")
+    assert page is not None
+
+    update_page(db_conn, page_id=page.id, content="same")
+
+    latest = get_revision(db_conn, page_id=page.id)
+    assert latest is not None
+    assert latest.revision == 1
+
+
+def test_update_page_replace_summary(db_conn: Connection) -> None:
+    site_id = new_site(db_conn, content="<p>hello world</p>", secret_url="up3")
+    page = get_page(db_conn, site_id=site_id, page_name="")
+    assert page is not None
+
+    update_page(db_conn, page_id=page.id, content="<p>hello there</p>")
+
+    latest = get_revision(db_conn, page_id=page.id)
+    assert latest is not None
+    assert latest.changes is not None
+    assert "Changed" in latest.changes
+    assert "world" in latest.changes
+    assert "there" in latest.changes
+
+
+def test_update_page_clears_draft(db_conn: Connection) -> None:
+    from sqlalchemy import insert as sa_insert
+
+    site_id = new_site(db_conn, content="hi", secret_url="up4")
+    page = get_page(db_conn, site_id=site_id, page_name="")
+    assert page is not None
+
+    db_conn.execute(sa_insert(drafts).values(page_id=page.id, content="draft text"))
+    assert db_conn.execute(select(drafts).where(drafts.c.page_id == page.id)).first() is not None
+
+    update_page(db_conn, page_id=page.id, content="hi changed")
+
+    assert db_conn.execute(select(drafts).where(drafts.c.page_id == page.id)).first() is None
+
+
+def test_update_page_updates_caret_and_scroll(db_conn: Connection) -> None:
+    site_id = new_site(db_conn, content="hi", secret_url="up5")
+    page = get_page(db_conn, site_id=site_id, page_name="")
+    assert page is not None
+
+    update_page(db_conn, page_id=page.id, content="hi changed", scroll_pos=80, caret_pos=10)
+
+    refreshed = get_page(db_conn, site_id=site_id, page_name="")
+    assert refreshed is not None
+    assert refreshed.scroll_pos == 80
+    assert refreshed.caret_pos == 10
+
+
+# ---- delete_page / undelete_page ----
+
+
+def test_delete_page_marks_deleted_and_records_revision(db_conn: Connection) -> None:
+    site_id = new_site(db_conn, content="hi", secret_url="dp1")
+    page = get_page(db_conn, site_id=site_id, page_name="")
+    assert page is not None
+
+    delete_page(db_conn, page_id=page.id)
+
+    deleted_row = db_conn.execute(select(pages).where(pages.c.id == page.id)).one()
+    assert deleted_row.deleted is True
+
+    latest = get_revision(db_conn, page_id=page.id)
+    assert latest is not None
+    assert latest.revision == 2
+    assert latest.content == ""
+    assert latest.changes == "<em>Page deleted.</em>"
+
+
+def test_undelete_page_restores_with_new_name(db_conn: Connection) -> None:
+    site_id = new_site(db_conn, content="hi", secret_url="ud1")
+    new_page(db_conn, site_id=site_id, name="foo", content="x")
+    page = get_page(db_conn, site_id=site_id, page_name="foo")
+    assert page is not None
+
+    delete_page(db_conn, page_id=page.id)
+    undelete_page(db_conn, page_id=page.id, name="Foo")
+
+    refreshed = db_conn.execute(select(pages).where(pages.c.id == page.id)).one()
+    assert refreshed.deleted is False
+    assert refreshed.name == "Foo"
+
+
+# ---- delete_draft ----
+
+
+def test_delete_draft_removes_row(db_conn: Connection) -> None:
+    from sqlalchemy import insert as sa_insert
+
+    site_id = new_site(db_conn, content="hi", secret_url="dd1")
+    page = get_page(db_conn, site_id=site_id, page_name="")
+    assert page is not None
+
+    db_conn.execute(sa_insert(drafts).values(page_id=page.id, content="wip"))
+
+    delete_draft(db_conn, page_id=page.id)
+
+    assert db_conn.execute(select(drafts).where(drafts.c.page_id == page.id)).first() is None
+
+
+def test_delete_draft_noop_when_absent(db_conn: Connection) -> None:
+    site_id = new_site(db_conn, content="hi", secret_url="dd2")
+    page = get_page(db_conn, site_id=site_id, page_name="")
+    assert page is not None
+
+    delete_draft(db_conn, page_id=page.id)  # should not raise

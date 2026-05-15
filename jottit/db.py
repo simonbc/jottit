@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import difflib
 import random
 from dataclasses import dataclass
+from html import escape
 
 from flask import current_app, g
 from sqlalchemy import (
@@ -25,6 +27,9 @@ from sqlalchemy import (
     text,
     update,
 )
+from sqlalchemy import delete as sql_delete
+
+from jottit.diff import html2list
 
 metadata = MetaData()
 
@@ -260,33 +265,155 @@ def new_page(
     scroll_pos: int = 0,
     caret_pos: int = 0,
 ) -> int:
-    """Insert a page row plus its first revision (revision=1). Returns page_id.
-
-    Also updates `sites.updated` to the revision's created timestamp — Jottit
-    denormalizes "last activity" onto the site row to avoid joining to revisions
-    when listing sites by recency.
-    """
+    """Insert a page row plus its first revision (revision=1). Returns page_id."""
     page_id = conn.execute(
         insert(pages)
         .values(site_id=site_id, name=name, scroll_pos=scroll_pos, caret_pos=caret_pos)
         .returning(pages.c.id)
     ).scalar_one()
 
+    new_revision(
+        conn,
+        page_id=page_id,
+        revision=1,
+        content=content,
+        changes="<em>Created page</em>",
+        ip=ip,
+    )
+
+    return page_id
+
+
+def new_revision(
+    conn: Connection,
+    *,
+    page_id: int,
+    revision: int,
+    content: str,
+    changes: str | None,
+    ip: str | None = None,
+) -> None:
+    """Insert a revision and bump `sites.updated` to its created timestamp.
+
+    Jottit denormalizes "last activity" onto the site row to avoid joining to
+    revisions when listing sites by recency.
+    """
     revision_row = conn.execute(
         insert(revisions)
         .values(
             page_id=page_id,
-            revision=1,
+            revision=revision,
             content=content,
-            changes="<em>Created page</em>",
+            changes=changes,
             ip=ip,
         )
         .returning(revisions.c.created)
     ).one()
 
+    site_id = conn.execute(select(pages.c.site_id).where(pages.c.id == page_id)).scalar_one()
+
     conn.execute(update(sites).where(sites.c.id == site_id).values(updated=revision_row.created))
 
-    return page_id
+
+def update_caret_pos(
+    conn: Connection,
+    *,
+    page_id: int,
+    scroll_pos: int = 0,
+    caret_pos: int = 0,
+) -> None:
+    conn.execute(
+        update(pages)
+        .where(pages.c.id == page_id)
+        .values(scroll_pos=scroll_pos, caret_pos=caret_pos)
+    )
+
+
+def _format_changes(tokens: list[str], max_len: int = 40) -> str:
+    """Render a slice of html2list tokens as a quoted, escaped span snippet."""
+    s = " ".join(tokens).strip()
+    if len(s) > max_len:
+        s = s[:max_len].strip() + "..."
+    if not s:
+        return "whitespace"
+    return f'"<span class="src">{escape(s)}</span>"'
+
+
+def update_page(
+    conn: Connection,
+    *,
+    page_id: int,
+    content: str,
+    scroll_pos: int = 0,
+    caret_pos: int = 0,
+    ip: str | None = None,
+) -> None:
+    """Save a new revision if content changed, with a human-readable diff summary.
+
+    Also persists caret/scroll position and clears any draft. No-op on the
+    revision side when content matches the latest revision verbatim.
+    """
+    latest = get_revision(conn, page_id=page_id)
+    update_caret_pos(conn, page_id=page_id, scroll_pos=scroll_pos, caret_pos=caret_pos)
+    delete_draft(conn, page_id=page_id)
+
+    if latest is None or content == latest.content:
+        return
+
+    a = html2list(latest.content)
+    b = html2list(content)
+    matcher = difflib.SequenceMatcher(None, a, b)
+    changes = ""
+    for op, i1, i2, j1, j2 in matcher.get_opcodes():
+        if op == "equal":
+            continue
+        elif op == "replace":
+            changes = (
+                "Changed " + _format_changes(a[i1:i2], 20) + " to " + _format_changes(b[j1:j2], 20)
+            )
+        elif op == "delete":
+            changes = "Removed " + _format_changes(a[i1:i2])
+            break
+        elif op == "insert":
+            changes = "Added " + _format_changes(b[j1:j2])
+            break
+
+    new_revision(
+        conn,
+        page_id=page_id,
+        revision=latest.revision + 1,
+        content=content,
+        changes=changes,
+        ip=ip,
+    )
+
+
+def delete_page(conn: Connection, *, page_id: int, ip: str | None = None) -> None:
+    """Mark a page deleted and append a sentinel "page deleted" revision."""
+    latest = get_revision(conn, page_id=page_id)
+    next_revision = (latest.revision + 1) if latest is not None else 1
+    new_revision(
+        conn,
+        page_id=page_id,
+        revision=next_revision,
+        content="",
+        changes="<em>Page deleted.</em>",
+        ip=ip,
+    )
+    conn.execute(update(pages).where(pages.c.id == page_id).values(deleted=True))
+
+
+def undelete_page(conn: Connection, *, page_id: int, name: str) -> None:
+    """Restore a deleted page, also updating its name.
+
+    Jottit re-uses this path when the user deletes "foo" and re-creates it
+    as "Foo" — the underlying page is reused so prior revisions survive.
+    """
+    conn.execute(update(pages).where(pages.c.id == page_id).values(deleted=False, name=name))
+
+
+def delete_draft(conn: Connection, *, page_id: int) -> None:
+    conn.execute(sql_delete(drafts).where(drafts.c.page_id == page_id))
 
 
 def new_site(

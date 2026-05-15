@@ -1,44 +1,44 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>Design</title>
-</head>
-<body>
-  <h1>Design</h1>
-  {% if error %}<p class="error">{{ error }}</p>{% endif %}
-  <form method="post">
-    <fieldset>
-      <legend>Fonts</legend>
-      <p><label>Title font <input type="text" name="title_font" value="{{ design.title_font }}"></label></p>
-      <p><label>Subtitle font <input type="text" name="subtitle_font" value="{{ design.subtitle_font }}"></label></p>
-      <p><label>Headings font <input type="text" name="headings_font" value="{{ design.headings_font }}"></label></p>
-      <p><label>Content font <input type="text" name="content_font" value="{{ design.content_font }}"></label></p>
-    </fieldset>
+{% extends "base.html" %}
+{% block title %}Design{% endblock %}
+{% block content %}
+  <article class="admin">
+    <header><h1>Design</h1></header>
 
-    <fieldset>
-      <legend>Colors</legend>
-      <p><label>Header color <input type="text" name="header_color" value="{{ design.header_color }}" placeholder="#003452"></label></p>
-      <p><label>Title color <input type="text" name="title_color" value="{{ design.title_color }}" placeholder="#fff"></label></p>
-      <p><label>Subtitle color <input type="text" name="subtitle_color" value="{{ design.subtitle_color }}" placeholder="#bfe8ff"></label></p>
-    </fieldset>
+    {% include "partials/form_error.html" %}
 
-    <fieldset>
-      <legend>Sizes (percent)</legend>
-      <p><label>Title size <input type="number" name="title_size" value="{{ design.title_size }}" min="25" max="500"></label></p>
-      <p><label>Subtitle size <input type="number" name="subtitle_size" value="{{ design.subtitle_size }}" min="25" max="500"></label></p>
-      <p><label>Headings size <input type="number" name="headings_size" value="{{ design.headings_size }}" min="25" max="500"></label></p>
-      <p><label>Content size <input type="number" name="content_size" value="{{ design.content_size }}" min="25" max="500"></label></p>
-    </fieldset>
+    <form method="post" class="form design-form">
+      <fieldset>
+        <legend>Fonts</legend>
+        <p><label>Title <input type="text" name="title_font" value="{{ design.title_font }}"></label></p>
+        <p><label>Subtitle <input type="text" name="subtitle_font" value="{{ design.subtitle_font }}"></label></p>
+        <p><label>Headings <input type="text" name="headings_font" value="{{ design.headings_font }}"></label></p>
+        <p><label>Content <input type="text" name="content_font" value="{{ design.content_font }}"></label></p>
+      </fieldset>
 
-    <fieldset>
-      <legend>Background</legend>
-      <p><label>Hue (0–360) <input type="number" name="hue" value="{{ design.hue }}" min="0" max="360"></label></p>
-      <p><label>Brightness (0–300) <input type="number" name="brightness" value="{{ design.brightness }}" min="0" max="300"></label></p>
-    </fieldset>
+      <fieldset>
+        <legend>Colors</legend>
+        <p><label>Header <input type="text" name="header_color" value="{{ design.header_color }}" placeholder="#003452"></label></p>
+        <p><label>Title <input type="text" name="title_color" value="{{ design.title_color }}" placeholder="#fff"></label></p>
+        <p><label>Subtitle <input type="text" name="subtitle_color" value="{{ design.subtitle_color }}" placeholder="#bfe8ff"></label></p>
+      </fieldset>
 
-    <p><button type="submit">Save design</button></p>
-  </form>
-  <p><a href="settings">Back to settings</a></p>
-</body>
-</html>
+      <fieldset>
+        <legend>Sizes (percent)</legend>
+        <p><label>Title <input type="number" name="title_size" value="{{ design.title_size }}" min="25" max="500"></label></p>
+        <p><label>Subtitle <input type="number" name="subtitle_size" value="{{ design.subtitle_size }}" min="25" max="500"></label></p>
+        <p><label>Headings <input type="number" name="headings_size" value="{{ design.headings_size }}" min="25" max="500"></label></p>
+        <p><label>Content <input type="number" name="content_size" value="{{ design.content_size }}" min="25" max="500"></label></p>
+      </fieldset>
+
+      <fieldset>
+        <legend>Background</legend>
+        <p><label>Hue (0–360) <input type="number" name="hue" value="{{ design.hue }}" min="0" max="360"></label></p>
+        <p><label>Brightness (0–300) <input type="number" name="brightness" value="{{ design.brightness }}" min="0" max="300"></label></p>
+      </fieldset>
+
+      <p><button type="submit">Save design</button></p>
+    </form>
+
+    <p><a href="settings">Back to settings</a></p>
+  </article>
+{% endblock %}

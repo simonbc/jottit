@@ -1,15 +1,19 @@
 from __future__ import annotations
 
+import io
 import re
+import zipfile
 
-from flask import abort, current_app, g, jsonify, redirect, render_template, request
+from flask import abort, current_app, g, jsonify, redirect, render_template, request, send_file
 from flask.typing import ResponseReturnValue
 from sqlalchemy import Connection
 
 from jottit import auth
 from jottit.db import (
     change_public_url,
+    delete_site,
     get_design,
+    get_pages_for_export,
     get_request_conn,
     is_public_url_available,
     set_password,
@@ -192,8 +196,20 @@ def url_available(site_slug: str) -> ResponseReturnValue:
     return jsonify(available=is_public_url_available(conn, public_url=url))
 
 
-def delete(site_slug: str) -> str:
-    return f"admin:{site_slug} admin/delete {request.method} (TODO)"
+def delete(site_slug: str) -> ResponseReturnValue:
+    if (response := _gate_admin()) is not None:
+        return response
+
+    if request.method == "GET":
+        return render_template("admin_delete.html")
+
+    conn = _conn()
+    delete_site(conn, site_id=g.site.id)
+    auth.sign_out(g.site.id)
+    # The site no longer resolves at its old URL; bounce the user back to
+    # the apex homepage instead of an immediate 404 loop.
+    domain = current_app.config["SERVER_NAME"]
+    return redirect(f"{request.scheme}://{domain}/", code=303)
 
 
 def change_site_address(site_slug: str) -> ResponseReturnValue:
@@ -291,5 +307,33 @@ def change_password(site_slug: str) -> ResponseReturnValue:
     return redirect(f"{site_root()}admin/settings", code=303)
 
 
-def export(site_slug: str) -> str:
-    return f"admin:{site_slug} admin/export GET (TODO)"
+def export(site_slug: str) -> ResponseReturnValue:
+    """Stream a zip with one .md per page (latest revision only) as a download."""
+    if (response := _gate_admin()) is not None:
+        return response
+
+    conn = _conn()
+    rows = get_pages_for_export(conn, site_id=g.site.id)
+
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:
+        for row in rows:
+            zf.writestr(_export_filename(row.page_name), row.content)
+    buf.seek(0)
+
+    slug = g.site.public_url or g.site.secret_url
+    return send_file(
+        buf,
+        mimetype="application/zip",
+        as_attachment=True,
+        download_name=f"{slug}-export.zip",
+    )
+
+
+def _export_filename(page_name: str) -> str:
+    """Filename inside the export zip. The empty name (home page) becomes 'home.md'."""
+    safe = page_name or "home"
+    # Keep names predictable: stripped of path separators and trailing dots
+    # (Windows hates trailing dots on filenames).
+    safe = safe.replace("/", "_").replace("\\", "_").rstrip(".") or "home"
+    return f"{safe}.md"

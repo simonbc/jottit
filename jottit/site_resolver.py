@@ -27,6 +27,10 @@ def resolve_site() -> None:
         return
 
     if request.blueprint == "secret":
-        g.site = get_site(conn, secret_url=g.site_slug)
+        site = get_site(conn, secret_url=g.site_slug)
     else:
-        g.site = get_site(conn, public_url=g.site_slug)
+        site = get_site(conn, public_url=g.site_slug)
+    # Deleted sites stay in the database (so an admin restore path is
+    # possible later) but are invisible to the resolver — every request
+    # for one hits the same 404 as a never-existed slug.
+    g.site = site if site is not None and not site.deleted else None

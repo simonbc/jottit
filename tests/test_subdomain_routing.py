@@ -28,30 +28,7 @@ def test_site_blueprint(
     assert expected_substring in body
 
 
-@pytest.mark.parametrize(
-    ("method", "path", "expected_substring"),
-    [
-        # /admin/settings is exercised end-to-end in tests/test_admin_settings.py.
-        # /admin/design is exercised end-to-end in tests/test_admin_design.py.
-        # /admin/url-available and /admin/change-site-address are exercised
-        # end-to-end in tests/test_admin_change_site_address.py.
-        ("GET", "/admin/delete", "admin/delete GET"),
-        ("POST", "/admin/delete", "admin/delete POST"),
-        # /admin/change-password is exercised end-to-end in
-        # tests/test_admin_change_password.py.
-        ("GET", "/admin/export", "admin/export GET"),
-    ],
-)
-def test_admin_blueprint(
-    client: FlaskClient, method: str, path: str, expected_substring: str
-) -> None:
-    response = client.open(path, method=method, base_url=SITE_BASE)
-    assert response.status_code == 200
-    body = response.data.decode()
-    assert body.startswith("admin:mysite ")
-    assert expected_substring in body
-
-
+# /admin/* routes are exercised end-to-end in tests/test_admin_*.py.
 # Page routes are exercised end-to-end in tests/test_page_view.py.
 
 

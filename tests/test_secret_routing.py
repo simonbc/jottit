@@ -28,49 +28,10 @@ def test_secret_site_routes(
     assert expected_substring in body
 
 
-@pytest.mark.parametrize(
-    ("method", "path", "expected_substring"),
-    [
-        # /admin/settings is exercised end-to-end in tests/test_admin_settings.py.
-        # /admin/design is exercised end-to-end in tests/test_admin_design.py.
-        # /admin/url-available and /admin/change-site-address are exercised
-        # end-to-end in tests/test_admin_change_site_address.py.
-        ("GET", "/abc123/admin/delete", "admin/delete GET"),
-        ("POST", "/abc123/admin/delete", "admin/delete POST"),
-        # /admin/change-password is exercised end-to-end in
-        # tests/test_admin_change_password.py.
-        ("GET", "/abc123/admin/export", "admin/export GET"),
-    ],
-)
-def test_secret_admin_routes(
-    client: FlaskClient, method: str, path: str, expected_substring: str
-) -> None:
-    response = client.open(path, method=method, base_url=APEX)
-    assert response.status_code == 200
-    body = response.data.decode()
-    assert body.startswith("admin:abc123 ")
-    assert expected_substring in body
-
-
-# Page routes via the secret blueprint are exercised end-to-end in
-# tests/test_page_view.py. The site/admin parity checks below exercise that
-# the secret and subdomain blueprints share the same handler functions.
-
-
-@pytest.mark.parametrize(
-    ("secret_path", "subdomain_path"),
-    # Admin routes are exercised individually in tests/test_admin_*.py.
-    # The non-admin /site/changes-style routes still need a handler-parity
-    # check once they're wired up in M6; this list will repopulate then.
-    [],
-)
-def test_secret_and_subdomain_share_handler(
-    client: FlaskClient, secret_path: str, subdomain_path: str
-) -> None:
-    secret = client.get(secret_path, base_url=APEX)
-    subdomain = client.get(subdomain_path, base_url="http://abc123.jottit.test/")
-    assert secret.status_code == subdomain.status_code == 200
-    assert secret.data == subdomain.data
+# /admin/* routes via the secret blueprint are exercised end-to-end in
+# tests/test_admin_*.py. Page routes are in tests/test_page_view.py.
+# Handler-parity between subdomain and secret blueprints is implicit in
+# those files: each admin test has a "via secret URL" case.
 
 
 def test_apex_static_routes_still_win_over_secret_prefix(client: FlaskClient) -> None:

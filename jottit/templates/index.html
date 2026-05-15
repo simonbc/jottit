@@ -1,11 +1,28 @@
-<!doctype html>
-<html lang="en">
-<head><meta charset="utf-8"><title>Jottit</title></head>
-<body>
-  <h1>Jottit</h1>
-  <form method="post" action="/">
-    <p><textarea name="content" rows="10" cols="60"></textarea></p>
-    <p><button type="submit">Create a site</button></p>
-  </form>
-</body>
-</html>
+{% extends "base.html" %}
+{% block title %}Jottit — make a site by filling out a textbox{% endblock %}
+{% block content %}
+  <article class="front">
+    <header>
+      <h1>Jottit</h1>
+      <p class="lede">Getting a website should be as easy as filling out a textbox.</p>
+    </header>
+
+    <form method="post" action="/" class="new-site">
+      <p>
+        <label>
+          <span class="visually-hidden">What goes on the home page?</span>
+          <textarea name="content" rows="12" cols="60" autofocus
+                    placeholder="What goes on the home page?"></textarea>
+        </label>
+      </p>
+      <p class="hint">
+        <label>
+          Want a custom subdomain?
+          <input type="text" name="public_url" placeholder="my-site"
+                 pattern="[a-z0-9-]+" autocomplete="off">
+        </label>
+      </p>
+      <p><button type="submit">Create a site</button></p>
+    </form>
+  </article>
+{% endblock %}

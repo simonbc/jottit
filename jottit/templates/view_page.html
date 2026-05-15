@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>{{ page_name or "Home" }}</title>
+</head>
+<body>
+  <article>{{ content_html|safe }}</article>
+  <footer>
+    <small>revision {{ revision.revision }}</small>
+  </footer>
+</body>
+</html>

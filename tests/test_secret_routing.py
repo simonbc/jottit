@@ -60,31 +60,14 @@ def test_secret_admin_routes(
     assert expected_substring in body
 
 
-def test_secret_page_home(client: FlaskClient) -> None:
-    response = client.get("/abc123/", base_url=APEX)
-    assert response.status_code == 200
-    assert response.data.decode() == "page:abc123 home GET (TODO)"
-
-
-@pytest.mark.parametrize("method", ["GET", "POST"])
-def test_secret_page_named(client: FlaskClient, method: str) -> None:
-    response = client.open("/abc123/about", method=method, base_url=APEX)
-    assert response.status_code == 200
-    body = response.data.decode()
-    assert body == f"page:abc123 page=about m=view {method} (TODO)"
-
-
-def test_secret_page_mode_query_param(client: FlaskClient) -> None:
-    response = client.get("/abc123/some-page?m=edit", base_url=APEX)
-    assert response.status_code == 200
-    assert "m=edit" in response.data.decode()
+# Page routes via the secret blueprint are exercised end-to-end in
+# tests/test_page_view.py. The site/admin parity checks below exercise that
+# the secret and subdomain blueprints share the same handler functions.
 
 
 @pytest.mark.parametrize(
     ("secret_path", "subdomain_path"),
     [
-        ("/abc123/", "/"),
-        ("/abc123/about", "/about"),
         ("/abc123/site/claim", "/site/claim"),
         ("/abc123/site/signin", "/site/signin"),
         ("/abc123/admin/settings", "/admin/settings"),

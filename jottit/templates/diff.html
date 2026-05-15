@@ -1,18 +1,20 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>Diff: {{ page_name or "Home" }}</title>
-</head>
-<body>
-  <h1>Diff: {{ page_name or "Home" }}</h1>
-  <p>
-    Comparing
-    <a href="{{ site_root_path }}{{ page_name }}?r={{ a.revision }}">revision {{ a.revision }}</a>
-    with
-    <a href="{{ site_root_path }}{{ page_name }}?r={{ b.revision }}">revision {{ b.revision }}</a>.
-  </p>
-  <article>{{ diff_html|safe }}</article>
-  <p><a href="{{ site_root_path }}{{ page_name }}?m=history">Back to history</a></p>
-</body>
-</html>
+{% extends "base.html" %}
+{% block title %}Diff: {{ page_name or "Home" }}{% endblock %}
+
+{% block content %}
+  <article class="diff">
+    <header>
+      <h1>Diff: {{ page_name or "Home" }}</h1>
+      <p>
+        Comparing
+        <a href="{{ site_root_path }}{{ page_slug(page_name) }}?r={{ a.revision }}">revision {{ a.revision }}</a>
+        with
+        <a href="{{ site_root_path }}{{ page_slug(page_name) }}?r={{ b.revision }}">revision {{ b.revision }}</a>.
+      </p>
+    </header>
+
+    <section class="diff-body">{{ diff_html|safe }}</section>
+
+    <p><a href="{{ site_root_path }}{{ page_slug(page_name) }}?m=history">Back to history</a></p>
+  </article>
+{% endblock %}

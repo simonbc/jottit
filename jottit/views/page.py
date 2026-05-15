@@ -4,6 +4,7 @@ from flask import abort, g, jsonify, redirect, render_template, request
 from flask.typing import ResponseReturnValue
 from sqlalchemy import Connection
 
+from jottit import auth
 from jottit.db import (
     delete_page,
     get_draft,
@@ -31,6 +32,9 @@ def view(site_slug: str, page_name: str) -> ResponseReturnValue:
         abort(500)
 
     mode = request.args.get("m", "view")
+    action = _action_for(mode)
+    if (response := auth.gate(action)) is not None:
+        return response
 
     if request.method == "POST":
         if mode == "current_revision":
@@ -41,6 +45,22 @@ def view(site_slug: str, page_name: str) -> ResponseReturnValue:
         return _render_edit_form(conn, page_name)
 
     return _render_view(conn, page_name)
+
+
+def _action_for(mode: str) -> str:
+    """Map a (method, mode) pair onto the auth-matrix action label."""
+    if request.method == "POST":
+        # current_revision is a JSON probe used by the editor JS, so it
+        # logically requires the same permission as the edit it's about
+        # to perform.
+        return "edit"
+    if mode == "edit":
+        return "edit"
+    # GET ?r=N exposes an old revision, which is gated more tightly than
+    # the latest one on `public` sites — see is_action_allowed.
+    if request.args.get("r") is not None:
+        return "view_revision"
+    return "view"
 
 
 def _render_view(conn: Connection, page_name: str) -> ResponseReturnValue:

@@ -2,10 +2,14 @@ from __future__ import annotations
 
 import secrets
 from typing import Any
+from urllib.parse import quote
 
 from argon2 import PasswordHasher
 from argon2.exceptions import InvalidHashError, VerifyMismatchError
-from flask import session
+from flask import abort, g, redirect, request, session
+from flask.typing import ResponseReturnValue
+
+from jottit.urls import site_root
 
 _hasher = PasswordHasher()
 
@@ -97,3 +101,38 @@ def is_action_allowed(*, site: Any, action: str) -> bool:
     if security == "public":
         return action == "view"
     return False
+
+
+def gate(action: str) -> ResponseReturnValue | None:
+    """Enforce `action` on `g.site` for the current request.
+
+    Returns `None` when the visitor may proceed; otherwise returns a
+    Response the caller should return immediately:
+    - GETs that need a login redirect to /site/signin with `return_to`
+      preserved so the visitor lands back where they were.
+    - POSTs (or anything other than GET) get a 401 — they're typically
+      JSON/AJAX endpoints where a redirect chain doesn't help.
+    """
+    if is_action_allowed(site=g.site, action=action):
+        return None
+    if request.method == "GET":
+        rel = _current_path_relative_to_site()
+        return redirect(
+            f"{site_root()}site/signin?return_to={quote(rel, safe='/?=&')}",
+            code=303,
+        )
+    abort(401)
+
+
+def _current_path_relative_to_site() -> str:
+    """The current request path+query stripped of the site_root prefix.
+
+    Used to build a `return_to` value that, after sign-in, gets
+    concatenated back onto site_root() — so the same physical URL works
+    for both subdomain and secret-URL sites.
+    """
+    path = request.path
+    root = site_root()
+    relative = path[len(root) :] if path.startswith(root) else path.lstrip("/")
+    query = request.query_string.decode("utf-8") if request.query_string else ""
+    return f"{relative}?{query}" if query else relative

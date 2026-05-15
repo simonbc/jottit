@@ -3,6 +3,7 @@ from __future__ import annotations
 from flask import abort, g, jsonify, request
 from flask.typing import ResponseReturnValue
 
+from jottit import auth
 from jottit.db import (
     delete_draft,
     get_page,
@@ -15,6 +16,8 @@ from jottit.db import (
 
 def save(site_slug: str) -> ResponseReturnValue:
     """Autosave the editor's current textarea content as a draft."""
+    if (response := _gate_edit()) is not None:
+        return response
     page = _resolve_page()
     if page is None:
         return "", 204
@@ -26,6 +29,8 @@ def save(site_slug: str) -> ResponseReturnValue:
 
 def cancel(site_slug: str) -> ResponseReturnValue:
     """Discard the current draft and persist the latest caret/scroll position."""
+    if (response := _gate_edit()) is not None:
+        return response
     page = _resolve_page()
     if page is None:
         return "", 204
@@ -45,6 +50,8 @@ def recover_live_version(site_slug: str) -> ResponseReturnValue:
     server clears the draft, sends back the live content, the textarea
     re-populates from it.
     """
+    if (response := _gate_edit()) is not None:
+        return response
     page = _resolve_page()
     if page is None:
         return jsonify(content="")
@@ -53,6 +60,12 @@ def recover_live_version(site_slug: str) -> ResponseReturnValue:
     revision = get_revision(conn, page_id=page.id)
     delete_draft(conn, page_id=page.id)
     return jsonify(content=revision.content if revision is not None else "")
+
+
+def _gate_edit() -> ResponseReturnValue | None:
+    if g.site is None:
+        abort(404)
+    return auth.gate("edit")
 
 
 def _conn():

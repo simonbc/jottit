@@ -8,6 +8,7 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 from jottit.blueprints.admin import admin_bp
 from jottit.blueprints.page import page_bp
 from jottit.blueprints.root import root_bp
+from jottit.blueprints.secret import secret_bp
 from jottit.blueprints.site import site_bp
 from jottit.site_resolver import resolve_site
 
@@ -21,6 +22,7 @@ def create_app() -> Flask:
     app.register_blueprint(site_bp)
     app.register_blueprint(admin_bp)
     app.register_blueprint(page_bp)
+    app.register_blueprint(secret_bp)
 
     app.before_request(resolve_site)
 

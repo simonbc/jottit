@@ -1,16 +1,10 @@
 from __future__ import annotations
 
-from flask import Blueprint, request
+from flask import Blueprint
+
+from jottit.views import page as views
 
 page_bp = Blueprint("page", __name__, subdomain="<site_slug>")
 
-
-@page_bp.route("/")
-def home(site_slug: str) -> str:
-    return f"page:{site_slug} home GET (TODO)"
-
-
-@page_bp.route("/<page_name>", methods=["GET", "POST"])
-def page(site_slug: str, page_name: str) -> str:
-    mode = request.args.get("m", "view")
-    return f"page:{site_slug} page={page_name} m={mode} {request.method} (TODO)"
+page_bp.add_url_rule("/", view_func=views.home)
+page_bp.add_url_rule("/<page_name>", view_func=views.view, methods=["GET", "POST"])

@@ -1,40 +1,19 @@
 from __future__ import annotations
 
-from flask import Blueprint, request
+from flask import Blueprint
+
+from jottit.views import admin as views
 
 admin_bp = Blueprint("admin", __name__, subdomain="<site_slug>", url_prefix="/admin")
 
-
-@admin_bp.route("/settings", methods=["GET", "POST"])
-def settings(site_slug: str) -> str:
-    return f"admin:{site_slug} admin/settings {request.method} (TODO)"
-
-
-@admin_bp.route("/design", methods=["GET", "POST"])
-def design(site_slug: str) -> str:
-    return f"admin:{site_slug} admin/design {request.method} (TODO)"
-
-
-@admin_bp.route("/url-available", methods=["POST"])
-def url_available(site_slug: str) -> str:
-    return f"admin:{site_slug} admin/url-available POST (TODO)"
-
-
-@admin_bp.route("/delete", methods=["GET", "POST"])
-def delete(site_slug: str) -> str:
-    return f"admin:{site_slug} admin/delete {request.method} (TODO)"
-
-
-@admin_bp.route("/change-site-address", methods=["GET", "POST"])
-def change_site_address(site_slug: str) -> str:
-    return f"admin:{site_slug} admin/change-site-address {request.method} (TODO)"
-
-
-@admin_bp.route("/change-password", methods=["GET", "POST"])
-def change_password(site_slug: str) -> str:
-    return f"admin:{site_slug} admin/change-password {request.method} (TODO)"
-
-
-@admin_bp.route("/export")
-def export(site_slug: str) -> str:
-    return f"admin:{site_slug} admin/export GET (TODO)"
+admin_bp.add_url_rule("/settings", view_func=views.settings, methods=["GET", "POST"])
+admin_bp.add_url_rule("/design", view_func=views.design, methods=["GET", "POST"])
+admin_bp.add_url_rule("/url-available", view_func=views.url_available, methods=["POST"])
+admin_bp.add_url_rule("/delete", view_func=views.delete, methods=["GET", "POST"])
+admin_bp.add_url_rule(
+    "/change-site-address",
+    view_func=views.change_site_address,
+    methods=["GET", "POST"],
+)
+admin_bp.add_url_rule("/change-password", view_func=views.change_password, methods=["GET", "POST"])
+admin_bp.add_url_rule("/export", view_func=views.export)

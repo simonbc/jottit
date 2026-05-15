@@ -9,15 +9,24 @@ from sqlalchemy import Connection
 from jottit import auth
 from jottit.db import (
     change_public_url,
+    get_design,
     get_request_conn,
     is_public_url_available,
     set_password,
+    update_design,
     update_site,
 )
 from jottit.urls import site_root
 
 _ALLOWED_SECURITY_LEVELS = {"private", "public", "open"}
 _PUBLIC_URL_RE = re.compile(r"^[a-z0-9-]+$")
+_HEX_COLOR_RE = re.compile(r"^#[0-9a-fA-F]{3,8}$")
+
+# Field groupings for /admin/design. These tuples are the source of truth
+# for the rendered form, the POST parser, and the validator.
+_DESIGN_FONT_FIELDS = ("title_font", "subtitle_font", "headings_font", "content_font")
+_DESIGN_COLOR_FIELDS = ("header_color", "title_color", "subtitle_color")
+_DESIGN_SIZE_FIELDS = ("title_size", "subtitle_size", "headings_size", "content_size")
 
 
 def settings(site_slug: str) -> ResponseReturnValue:
@@ -78,8 +87,93 @@ def _gate_admin() -> ResponseReturnValue | None:
     return auth.gate("admin")
 
 
-def design(site_slug: str) -> str:
-    return f"admin:{site_slug} admin/design {request.method} (TODO)"
+def design(site_slug: str) -> ResponseReturnValue:
+    if (response := _gate_admin()) is not None:
+        return response
+
+    conn = _conn()
+    design_row = get_design(conn, site_id=g.site.id)
+
+    if request.method == "GET":
+        return render_template(
+            "admin_design.html",
+            design=_design_view_model(design_row),
+            error=None,
+        )
+
+    submitted = {field: request.form.get(field, "") for field in _all_design_fields()}
+    error = _validate_design(submitted)
+    if error is not None:
+        return render_template(
+            "admin_design.html",
+            design=submitted,
+            error=error,
+        ), 400
+
+    update_design(conn, site_id=g.site.id, **_coerce_design(submitted))
+    return redirect(f"{site_root()}admin/design", code=303)
+
+
+def _all_design_fields() -> tuple[str, ...]:
+    return (
+        *_DESIGN_FONT_FIELDS,
+        *_DESIGN_COLOR_FIELDS,
+        *_DESIGN_SIZE_FIELDS,
+        "hue",
+        "brightness",
+    )
+
+
+def _design_view_model(row: object) -> dict[str, str]:
+    """Surface design fields as strings for the template (sizes get str-coerced)."""
+    if row is None:
+        return {f: "" for f in _all_design_fields()}
+    return {
+        f: ("" if (v := getattr(row, f, None)) is None else str(v)) for f in _all_design_fields()
+    }
+
+
+def _validate_design(values: dict[str, str]) -> str | None:
+    for f in _DESIGN_FONT_FIELDS:
+        # Free-form for now (M9 will introduce a real picker). Block stray HTML
+        # so a stored value can't smuggle markup into the rendered page.
+        if any(c in values[f] for c in "<>\"'"):
+            return f"{f.replace('_', ' ').capitalize()} contains invalid characters."
+    for f in _DESIGN_COLOR_FIELDS:
+        if values[f] and not _HEX_COLOR_RE.fullmatch(values[f]):
+            return f"{f.replace('_', ' ').capitalize()} must be a hex color like #fff or #abcdef."
+    for f in _DESIGN_SIZE_FIELDS:
+        if values[f] and not _is_int_in_range(values[f], 25, 500):
+            return f"{f.replace('_', ' ').capitalize()} must be a number between 25 and 500."
+    if values["hue"] and not _is_int_in_range(values["hue"], 0, 360):
+        return "Hue must be a number between 0 and 360."
+    if values["brightness"] and not _is_int_in_range(values["brightness"], 0, 300):
+        return "Brightness must be a number between 0 and 300."
+    return None
+
+
+def _is_int_in_range(value: str, lo: int, hi: int) -> bool:
+    try:
+        n = int(value)
+    except ValueError:
+        return False
+    return lo <= n <= hi
+
+
+def _coerce_design(values: dict[str, str]) -> dict[str, object]:
+    """Turn validated form strings into typed values for the DB layer.
+
+    Empty strings are dropped so unchanged columns aren't overwritten with
+    nulls; sizes are coerced to int (the column is Integer).
+    """
+    out: dict[str, object] = {}
+    for f in (*_DESIGN_FONT_FIELDS, *_DESIGN_COLOR_FIELDS, "hue", "brightness"):
+        if values[f]:
+            out[f] = values[f]
+    for f in _DESIGN_SIZE_FIELDS:
+        if values[f]:
+            out[f] = int(values[f])
+    return out
 
 
 def url_available(site_slug: str) -> ResponseReturnValue:

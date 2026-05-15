@@ -32,8 +32,7 @@ def test_site_blueprint(
     ("method", "path", "expected_substring"),
     [
         # /admin/settings is exercised end-to-end in tests/test_admin_settings.py.
-        ("GET", "/admin/design", "admin/design GET"),
-        ("POST", "/admin/design", "admin/design POST"),
+        # /admin/design is exercised end-to-end in tests/test_admin_design.py.
         # /admin/url-available and /admin/change-site-address are exercised
         # end-to-end in tests/test_admin_change_site_address.py.
         ("GET", "/admin/delete", "admin/delete GET"),

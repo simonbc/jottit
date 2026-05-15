@@ -32,8 +32,7 @@ def test_secret_site_routes(
     ("method", "path", "expected_substring"),
     [
         # /admin/settings is exercised end-to-end in tests/test_admin_settings.py.
-        ("GET", "/abc123/admin/design", "admin/design GET"),
-        ("POST", "/abc123/admin/design", "admin/design POST"),
+        # /admin/design is exercised end-to-end in tests/test_admin_design.py.
         # /admin/url-available and /admin/change-site-address are exercised
         # end-to-end in tests/test_admin_change_site_address.py.
         ("GET", "/abc123/admin/delete", "admin/delete GET"),
@@ -60,9 +59,10 @@ def test_secret_admin_routes(
 
 @pytest.mark.parametrize(
     ("secret_path", "subdomain_path"),
-    [
-        ("/abc123/admin/design", "/admin/design"),
-    ],
+    # Admin routes are exercised individually in tests/test_admin_*.py.
+    # The non-admin /site/changes-style routes still need a handler-parity
+    # check once they're wired up in M6; this list will repopulate then.
+    [],
 )
 def test_secret_and_subdomain_share_handler(
     client: FlaskClient, secret_path: str, subdomain_path: str

@@ -434,6 +434,72 @@ def new_draft(conn: Connection, *, page_id: int, content: str) -> None:
         conn.execute(update(drafts).where(drafts.c.page_id == page_id).values(content=content))
 
 
+# ---- Site auth + settings ----
+
+
+def claim_site(
+    conn: Connection,
+    *,
+    site_id: int,
+    password_hash: str,
+    email: str,
+    security: str,
+) -> None:
+    """Set the initial password, email, and security level on a fresh site.
+
+    The site is "claimed" the moment `sites.password` is non-null — claim
+    bundles password+email+security because the original UX collected all
+    three on a single form.
+    """
+    conn.execute(
+        update(sites)
+        .where(sites.c.id == site_id)
+        .values(password=password_hash, email=email, security=security)
+    )
+
+
+def set_password(conn: Connection, *, site_id: int, password_hash: str) -> None:
+    conn.execute(update(sites).where(sites.c.id == site_id).values(password=password_hash))
+
+
+def set_change_pwd_token(conn: Connection, *, site_id: int, token: str) -> None:
+    """Store a one-time token used by the password-recovery email link."""
+    conn.execute(update(sites).where(sites.c.id == site_id).values(change_pwd_token=token))
+
+
+def recover_password(conn: Connection, *, site_id: int, password_hash: str) -> None:
+    """Replace the password and atomically clear the recovery token."""
+    conn.execute(
+        update(sites)
+        .where(sites.c.id == site_id)
+        .values(password=password_hash, change_pwd_token=None)
+    )
+
+
+def update_site(
+    conn: Connection,
+    *,
+    site_id: int,
+    title: str | None = None,
+    subtitle: str | None = None,
+    email: str | None = None,
+    security: str | None = None,
+) -> None:
+    """Patch a subset of the site settings fields. Unprovided fields are untouched."""
+    values: dict[str, str | None] = {}
+    if title is not None:
+        values["title"] = title
+    if subtitle is not None:
+        values["subtitle"] = subtitle
+    if email is not None:
+        values["email"] = email
+    if security is not None:
+        values["security"] = security
+    if not values:
+        return
+    conn.execute(update(sites).where(sites.c.id == site_id).values(**values))
+
+
 def new_site(
     conn: Connection,
     *,

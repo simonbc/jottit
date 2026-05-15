@@ -5,6 +5,7 @@ from sqlalchemy import Connection, select
 
 from jottit.db import (
     _AMBIGUOUS_CHARS,
+    claim_site,
     delete_draft,
     delete_page,
     designs,
@@ -15,10 +16,14 @@ from jottit.db import (
     new_page,
     new_site,
     pages,
+    recover_password,
     revisions,
+    set_change_pwd_token,
+    set_password,
     undelete_page,
     update_caret_pos,
     update_page,
+    update_site,
 )
 
 
@@ -349,3 +354,121 @@ def test_delete_draft_noop_when_absent(db_conn: Connection) -> None:
     assert page is not None
 
     delete_draft(db_conn, page_id=page.id)  # should not raise
+
+
+# ---- claim_site ----
+
+
+def test_claim_site_sets_password_email_and_security(db_conn: Connection) -> None:
+    site_id = new_site(db_conn, content="hi", secret_url="cl1")
+
+    claim_site(
+        db_conn,
+        site_id=site_id,
+        password_hash="$argon2id$fake-hash",
+        email="owner@example.com",
+        security="private",
+    )
+
+    row = get_site(db_conn, site_id=site_id)
+    assert row is not None
+    assert row.password == "$argon2id$fake-hash"
+    assert row.email == "owner@example.com"
+    assert row.security == "private"
+
+
+# ---- set_password ----
+
+
+def test_set_password_only_touches_password_column(db_conn: Connection) -> None:
+    site_id = new_site(db_conn, content="hi", secret_url="sp1")
+    claim_site(
+        db_conn,
+        site_id=site_id,
+        password_hash="$argon2id$old",
+        email="owner@example.com",
+        security="public",
+    )
+
+    set_password(db_conn, site_id=site_id, password_hash="$argon2id$new")
+
+    row = get_site(db_conn, site_id=site_id)
+    assert row is not None
+    assert row.password == "$argon2id$new"
+    assert row.email == "owner@example.com"
+    assert row.security == "public"
+
+
+# ---- change_pwd_token / recover_password ----
+
+
+def test_set_change_pwd_token_stores_token(db_conn: Connection) -> None:
+    site_id = new_site(db_conn, content="hi", secret_url="tk1")
+
+    set_change_pwd_token(db_conn, site_id=site_id, token="abc123token")
+
+    row = get_site(db_conn, site_id=site_id)
+    assert row is not None
+    assert row.change_pwd_token == "abc123token"
+
+
+def test_recover_password_sets_password_and_clears_token(db_conn: Connection) -> None:
+    site_id = new_site(db_conn, content="hi", secret_url="rp1")
+    set_change_pwd_token(db_conn, site_id=site_id, token="one-time-token")
+
+    recover_password(db_conn, site_id=site_id, password_hash="$argon2id$recovered")
+
+    row = get_site(db_conn, site_id=site_id)
+    assert row is not None
+    assert row.password == "$argon2id$recovered"
+    assert row.change_pwd_token is None
+
+
+# ---- update_site ----
+
+
+def test_update_site_patches_only_provided_fields(db_conn: Connection) -> None:
+    site_id = new_site(db_conn, content="hi", secret_url="us1")
+    claim_site(
+        db_conn,
+        site_id=site_id,
+        password_hash="$argon2id$x",
+        email="orig@example.com",
+        security="public",
+    )
+
+    update_site(db_conn, site_id=site_id, title="My Site", subtitle="of jottings")
+
+    row = get_site(db_conn, site_id=site_id)
+    assert row is not None
+    assert row.title == "My Site"
+    assert row.subtitle == "of jottings"
+    # Untouched fields are preserved.
+    assert row.email == "orig@example.com"
+    assert row.security == "public"
+
+
+def test_update_site_no_args_is_noop(db_conn: Connection) -> None:
+    site_id = new_site(db_conn, content="hi", secret_url="us2")
+
+    update_site(db_conn, site_id=site_id)  # should not raise
+
+    row = get_site(db_conn, site_id=site_id)
+    assert row is not None
+
+
+def test_update_site_can_change_security_level(db_conn: Connection) -> None:
+    site_id = new_site(db_conn, content="hi", secret_url="us3")
+    claim_site(
+        db_conn,
+        site_id=site_id,
+        password_hash="$argon2id$x",
+        email="o@example.com",
+        security="private",
+    )
+
+    update_site(db_conn, site_id=site_id, security="open")
+
+    row = get_site(db_conn, site_id=site_id)
+    assert row is not None
+    assert row.security == "open"

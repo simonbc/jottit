@@ -177,7 +177,7 @@ def test_edit_form_prefers_draft_over_revision_content(
     client: FlaskClient, db_engine: Engine
 ) -> None:
     with db_engine.begin() as conn:
-        site_id = new_site(conn, content="live version", secret_url="ed1", public_url="zeta")
+        site_id = new_site(conn, content="seeded-revision-text", secret_url="ed1", public_url="zeta")
         page = get_page(conn, site_id=site_id, page_name="")
         assert page is not None
         new_draft(conn, page_id=page.id, content="in-flight draft text")
@@ -187,7 +187,7 @@ def test_edit_form_prefers_draft_over_revision_content(
     assert response.status_code == 200
     body = response.data.decode()
     assert "in-flight draft text" in body
-    assert "live version" not in body
+    assert "seeded-revision-text" not in body
 
 
 # ---- POST ?m=current_revision ----

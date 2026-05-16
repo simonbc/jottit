@@ -451,21 +451,40 @@
 
   /* ---------- Edit-page draft banner / status ---------- */
   .draft-banner {
-    background: #333;
+    background: #555;
     color: #fff;
-    padding: 8px 12px;
-    margin: 0 0 8px 0;
+    padding: 7px 40px 7px 12px;
+    margin: 0;
     font-size: 0.9em;
-    display: flex;
-    gap: 12px;
-    align-items: center;
-    flex-wrap: wrap;
+    text-align: center;
+    position: relative;
   }
 
   .draft-banner .link-button {
     color: #fff;
     font-weight: bold;
     text-decoration: underline;
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    font: inherit;
+    min-height: auto;
+  }
+
+  .draft-banner-dismiss {
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    transform: translateY(-50%);
+    background: none;
+    border: 0;
+    color: #fff;
+    font-size: 1.3em;
+    cursor: pointer;
+    padding: 0 4px;
+    line-height: 1;
+    min-height: auto;
   }
 
   .draft-status {
@@ -475,8 +494,26 @@
     font-style: italic;
   }
 
-  /* ---------- Edit page ---------- */
-  .edit-page { margin-top: 0; }
+  /* ---------- "Formatting help" link top-right in fullscreen edit ---------- */
+  #formatting_help_link {
+    position: absolute;
+    top: 6px;
+    right: 12px;
+    font-size: 0.85em;
+    z-index: 1;
+  }
+
+  /* ---------- Edit page (body.edit — fullscreen, no chrome) ---------- */
+  body.edit { min-height: 100svh; display: flex; flex-direction: column; }
+
+  .edit-page {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    padding: 8px 12px;
+    gap: 6px;
+  }
 
   .edit-heading {
     font-size: 1.1em;
@@ -490,8 +527,9 @@
   .edit-split {
     display: flex;
     flex-direction: column;
+    flex: 1 1 auto;
     gap: 8px;
-    margin: 8px 0;
+    min-height: 0;
   }
 
   @media (min-width: 768px) {
@@ -507,9 +545,11 @@
   #content_text,
   .edit-page textarea {
     width: 100%;
+    flex: 1 1 auto;
     min-height: 320px;
     font-family: var(--font-stack-mono);
     line-height: var(--line-height-normal);
+    resize: none;
   }
 
   .edit-preview {

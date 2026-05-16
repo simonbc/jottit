@@ -1,40 +1,46 @@
-{% extends "site_base.html" %}
+{# Fullscreen edit chrome (body.edit): edge-to-edge textarea on the left,
+   live preview on the right, action bar pinned to the bottom. No claim
+   banner, header, sidebar, or footer. #}
+{% extends "base.html" %}
 
-{% block title %}Edit: {{ page_name or "Home" }}{% if site and site.title %} — {{ site.title }}{% endif %}{% endblock %}
+{% block title %}Editing {{ page_name or "Home" }}{% if site and site.title %} · {{ site.title }}{% endif %}{% endblock %}
 
-{% block content %}
-  <div class="edit-page">
-    <h1 class="edit-heading">Editing: <span class="page_name">{{ page_name or "Home" }}</span></h1>
+{% block body_class %}edit{% endblock %}
+
+{% block body %}
+  <form method="post" action="" id="edit_form"
+        data-original-content="{{ content }}"
+        data-page-name="{{ page_name }}">
+    <input type="hidden" name="current_revision" value="{{ current_revision }}">
+    <input type="hidden" id="caret_pos" name="caret_pos" value="{{ caret_pos }}">
+    <input type="hidden" id="scroll_pos" name="scroll_pos" value="{{ scroll_pos }}">
+
+    <a id="formatting_help_link" href="https://daringfireball.net/projects/markdown/syntax" target="_blank" rel="noopener">Formatting help</a>
 
     <div id="draft_banner" class="draft-banner" hidden>
-      <span>You have an unsaved draft from a previous edit.</span>
-      <button type="button" id="draft_restore" class="link-button">Restore it</button>
-      <button type="button" id="draft_discard" class="link-button">Discard</button>
+      <span>Here's your draft back. If you don't want it, <button type="button" id="draft_revert" class="link-button">revert to the live version</button></span>
+      <button type="button" id="draft_dismiss" class="draft-banner-dismiss" aria-label="Dismiss">&times;</button>
     </div>
 
-    <form method="post" action="" id="edit_form" class="form"
-          data-original-content="{{ content }}"
-          data-page-name="{{ page_name }}">
-      <input type="hidden" name="current_revision" value="{{ current_revision }}">
-      <div class="edit-split">
-        <label for="content_text" class="visually-hidden">Page content (Markdown)</label>
-        <textarea id="content_text" name="content" rows="20" cols="80" autofocus>{{ content }}</textarea>
-        <div id="preview" class="edit-preview" aria-live="polite" aria-label="Preview"></div>
-      </div>
-      <div class="form-actions edit-actions">
-        <button type="submit">Save</button>
-        <a class="button-cancel" href="{{ site_root_path }}{{ page_slug(page_name) }}">Cancel</a>
-        {% if page_name %}
-          <button type="submit" name="delete" value="1" id="delete">Delete page</button>
-        {% endif %}
-        <span id="draft_status" class="draft-status" aria-live="polite"></span>
-      </div>
-    </form>
-  </div>
+    <div class="edit-split">
+      <label for="content_text" class="visually-hidden">Page content (Markdown)</label>
+      <textarea id="content_text" name="content" autofocus>{{ content }}</textarea>
+      <div id="preview" class="edit-preview" aria-live="polite" aria-label="Preview"></div>
+    </div>
+
+    <div class="edit-actions">
+      <button type="submit">Publish</button>
+      or <a class="button-cancel" href="{{ site_root_path }}{{ page_slug(page_name) }}">Cancel</a>
+      {% if page_name %}
+        <button type="submit" name="delete" value="1" id="delete">Delete page</button>
+      {% endif %}
+      <span id="draft_status" class="draft-status" aria-live="polite"></span>
+    </div>
+  </form>
 {% endblock %}
 
 {% block scripts %}
-  {{ super() }}
+  <script src="{{ url_for('static', filename='js/caret.js') }}" defer></script>
   <script src="{{ url_for('static', filename='js/drafts.js') }}" defer></script>
   <script src="{{ url_for('static', filename='js/vendor/marked.min.js') }}" defer></script>
   <script src="{{ url_for('static', filename='js/preview.js') }}" defer></script>

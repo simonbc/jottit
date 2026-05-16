@@ -274,6 +274,8 @@ def _render_edit_form(conn: Connection, page_name: str) -> ResponseReturnValue:
             page_name=page_name,
             content="",
             current_revision=0,
+            caret_pos=0,
+            scroll_pos=0,
         )
 
     revision = get_revision(conn, page_id=page.id)
@@ -286,6 +288,8 @@ def _render_edit_form(conn: Connection, page_name: str) -> ResponseReturnValue:
         page_name=page_name,
         content=content,
         current_revision=revision.revision if revision else 0,
+        caret_pos=page.caret_pos,
+        scroll_pos=page.scroll_pos,
     )
 
 

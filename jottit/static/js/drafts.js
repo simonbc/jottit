@@ -1,7 +1,7 @@
-// Edit-page drafts island. Stores the textarea content in localStorage on
-// every change (debounced 1s); if a stored draft differs from the server
-// content when the page loads, shows a restore banner. On successful submit
-// the draft is cleared.
+// Edit-page drafts island. Auto-restores any in-progress draft on load (no
+// click needed), and offers a revert-to-live link to undo. On every change
+// the textarea content is written back to localStorage (debounced 1s); on
+// successful submit the draft is cleared.
 //
 // Storage shape: { content: string, savedAt: ms-epoch } under
 // `jottit-draft:${pathname}`. Drafts older than 30 days are pruned on load.
@@ -9,8 +9,8 @@
   const form = document.getElementById("edit_form");
   const textarea = document.getElementById("content_text");
   const banner = document.getElementById("draft_banner");
-  const restore = document.getElementById("draft_restore");
-  const discard = document.getElementById("draft_discard");
+  const revert = document.getElementById("draft_revert");
+  const dismiss = document.getElementById("draft_dismiss");
   const status = document.getElementById("draft_status");
   if (!form || !textarea) return;
 
@@ -46,21 +46,24 @@
     try { localStorage.removeItem(KEY); } catch { /* ignore */ }
   };
 
+  // Auto-restore: if there's a stored draft that differs from the server
+  // content, swap it in immediately and surface the revert banner.
   const stored = read();
-  if (stored && stored.content !== original && stored.content !== textarea.value && banner) {
+  if (stored && stored.content !== original && banner) {
+    textarea.value = stored.content;
     banner.hidden = false;
   }
 
-  restore?.addEventListener("click", () => {
-    if (stored) textarea.value = stored.content;
-    banner.hidden = true;
-    textarea.focus();
-  });
-
-  discard?.addEventListener("click", () => {
+  revert?.addEventListener("click", () => {
+    textarea.value = original;
     clear();
     banner.hidden = true;
     textarea.focus();
+    textarea.dispatchEvent(new Event("input"));
+  });
+
+  dismiss?.addEventListener("click", () => {
+    banner.hidden = true;
   });
 
   let timer = null;

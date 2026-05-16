@@ -1,29 +1,10 @@
 from __future__ import annotations
 
-import pytest
 from flask.testing import FlaskClient
 
-SITE_BASE = "http://mysite.jottit.test/"
-
-
-@pytest.mark.parametrize(
-    ("method", "path", "expected_substring"),
-    [
-        # /site/claim, /site/signin, /site/signout, /site/forgot-password,
-        # /site/change-password, /site/changes, /site/changes.rss, and
-        # /site/changes.json are exercised end-to-end in their respective
-        # test files.
-        ("POST", "/site/hide-primer", "site/hide-primer POST"),
-    ],
-)
-def test_site_blueprint(
-    client: FlaskClient, method: str, path: str, expected_substring: str
-) -> None:
-    response = client.open(path, method=method, base_url=SITE_BASE)
-    assert response.status_code == 200
-    body = response.data.decode()
-    assert body.startswith("site:mysite ")
-    assert expected_substring in body
+# /site/claim, /site/signin, /site/signout, /site/forgot-password,
+# /site/change-password, /site/changes, /site/changes.rss, /site/changes.json,
+# and /site/hide-primer are exercised end-to-end in their respective test files.
 
 
 # /admin/* routes are exercised end-to-end in tests/test_admin_*.py.

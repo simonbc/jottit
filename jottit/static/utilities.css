@@ -1,19 +1,15 @@
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
-  border: 0;
+@layer utilities {
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .text-muted { color: var(--color-text-muted); }
 }
-
-.deleted { color: var(--muted); }
-
-.empty { color: var(--muted); }
-
-.cancel { color: var(--muted); }
-
-.count { color: var(--muted); }

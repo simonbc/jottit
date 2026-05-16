@@ -12,6 +12,7 @@ from jottit.db import (
     get_request_conn,
     recover_password,
     set_change_pwd_token,
+    sites,
 )
 from jottit.render import format_content
 from jottit.urls import page_slug, site_root
@@ -320,5 +321,9 @@ def _absolute_url(path: str) -> str:
     return f"{request.scheme}://{request.host}{site_root()}{path}"
 
 
-def hide_primer(site_slug: str) -> str:
-    return f"site:{site_slug} site/hide-primer POST (TODO)"
+def hide_primer(site_slug: str) -> ResponseReturnValue:
+    if g.site is None:
+        abort(404)
+    conn = get_request_conn()
+    conn.execute(sites.update().where(sites.c.id == g.site.id).values(show_primer=False))
+    return redirect(site_root(), code=303)

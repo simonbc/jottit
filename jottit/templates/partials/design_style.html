@@ -1,23 +1,14 @@
-{# Inline CSS variables sourced from the site's design row.
-
-   The 2007 site embedded full per-site CSS rules here; we surface the
-   values as custom properties instead and let the global stylesheet
-   reference them. That keeps the per-request payload small and lets
-   the M9 stylesheet rewrite without coordinating with this template. #}
+{# Per-site overrides written into :root so the global stylesheet
+   picks them up via var(--…). Empty values leave the token defaults
+   from tokens.css in place. #}
 <style>
   :root {
-    {% if design.header_color %}--header-color: {{ design.header_color }};{% endif %}
-    {% if design.title_color %}--title-color: {{ design.title_color }};{% endif %}
-    {% if design.subtitle_color %}--subtitle-color: {{ design.subtitle_color }};{% endif %}
-    {% if design.title_font %}--title-font: {{ design.title_font|replace("_", " ") }};{% endif %}
-    {% if design.subtitle_font %}--subtitle-font: {{ design.subtitle_font|replace("_", " ") }};{% endif %}
-    {% if design.headings_font %}--headings-font: {{ design.headings_font|replace("_", " ") }};{% endif %}
-    {% if design.content_font %}--content-font: {{ design.content_font|replace("_", " ") }};{% endif %}
-    {% if design.title_size %}--title-size: {{ design.title_size }}%;{% endif %}
-    {% if design.subtitle_size %}--subtitle-size: {{ design.subtitle_size }}%;{% endif %}
-    {% if design.headings_size %}--headings-size: {{ design.headings_size }}%;{% endif %}
-    {% if design.content_size %}--content-size: {{ design.content_size }}%;{% endif %}
-    {% if design.hue %}--hue: {{ design.hue }};{% endif %}
-    {% if design.brightness %}--brightness: {{ design.brightness }};{% endif %}
+    {% if design.header_color %}--color-header: {{ design.header_color }};{% endif %}
+    {% if design.title_color %}--color-title: {{ design.title_color }};{% endif %}
+    {% if design.subtitle_color %}--color-subtitle: {{ design.subtitle_color }};{% endif %}
+    {% if design.title_font %}--font-family-title: {{ design.title_font|replace("_", " ") }}, sans-serif;{% endif %}
+    {% if design.subtitle_font %}--font-family-subtitle: {{ design.subtitle_font|replace("_", " ") }}, sans-serif;{% endif %}
+    {% if design.headings_font %}--font-family-headings: {{ design.headings_font|replace("_", " ") }}, sans-serif;{% endif %}
+    {% if design.content_font %}--font-family-content: {{ design.content_font|replace("_", " ") }}, sans-serif;{% endif %}
   }
 </style>

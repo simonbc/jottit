@@ -31,6 +31,7 @@ def chrome_context() -> dict[str, Any]:
             "is_unclaimed": False,
             "site_root_path": "/",
             "page_slug": page_slug,
+            "current_path": request.path,
         }
 
     conn = get_request_conn()

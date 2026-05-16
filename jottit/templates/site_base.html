@@ -1,0 +1,89 @@
+{# Per-site chrome (body.app): black claim banner above a colored header
+   strip, white content card on the left, page-list sidebar on the right,
+   footer credit beneath the content. Templates that render inside a
+   site (view_page, history, settings, …) extend this. #}
+{% extends "base.html" %}
+
+{% block body_class %}app{% endblock %}
+
+{% block body %}
+  {% if site and is_unclaimed %}
+    <form method="post" action="{{ site_root_path }}site/claim" id="claim_site">
+      <a href="{{ site_root_path }}site/claim">Claim this site</a>
+      <span id="pick_password">
+        <label for="claim-banner-password">Pick a password:</label>
+        <input id="claim-banner-password" type="password" name="password" autocomplete="new-password">
+        <button type="submit">Claim</button>
+      </span>
+    </form>
+  {% endif %}
+
+  <header class="site-header" id="header">
+    <div class="site-header-inner" id="title_and_subtitle">
+      <div class="site-titles">
+        <h1 class="site-title"><a href="{{ site_root_path }}">{{ site.title or "" }}</a></h1>
+        <div class="site-subtitle" id="subtitle">{{ site.subtitle or "" }}</div>
+      </div>
+      <nav class="site-nav" id="menu" aria-label="Site">
+        {%- set _items = [] -%}
+        {%- set _ = _items.append(("recent changes", site_root_path + "site/changes")) -%}
+        {%- if is_signed_in or is_unclaimed -%}
+          {%- set _ = _items.append(("settings", site_root_path + "admin/settings")) -%}
+          {%- set _ = _items.append(("design", site_root_path + "admin/design")) -%}
+        {%- endif -%}
+        {%- if is_signed_in -%}
+          {%- set _ = _items.append(("sign out", site_root_path + "site/signout")) -%}
+        {%- elif not is_unclaimed -%}
+          {%- set _ = _items.append(("sign in", site_root_path + "site/signin")) -%}
+        {%- endif -%}
+        {%- for label, href in _items -%}
+          {%- if not loop.first %} <span class="sep">|</span> {% endif -%}
+          {%- if label == "sign out" -%}
+            <form method="post" action="{{ href }}" class="inline">
+              <button type="submit" class="link-button">sign out</button>
+            </form>
+          {%- else -%}
+            <a href="{{ href }}">{{ label }}</a>
+          {%- endif -%}
+        {%- endfor -%}
+      </nav>
+    </div>
+  </header>
+
+  <div class="site-body" id="content_wrapper">
+    <div class="site-content-column">
+      <article class="site-content" id="content">
+        {% block content %}{% endblock %}
+      </article>
+      <footer class="page-footer" id="footer">
+        <p>powered by <strong><a href="/">Jottit</a></strong></p>
+      </footer>
+    </div>
+    <aside class="site-sidebar" id="sidebar" aria-label="Site pages">
+      {% if is_signed_in or is_unclaimed %}
+        <form class="form" id="new_page_form" action="{{ site_root_path }}" method="get">
+          <div id="new_page">
+            <button type="button" class="button-toggle-newpage">Create a new page</button>
+          </div>
+          <div id="new_page_input" hidden>
+            <input type="hidden" name="m" value="edit">
+            <input type="text" id="new_page_name" name="name" value="">
+            <button type="submit">Create</button>
+            or <a href="#" class="link-close-newpage">Close</a>
+          </div>
+        </form>
+      {% endif %}
+      <nav id="pages" class="site-pages" aria-label="Pages">
+        {% for p in pages %}
+          {% set label = p.name or "Home" %}
+          {% set href = site_root_path + page_slug(p.name) %}
+          {% if current_path == href %}
+            <strong aria-current="page">{{ label }}</strong>
+          {% else %}
+            <a href="{{ href }}">{{ label }}</a>
+          {% endif %}
+        {% endfor %}
+      </nav>
+    </aside>
+  </div>
+{% endblock %}

@@ -40,7 +40,7 @@ def test_home_on_public_subdomain_renders_latest_revision(
     assert response.status_code == 200
     body = response.data.decode()
     assert "<strong>hi there</strong>" in body
-    assert "Revision 1" in body
+    assert "changed" in body  # dateline footer
 
 
 def test_named_page_renders_content(client: FlaskClient, db_engine: Engine) -> None:

@@ -1,6 +1,6 @@
-{% extends "base.html" %}
+{% extends "site_base.html" %}
 
-{% block title %}{{ page_name or "Home" }}{% if site and site.title %} — {{ site.title }}{% endif %}{% endblock %}
+{% block title %}{% if site and site.title %}{{ site.title }}: {% endif %}{{ page_name or "Home" }}{% endblock %}
 
 {% block head %}
   <link rel="alternate" type="application/rss+xml"
@@ -15,45 +15,44 @@
 {% endblock %}
 
 {% block content %}
-  <article class="page">
-    <header>
-      <h1>{{ page_name or "Home" }}</h1>
-      {% if is_old_revision %}
-        <p class="revision-banner">
-          Viewing revision <strong>{{ revision.revision }}</strong>
-          of {{ latest_revision_number }}.
-          <a href="{{ site_root_path }}{{ page_slug(page_name) }}">Latest</a>
-          {% if revision.revision > 1 %}
-            · <a href="?r={{ revision.revision - 1 }}">prev</a>
-          {% endif %}
-          {% if revision.revision < latest_revision_number %}
-            · <a href="?r={{ revision.revision + 1 }}">next</a>
-          {% endif %}
-        </p>
+  {% if site.show_primer and (is_signed_in or is_unclaimed) and not page_name %}
+    <form method="post" action="{{ site_root_path }}site/hide-primer" id="primer" class="primer">
+      <button type="submit" class="primer-dismiss link-button">Remove this message</button>
+      <h1>That was easy!</h1>
+      <p>Here's your new site. Be sure to bookmark it so you can find it again. To change it, just press the edit button at the bottom of the page. Enjoy!</p>
+    </form>
+  {% endif %}
 
-        {% if is_signed_in or is_unclaimed %}
-          <form action="" method="post" class="revert">
-            <input type="hidden" name="m" value="revert">
-            <input type="hidden" name="r" value="{{ revision.revision }}">
-            <button type="submit">Revert page to this revision</button>
-          </form>
-        {% endif %}
-      {% endif %}
-    </header>
-
-    <div class="content">
-      {{ content_html|safe }}
-    </div>
-
-    <footer class="page-meta">
+  {% if is_old_revision %}
+    <div id="browse_revs" class="revision-banner">
       <p>
-        Revision {{ revision.revision }} &middot;
-        <time datetime="{{ revision.created.isoformat() }}Z">{{ revision.created.strftime("%Y-%m-%d %H:%M") }} UTC</time>
-        {% if is_signed_in or is_unclaimed %}
-          &middot; <a href="?m=edit">edit</a>
-          &middot; <a href="?m=history">history</a>
+        Viewing revision <strong>{{ revision.revision }}</strong> of {{ latest_revision_number }}.
+        <a href="{{ site_root_path }}{{ page_slug(page_name) }}">Latest</a>
+        {% if revision.revision > 1 %}
+          | <a href="?r={{ revision.revision - 1 }}">&laquo; prev</a>
+        {% endif %}
+        {% if revision.revision < latest_revision_number %}
+          | <a href="?r={{ revision.revision + 1 }}">next &raquo;</a>
         {% endif %}
       </p>
-    </footer>
-  </article>
+      {% if is_signed_in or is_unclaimed %}
+        <form action="" method="post" class="revert">
+          <input type="hidden" name="m" value="revert">
+          <input type="hidden" name="r" value="{{ revision.revision }}">
+          <button type="submit">Revert to this revision</button>
+        </form>
+      {% endif %}
+    </div>
+  {% endif %}
+
+  {{ content_html|safe }}
+
+  <div class="dateline" id="dateline" aria-label="Page actions">
+    <span>changed <time datetime="{{ revision.created.isoformat() }}Z">{{ revision.created.strftime("%Y-%m-%d %H:%M") }} UTC</time></span>
+    {% if is_signed_in or is_unclaimed %}
+      {% if page_name %}<a href="?m=delete">delete</a>{% endif %}
+      <a href="?m=history">history</a>
+      <a href="?m=edit">edit</a>
+    {% endif %}
+  </div>
 {% endblock %}

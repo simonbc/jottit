@@ -13,28 +13,12 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='base.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='components.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='utilities.css') }}">
-  {% block head %}{% endblock %}
   {% if design %}
     {% include "partials/design_style.html" %}
   {% endif %}
+  {% block head %}{% endblock %}
 </head>
-<body>
-  <div class="page">
-    {% if site %}
-      {% include "partials/site_header.html" %}
-    {% endif %}
-
-    <main>
-      {% block content %}{% endblock %}
-    </main>
-
-    {% if site %}
-      {% include "partials/site_sidebar.html" %}
-    {% endif %}
-
-    <footer class="site-footer">
-      <p>Powered by <a href="https://jottit.org/">Jottit</a>.</p>
-    </footer>
-  </div>
+<body class="{% block body_class %}page{% endblock %}">
+  {% block body %}{% endblock %}
 </body>
 </html>

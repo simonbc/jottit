@@ -1,0 +1,37 @@
+{# Front-page chrome (body.site): white header band with the green
+   Jottit logo, gray body holding the content, blue-link nav along
+   the bottom. The front page and any other jottit-the-service pages
+   (about, sites, help — to be ported later) extend this. #}
+{% extends "base.html" %}
+
+{% block body_class %}site{% endblock %}
+
+{% block body %}
+  <header class="main-header">
+    {% block header %}
+      <img id="logo" src="{{ url_for('static', filename='logo.png') }}" width="170" height="75" alt="Jottit">
+    {% endblock %}
+  </header>
+
+  <main class="page-main">
+    {% block content %}{% endblock %}
+  </main>
+
+  {% set _here = page_url|default("/") %}
+  {% set _nav = [
+    ("/", "home"),
+    ("/about", "about"),
+    ("/sites", "find your site"),
+    ("/help", "help"),
+  ] %}
+  <nav class="main-nav" aria-label="Main">
+    {%- for url, label in _nav -%}
+      {%- if url == _here -%}
+        <span aria-current="page">{{ label }}</span>
+      {%- else -%}
+        <a href="{{ url }}">{{ label }}</a>
+      {%- endif -%}
+      {%- if not loop.last %} <span class="main-nav-sep">|</span> {% endif -%}
+    {%- endfor -%}
+  </nav>
+{% endblock %}

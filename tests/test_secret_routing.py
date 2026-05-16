@@ -1,29 +1,13 @@
 from __future__ import annotations
 
-import pytest
 from flask.testing import FlaskClient
 
 APEX = "http://jottit.test/"
 
 
-@pytest.mark.parametrize(
-    ("method", "path", "expected_substring"),
-    [
-        # /site/claim, /site/signin, /site/signout, /site/forgot-password,
-        # /site/change-password, /site/changes, /site/changes.rss, and
-        # /site/changes.json are exercised end-to-end in their respective
-        # test files.
-        ("POST", "/abc123/site/hide-primer", "site/hide-primer POST"),
-    ],
-)
-def test_secret_site_routes(
-    client: FlaskClient, method: str, path: str, expected_substring: str
-) -> None:
-    response = client.open(path, method=method, base_url=APEX)
-    assert response.status_code == 200
-    body = response.data.decode()
-    assert body.startswith("site:abc123 ")
-    assert expected_substring in body
+# /site/claim, /site/signin, /site/signout, /site/forgot-password,
+# /site/change-password, /site/changes, /site/changes.rss, /site/changes.json,
+# and /site/hide-primer are exercised end-to-end in their respective test files.
 
 
 # /admin/* routes via the secret blueprint are exercised end-to-end in

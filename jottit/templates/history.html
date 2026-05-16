@@ -1,24 +1,36 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>History: {{ page_name or "Home" }}</title>
-</head>
-<body>
-  <h1>History: {{ page_name or "Home" }}</h1>
-  <p>{{ total }} revision{{ "s" if total != 1 }}.</p>
-  <ul>
-    {% for r in revisions %}
-      <li>
-        <a href="{{ site_root_path }}{{ page_name }}?r={{ r.revision }}">Revision {{ r.revision }}</a>
-        <small>{{ r.created.strftime("%Y-%m-%d %H:%M") }} UTC</small>
-        {% if r.changes %}<span class="changes">{{ r.changes|safe }}</span>{% endif %}
-      </li>
-    {% endfor %}
-  </ul>
-  {% if older_before %}
-    <p><a href="?m=history&amp;before={{ older_before }}">Older &rarr;</a></p>
-  {% endif %}
-  <p><a href="{{ site_root_path }}{{ page_name }}">Back to page</a></p>
-</body>
-</html>
+{% extends "base.html" %}
+{% block title %}History: {{ page_name or "Home" }}{% endblock %}
+
+{% block head %}
+  <link rel="alternate" type="application/rss+xml"
+        title="{{ page_name or 'Home' }} history"
+        href="?m=history_rss">
+  <link rel="alternate" type="application/feed+json"
+        title="{{ page_name or 'Home' }} history (JSON)"
+        href="?m=history_json">
+{% endblock %}
+
+{% block content %}
+  <article class="history">
+    <header>
+      <h1>History: {{ page_name or "Home" }}</h1>
+      <p class="count">{{ total }} revision{{ "s" if total != 1 }}.</p>
+    </header>
+
+    <ol class="revisions">
+      {% for r in revisions %}
+        <li>
+          <a href="{{ site_root_path }}{{ page_slug(page_name) }}?r={{ r.revision }}">Revision {{ r.revision }}</a>
+          <time datetime="{{ r.created.isoformat() }}Z">{{ r.created.strftime("%Y-%m-%d %H:%M") }} UTC</time>
+          {% if r.changes %}<span class="changes">{{ r.changes|safe }}</span>{% endif %}
+        </li>
+      {% endfor %}
+    </ol>
+
+    {% if older_before %}
+      <p class="pagination"><a href="?m=history&amp;before={{ older_before }}">Older &rarr;</a></p>
+    {% endif %}
+
+    <p><a href="{{ site_root_path }}{{ page_slug(page_name) }}">Back to page</a></p>
+  </article>
+{% endblock %}

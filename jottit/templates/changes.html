@@ -1,30 +1,36 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>Recent changes</title>
-</head>
-<body>
-  <h1>Recent changes</h1>
-  {% if changes %}
-    <ul>
-      {% for c in changes %}
-        <li>
-          <a href="{{ site_root_path }}{{ page_slug(c.page_name) }}?r={{ c.revision }}">
-            {{ c.page_name or "Home" }} &mdash; revision {{ c.revision }}
-          </a>
-          <small>{{ c.created.strftime("%Y-%m-%d %H:%M") }} UTC</small>
-          {% if c.page_deleted %}<em>(page since deleted)</em>{% endif %}
-          {% if c.changes %}<span class="changes">{{ c.changes|safe }}</span>{% endif %}
-        </li>
-      {% endfor %}
-    </ul>
-    {% if older_before %}
-      <p><a href="?before={{ older_before }}">Older &rarr;</a></p>
+{% extends "base.html" %}
+{% block title %}Recent changes{% endblock %}
+
+{% block head %}
+  <link rel="alternate" type="application/rss+xml"
+        title="Recent changes" href="?m=rss">
+  <link rel="alternate" type="application/feed+json"
+        title="Recent changes (JSON)" href="?m=json">
+{% endblock %}
+
+{% block content %}
+  <article class="changes">
+    <header><h1>Recent changes</h1></header>
+
+    {% if changes %}
+      <ol class="revisions">
+        {% for c in changes %}
+          <li>
+            <a href="{{ site_root_path }}{{ page_slug(c.page_name) }}?r={{ c.revision }}">{{ c.page_name or "Home" }} — revision {{ c.revision }}</a>
+            <time datetime="{{ c.created.isoformat() }}Z">{{ c.created.strftime("%Y-%m-%d %H:%M") }} UTC</time>
+            {% if c.page_deleted %}<em class="deleted">(page since deleted)</em>{% endif %}
+            {% if c.changes %}<span class="changes">{{ c.changes|safe }}</span>{% endif %}
+          </li>
+        {% endfor %}
+      </ol>
+
+      {% if older_before %}
+        <p class="pagination"><a href="?before={{ older_before }}">Older &rarr;</a></p>
+      {% endif %}
+    {% else %}
+      <p class="empty">No changes yet.</p>
     {% endif %}
-  {% else %}
-    <p>No changes yet.</p>
-  {% endif %}
-  <p><a href="{{ site_root_path }}">Back to site</a></p>
-</body>
-</html>
+
+    <p><a href="{{ site_root_path }}">Back to site</a></p>
+  </article>
+{% endblock %}

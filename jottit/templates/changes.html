@@ -9,28 +9,26 @@
 {% endblock %}
 
 {% block content %}
-  <article class="changes">
-    <header><h1>Recent changes</h1></header>
+  <h1>Recent changes</h1>
 
-    {% if changes %}
-      <ol class="revisions">
-        {% for c in changes %}
-          <li>
-            <a href="{{ site_root_path }}{{ page_slug(c.page_name) }}?r={{ c.revision }}">{{ c.page_name or "Home" }} — revision {{ c.revision }}</a>
-            <time datetime="{{ c.created.isoformat() }}Z">{{ c.created.strftime("%Y-%m-%d %H:%M") }} UTC</time>
-            {% if c.page_deleted %}<em class="deleted">(page since deleted)</em>{% endif %}
-            {% if c.changes %}<span class="changes">{{ c.changes|safe }}</span>{% endif %}
-          </li>
-        {% endfor %}
-      </ol>
+  {% if changes %}
+    <ol class="revisions" id="changes">
+      {% for c in changes %}
+        <li>
+          <a href="{{ site_root_path }}{{ page_slug(c.page_name) }}?r={{ c.revision }}">{{ c.page_name or "Home" }} — revision {{ c.revision }}</a>
+          <time datetime="{{ c.created.isoformat() }}Z">{{ c.created.strftime("%Y-%m-%d %H:%M") }} UTC</time>
+          {% if c.page_deleted %}<em class="text-muted">(page since deleted)</em>{% endif %}
+          {% if c.changes %}<span class="changes">{{ c.changes|safe }}</span>{% endif %}
+        </li>
+      {% endfor %}
+    </ol>
 
-      {% if older_before %}
-        <p class="pagination"><a href="?before={{ older_before }}">Older &rarr;</a></p>
-      {% endif %}
-    {% else %}
-      <p class="empty">No changes yet.</p>
+    {% if older_before %}
+      <p class="pagination"><a href="?before={{ older_before }}">Older &rarr;</a></p>
     {% endif %}
+  {% else %}
+    <p class="text-muted">No changes yet.</p>
+  {% endif %}
 
-    <p><a href="{{ site_root_path }}">Back to site</a></p>
-  </article>
+  <p><a href="{{ site_root_path }}">Back to site</a></p>
 {% endblock %}

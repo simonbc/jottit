@@ -11,26 +11,22 @@
 {% endblock %}
 
 {% block content %}
-  <article class="history">
-    <header>
-      <h1>History: {{ page_name or "Home" }}</h1>
-      <p class="count">{{ total }} revision{{ "s" if total != 1 }}.</p>
-    </header>
+  <h1>History: {{ page_name or "Home" }}</h1>
+  <p class="text-muted">{{ total }} revision{{ "s" if total != 1 }}.</p>
 
-    <ol class="revisions">
-      {% for r in revisions %}
-        <li>
-          <a href="{{ site_root_path }}{{ page_slug(page_name) }}?r={{ r.revision }}">Revision {{ r.revision }}</a>
-          <time datetime="{{ r.created.isoformat() }}Z">{{ r.created.strftime("%Y-%m-%d %H:%M") }} UTC</time>
-          {% if r.changes %}<span class="changes">{{ r.changes|safe }}</span>{% endif %}
-        </li>
-      {% endfor %}
-    </ol>
+  <ol class="revisions" id="revisions">
+    {% for r in revisions %}
+      <li>
+        <a href="{{ site_root_path }}{{ page_slug(page_name) }}?r={{ r.revision }}">Revision {{ r.revision }}</a>
+        <time datetime="{{ r.created.isoformat() }}Z">{{ r.created.strftime("%Y-%m-%d %H:%M") }} UTC</time>
+        {% if r.changes %}<span class="changes">{{ r.changes|safe }}</span>{% endif %}
+      </li>
+    {% endfor %}
+  </ol>
 
-    {% if older_before %}
-      <p class="pagination"><a href="?m=history&amp;before={{ older_before }}">Older &rarr;</a></p>
-    {% endif %}
+  {% if older_before %}
+    <p class="pagination"><a href="?m=history&amp;before={{ older_before }}">Older &rarr;</a></p>
+  {% endif %}
 
-    <p><a href="{{ site_root_path }}{{ page_slug(page_name) }}">Back to page</a></p>
-  </article>
+  <p id="done"><a href="{{ site_root_path }}{{ page_slug(page_name) }}">Back to page</a></p>
 {% endblock %}

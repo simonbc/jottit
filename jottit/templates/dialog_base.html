@@ -1,0 +1,14 @@
+{# Base for modal-style single-form pages: signin, claim, forgot
+   password, change password (token recovery flow). No site chrome —
+   just a centered white card on the gray page. #}
+{% extends "base.html" %}
+
+{% block body_class %}page dialog-page{% endblock %}
+
+{% block body %}
+  <div class="dialog-wrapper">
+    <section class="dialog {% block dialog_class %}{% endblock %}">
+      {% block content %}{% endblock %}
+    </section>
+  </div>
+{% endblock %}

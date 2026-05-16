@@ -1,32 +1,52 @@
-{% extends "site_base.html" %}
+{% extends "dialog_base.html" %}
 {% block title %}Claim this site{% endblock %}
+{% block dialog_class %}dialog-wide{% endblock %}
+
 {% block content %}
-  <article class="site-form">
-    <header><h1>Claim this site</h1></header>
-    <p>Set a password and pick how open you want this site to be. We'll email you a recovery link if you forget the password later.</p>
+  <h1>Claim this site</h1>
+  <p>Set a password and pick how open you want this site to be. We'll email you a recovery link if you forget the password later.</p>
 
-    {% include "partials/form_error.html" %}
+  {% include "partials/form_error.html" %}
 
-    <form method="post" class="form">
-      <p>
-        <label>Password
-          <input type="password" name="password" value="{{ password }}" required autofocus>
-        </label>
-      </p>
-      <p>
-        <label>Email
-          <input type="email" name="email" value="{{ email }}" required>
-        </label>
-      </p>
+  <form method="post" action="" class="form">
+    <table class="settings">
+      <tr>
+        <th>Password</th>
+        <td><input type="password" name="password" value="{{ password }}" required autofocus></td>
+        <td class="explain">Required to edit (and maybe view) this site</td>
+      </tr>
+      <tr>
+        <th>Email</th>
+        <td><input type="email" name="email" value="{{ email }}" required></td>
+        <td class="explain">We'll send password resets here</td>
+      </tr>
+      <tr>
+        <th>Kind of site</th>
+        <td>
+          <table class="security">
+            <tr>
+              <td><input type="radio" id="claim_private" name="security" value="private" {% if security == "private" %}checked{% endif %}></td>
+              <td><label for="claim_private">Private</label></td>
+              <td class="explain">Require password to view and edit</td>
+            </tr>
+            <tr>
+              <td><input type="radio" id="claim_public" name="security" value="public" {% if security == "public" %}checked{% endif %}></td>
+              <td><label for="claim_public">Public</label></td>
+              <td class="explain">Anyone can view, password to edit</td>
+            </tr>
+            <tr>
+              <td><input type="radio" id="claim_open" name="security" value="open" {% if security == "open" %}checked{% endif %}></td>
+              <td><label for="claim_open">Open</label></td>
+              <td class="explain">Anyone can view and edit</td>
+            </tr>
+          </table>
+        </td>
+        <td class="explain"></td>
+      </tr>
+    </table>
 
-      <fieldset>
-        <legend>Security</legend>
-        <p><label><input type="radio" name="security" value="private" {% if security == "private" %}checked{% endif %}> Private — only you can view or edit</label></p>
-        <p><label><input type="radio" name="security" value="public" {% if security == "public" %}checked{% endif %}> Public — anyone can view, only you can edit</label></p>
-        <p><label><input type="radio" name="security" value="open" {% if security == "open" %}checked{% endif %}> Open — anyone can view or edit</label></p>
-      </fieldset>
-
-      <p><button type="submit">Claim site</button></p>
-    </form>
-  </article>
+    <div class="form-actions">
+      <button type="submit">Claim site</button>
+    </div>
+  </form>
 {% endblock %}

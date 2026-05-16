@@ -1,21 +1,20 @@
-{% extends "site_base.html" %}
+{% extends "dialog_base.html" %}
 {% block title %}Sign in{% endblock %}
+
 {% block content %}
-  <article class="site-form">
-    <header><h1>Sign in</h1></header>
+  <h1>Sign in</h1>
 
-    {% include "partials/form_error.html" %}
+  {% include "partials/form_error.html" %}
 
-    <form method="post" class="form">
-      <input type="hidden" name="return_to" value="{{ return_to }}">
-      <p>
-        <label>Password
-          <input type="password" name="password" required autofocus>
-        </label>
-      </p>
-      <p><button type="submit">Sign in</button></p>
-    </form>
-
-    <p class="forgot"><a href="forgot-password">Forgot your password?</a></p>
-  </article>
+  <form method="post" action="" class="form">
+    <input type="hidden" name="return_to" value="{{ return_to }}">
+    <p>
+      <label for="password">Password</label>
+      <input id="password" type="password" name="password" autocomplete="current-password" required autofocus>
+    </p>
+    <div class="form-actions">
+      <button type="submit">Sign in</button>
+      <a href="{{ site_root_path }}site/forgot-password">I forgot the password</a>
+    </div>
+  </form>
 {% endblock %}

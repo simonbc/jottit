@@ -494,25 +494,31 @@
     font-style: italic;
   }
 
-  /* ---------- "Formatting help" link top-right in fullscreen edit ---------- */
+  /* ---------- "Formatting help" link pinned to the top-right of the
+                editor split (above the preview pane) ---------- */
   #formatting_help_link {
     position: absolute;
-    top: 6px;
+    top: 4px;
     right: 12px;
     font-size: 0.85em;
     z-index: 1;
   }
 
   /* ---------- Edit page (body.edit — fullscreen, no chrome) ---------- */
-  body.edit { min-height: 100svh; display: flex; flex-direction: column; }
+  body.edit {
+    height: 100svh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
 
-  .edit-page {
+  body.edit > #edit_form {
     flex: 1 1 auto;
     display: flex;
     flex-direction: column;
     min-height: 0;
-    padding: 8px 12px;
-    gap: 6px;
+    padding: 0;
+    margin: 0;
   }
 
   .edit-heading {
@@ -525,6 +531,7 @@
   }
 
   .edit-split {
+    position: relative;
     display: flex;
     flex-direction: column;
     flex: 1 1 auto;

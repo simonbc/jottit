@@ -15,14 +15,13 @@
     <input type="hidden" id="caret_pos" name="caret_pos" value="{{ caret_pos }}">
     <input type="hidden" id="scroll_pos" name="scroll_pos" value="{{ scroll_pos }}">
 
-    <a id="formatting_help_link" href="https://daringfireball.net/projects/markdown/syntax" target="_blank" rel="noopener">Formatting help</a>
-
     <div id="draft_banner" class="draft-banner" hidden>
       <span>Here's your draft back. If you don't want it, <button type="button" id="draft_revert" class="link-button">revert to the live version</button></span>
       <button type="button" id="draft_dismiss" class="draft-banner-dismiss" aria-label="Dismiss">&times;</button>
     </div>
 
     <div class="edit-split">
+      <a id="formatting_help_link" href="https://daringfireball.net/projects/markdown/syntax" target="_blank" rel="noopener">Formatting help</a>
       <label for="content_text" class="visually-hidden">Page content (Markdown)</label>
       <textarea id="content_text" name="content" autofocus>{{ content }}</textarea>
       <div id="preview" class="edit-preview" aria-live="polite" aria-label="Preview"></div>

@@ -573,7 +573,7 @@
   .edit-preview > :first-child { margin-top: 0; }
 
   .edit-actions {
-    margin-top: 6px;
+    margin: 6px 0 12px 0;
   }
 
   .edit-actions #delete {

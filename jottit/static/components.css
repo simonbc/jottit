@@ -542,17 +542,19 @@
     }
   }
 
-  #content_text,
-  .edit-page textarea {
-    width: 100%;
-    flex: 1 1 auto;
+  #content_text {
+    flex: 1 1 0;
+    min-width: 0;
     min-height: 320px;
+    width: auto;
     font-family: var(--font-stack-mono);
     line-height: var(--line-height-normal);
     resize: none;
   }
 
   .edit-preview {
+    flex: 1 1 0;
+    min-width: 0;
     background: #fff;
     border: 1px solid var(--color-border);
     padding: 8px 12px;
@@ -562,11 +564,6 @@
   }
 
   .edit-preview > :first-child { margin-top: 0; }
-
-  /* Hide preview when JS hasn't populated it yet (and on no-JS clients) —
-     CSS-only, so a non-empty .edit-preview re-appears automatically once
-     marked.js renders. */
-  .edit-preview:empty { display: none; }
 
   .edit-actions {
     margin-top: 6px;

@@ -16,10 +16,11 @@
           data-original-content="{{ content }}"
           data-page-name="{{ page_name }}">
       <input type="hidden" name="current_revision" value="{{ current_revision }}">
-      <p>
+      <div class="edit-split">
         <label for="content_text" class="visually-hidden">Page content (Markdown)</label>
         <textarea id="content_text" name="content" rows="20" cols="80" autofocus>{{ content }}</textarea>
-      </p>
+        <div id="preview" class="edit-preview" aria-live="polite" aria-label="Preview"></div>
+      </div>
       <div class="form-actions edit-actions">
         <button type="submit">Save</button>
         <a class="button-cancel" href="{{ site_root_path }}{{ page_slug(page_name) }}">Cancel</a>
@@ -35,4 +36,6 @@
 {% block scripts %}
   {{ super() }}
   <script src="{{ url_for('static', filename='js/drafts.js') }}" defer></script>
+  <script src="{{ url_for('static', filename='js/vendor/marked.min.js') }}" defer></script>
+  <script src="{{ url_for('static', filename='js/preview.js') }}" defer></script>
 {% endblock %}

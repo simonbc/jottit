@@ -1,22 +1,21 @@
 {% extends "site_base.html" %}
 {% block title %}Change site address{% endblock %}
+
 {% block content %}
-  <article class="admin">
-    <header><h1>Change site address</h1></header>
+  <h1>Change site address</h1>
 
-    {% include "partials/form_error.html" %}
+  {% include "partials/form_error.html" %}
 
-    <form method="post" class="form">
-      <p>
-        <label>Site address
-          <input type="text" name="public_url" value="{{ public_url }}"
-                 autofocus pattern="[a-z0-9-]*" autocomplete="off">
-          <small>Letters, numbers, and dashes. Leave blank to remove the subdomain.</small>
-        </label>
-      </p>
-      <p><button type="submit">Save</button></p>
-    </form>
-
-    <p><a href="settings">Back to settings</a></p>
-  </article>
+  <form method="post" action="" id="change_public_url" class="form">
+    <p>
+      <label for="public_url">Site address</label>
+      <input id="public_url" type="text" name="public_url" value="{{ public_url }}"
+             autofocus pattern="[a-z0-9-]*" autocomplete="off">
+      <small>Letters, numbers, and dashes. Leave blank to remove the subdomain.</small>
+    </p>
+    <div class="form-actions">
+      <button type="submit">Save</button>
+      <a href="{{ site_root_path }}admin/settings" class="button-cancel">Cancel</a>
+    </div>
+  </form>
 {% endblock %}

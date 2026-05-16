@@ -366,16 +366,87 @@
   }
 
   /* ---------- Settings table (admin pages) ---------- */
-  .admin {
+  .settings {
+    width: 100%;
+    border-collapse: collapse;
     margin-top: 10px;
+    table-layout: fixed;
   }
 
-  .admin > header h1 {
-    margin-top: 0;
+  .settings th,
+  .settings td {
+    vertical-align: top;
+    padding: 15px 0 20px 0;
+    border-bottom: 1px solid var(--color-rule);
   }
 
-  .admin .form .form-actions {
-    margin-top: 16px;
+  .settings th {
+    width: 140px;
+    white-space: nowrap;
+    padding-top: 16px;
+    padding-right: 40px;
+    text-align: left;
+    font-family: var(--font-stack-system);
+    font-weight: bold;
+  }
+
+  .settings td.explain {
+    font-size: 90%;
+    font-weight: normal;
+    width: 220px;
+    padding-left: 20px;
+    color: var(--color-text-muted);
+  }
+
+  .settings input[type="text"],
+  .settings input[type="password"],
+  .settings input[type="email"],
+  .settings input[type="url"] {
+    width: 240px;
+    max-width: 100%;
+  }
+
+  .settings .security {
+    border-collapse: collapse;
+    width: auto;
+  }
+
+  .settings .security td {
+    border: 0;
+    padding: 2px 8px 2px 0;
+    font-size: 1em;
+  }
+
+  .settings .security td.explain {
+    font-size: 0.9em;
+    width: auto;
+    padding-left: 8px;
+    color: var(--color-text-muted);
+  }
+
+  .settings .security label {
+    font-weight: normal;
+    color: var(--color-text);
+  }
+
+  #delete_site {
+    margin-top: 40px;
+  }
+
+  #delete_site h2 {
+    font-size: 1em;
+    border-bottom: 1px solid var(--color-rule);
+    margin-bottom: 10px;
+  }
+
+  #delete_site a {
+    color: red;
+  }
+
+  .admin-links {
+    margin-top: 32px;
+    font-size: 0.9em;
+    color: var(--color-text-muted);
   }
 
   /* ---------- Primer welcome banner ---------- */

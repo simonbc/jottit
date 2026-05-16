@@ -1,14 +1,15 @@
 {% extends "site_base.html" %}
 {% block title %}Delete site{% endblock %}
+
 {% block content %}
-  <article class="admin">
-    <header><h1>Delete site</h1></header>
-    <p>This will remove the site from public listings and free its subdomain. Pages and revisions stay on file in case we ever add a restore path.</p>
+  <h1>Delete site</h1>
 
-    <form method="post" class="form">
-      <p><button type="submit" class="destructive">Delete this site</button></p>
-    </form>
+  <p>This will remove the site from public listings and free its subdomain. Pages and revisions stay on file in case we ever add a restore path.</p>
 
-    <p><a href="settings">Cancel</a></p>
-  </article>
+  <form method="post" action="" id="delete_site_form" class="form">
+    <div class="form-actions">
+      <button type="submit">Delete this site</button>
+      <a href="{{ site_root_path }}admin/settings" class="button-cancel">Cancel</a>
+    </div>
+  </form>
 {% endblock %}

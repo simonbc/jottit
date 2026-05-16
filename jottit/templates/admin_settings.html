@@ -1,46 +1,82 @@
 {% extends "site_base.html" %}
 {% block title %}Settings{% endblock %}
+
 {% block content %}
-  <article class="admin">
-    <header><h1>Settings</h1></header>
+  {% include "partials/form_error.html" %}
 
-    {% include "partials/form_error.html" %}
+  <form id="settings_form" method="post" action="">
+    <table id="settings" class="settings">
+      <tr>
+        <th>Title</th>
+        <td><input id="title" type="text" name="title" value="{{ title }}"></td>
+        <td class="explain">Appears at the top of every page</td>
+      </tr>
+      <tr>
+        <th>Subtitle</th>
+        <td><input id="subtitle_input" type="text" name="subtitle" value="{{ subtitle }}"></td>
+        <td class="explain">Appears below the title</td>
+      </tr>
+      <tr>
+        <th>Site address</th>
+        <td>
+          {% if public_url %}
+            <strong>{{ public_url }}</strong>
+            (<a href="{{ site_root_path }}admin/change-site-address">change</a>)
+          {% else %}
+            <a href="{{ site_root_path }}admin/change-site-address">Give your site an address</a>
+          {% endif %}
+        </td>
+        <td class="explain">Give your website an address that's easy to remember</td>
+      </tr>
+      {% if not is_unclaimed %}
+        <tr>
+          <th>Password</th>
+          <td><a href="{{ site_root_path }}admin/change-password">Change password</a></td>
+          <td class="explain">With a password you can allow only the people who know it to change the settings, edit pages or view your site</td>
+        </tr>
+        <tr>
+          <th>Email address</th>
+          <td><input id="email" type="email" name="email" value="{{ email }}"></td>
+          <td class="explain">If you forget your password, we'll send it to this address</td>
+        </tr>
+        <tr>
+          <th>Kind of site</th>
+          <td>
+            <table class="security">
+              <tr>
+                <td><input type="radio" id="private_input" name="security" value="private" {% if security == "private" %}checked{% endif %}></td>
+                <td><label for="private_input">Private</label></td>
+                <td class="explain">Require password to view and edit site</td>
+              </tr>
+              <tr>
+                <td><input type="radio" id="public_input" name="security" value="public" {% if security == "public" %}checked{% endif %}></td>
+                <td><label for="public_input">Public</label></td>
+                <td class="explain">Require password to edit site</td>
+              </tr>
+              <tr>
+                <td><input type="radio" id="open_input" name="security" value="open" {% if security == "open" %}checked{% endif %}></td>
+                <td><label for="open_input">Open</label></td>
+                <td class="explain">Everyone can view and edit</td>
+              </tr>
+            </table>
+          </td>
+          <td class="explain"></td>
+        </tr>
+      {% endif %}
+    </table>
 
-    <form method="post" class="form">
-      <p>
-        <label>Title
-          <input type="text" name="title" value="{{ title }}">
-        </label>
-      </p>
-      <p>
-        <label>Subtitle
-          <input type="text" name="subtitle" value="{{ subtitle }}">
-        </label>
-      </p>
-      <p>
-        <label>Email
-          <input type="email" name="email" value="{{ email }}">
-        </label>
-      </p>
+    <div class="form-actions">
+      <button type="submit">Save settings</button>
+    </div>
+  </form>
 
-      <fieldset>
-        <legend>Security</legend>
-        <p><label><input type="radio" name="security" value="private" {% if security == "private" %}checked{% endif %}> Private — only you can view or edit</label></p>
-        <p><label><input type="radio" name="security" value="public" {% if security == "public" %}checked{% endif %}> Public — anyone can view, only you can edit</label></p>
-        <p><label><input type="radio" name="security" value="open" {% if security == "open" %}checked{% endif %}> Open — anyone can view or edit</label></p>
-      </fieldset>
+  <section id="delete_site">
+    <h2>Delete site</h2>
+    <p>Deleting this site will <strong>immediately</strong> take it down. <a href="{{ site_root_path }}admin/delete">Delete this site</a>.</p>
+  </section>
 
-      <p><button type="submit">Save settings</button></p>
-    </form>
-
-    <nav class="admin-links" aria-label="Other settings">
-      <ul>
-        <li><a href="change-site-address">Site address: <code>{{ public_url or "(none)" }}</code></a></li>
-        <li><a href="change-password">Change password</a></li>
-        <li><a href="design">Design</a></li>
-        <li><a href="export">Export pages</a></li>
-        <li><a href="delete" class="destructive">Delete this site</a></li>
-      </ul>
-    </nav>
-  </article>
+  <nav class="admin-links" aria-label="Other settings">
+    <a href="{{ site_root_path }}admin/design">Design</a>
+    &middot; <a href="{{ site_root_path }}admin/export">Export pages</a>
+  </nav>
 {% endblock %}

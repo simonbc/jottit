@@ -449,6 +449,34 @@
     color: var(--color-text-muted);
   }
 
+  /* ---------- Edit page ---------- */
+  .edit-page { margin-top: 0; }
+
+  .edit-heading {
+    font-size: 1.1em;
+    margin: 0 0 0.3em 0;
+  }
+
+  .edit-heading .page_name {
+    color: var(--color-page-name);
+  }
+
+  #content_text,
+  .edit-page textarea {
+    width: 100%;
+    min-height: 320px;
+    font-family: var(--font-stack-mono);
+    line-height: var(--line-height-normal);
+  }
+
+  .edit-actions {
+    margin-top: 6px;
+  }
+
+  .edit-actions #delete {
+    margin-left: auto;
+  }
+
   /* ---------- Primer welcome banner ---------- */
   .primer {
     position: relative;

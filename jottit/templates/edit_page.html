@@ -3,24 +3,22 @@
 {% block title %}Edit: {{ page_name or "Home" }}{% if site and site.title %} — {{ site.title }}{% endif %}{% endblock %}
 
 {% block content %}
-  <article class="edit">
-    <header><h1>Edit: {{ page_name or "Home" }}</h1></header>
+  <div class="edit-page">
+    <h1 class="edit-heading">Editing: <span class="page_name">{{ page_name or "Home" }}</span></h1>
 
-    <form method="post" class="edit-form">
+    <form method="post" action="" id="edit_form" class="form">
       <input type="hidden" name="current_revision" value="{{ current_revision }}">
       <p>
-        <label>
-          <span class="visually-hidden">Page content (Markdown)</span>
-          <textarea name="content" rows="20" cols="80" autofocus>{{ content }}</textarea>
-        </label>
+        <label for="content_text" class="visually-hidden">Page content (Markdown)</label>
+        <textarea id="content_text" name="content" rows="20" cols="80" autofocus>{{ content }}</textarea>
       </p>
-      <p class="actions">
+      <div class="form-actions edit-actions">
         <button type="submit">Save</button>
-        <a class="cancel" href="{{ site_root_path }}{{ page_slug(page_name) }}">Cancel</a>
+        <a class="button-cancel" href="{{ site_root_path }}{{ page_slug(page_name) }}">Cancel</a>
         {% if page_name %}
-          <button type="submit" name="delete" value="1" class="destructive">Delete</button>
+          <button type="submit" name="delete" value="1" id="delete">Delete page</button>
         {% endif %}
-      </p>
+      </div>
     </form>
-  </article>
+  </div>
 {% endblock %}

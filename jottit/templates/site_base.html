@@ -87,3 +87,8 @@
     </aside>
   </div>
 {% endblock %}
+
+{% block scripts %}
+  <script src="{{ url_for('static', filename='js/new-page.js') }}" defer></script>
+  <script src="{{ url_for('static', filename='js/datestr.js') }}" defer></script>
+{% endblock %}

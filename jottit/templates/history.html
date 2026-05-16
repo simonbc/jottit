@@ -18,7 +18,7 @@
     {% for r in revisions %}
       <li>
         <a href="{{ site_root_path }}{{ page_slug(page_name) }}?r={{ r.revision }}">Revision {{ r.revision }}</a>
-        <time datetime="{{ r.created.isoformat() }}Z">{{ r.created.strftime("%Y-%m-%d %H:%M") }} UTC</time>
+        <time class="js-datestr" datetime="{{ r.created.isoformat() }}Z">{{ r.created.strftime("%Y-%m-%d %H:%M") }} UTC</time>
         {% if r.changes %}<span class="changes">{{ r.changes|safe }}</span>{% endif %}
       </li>
     {% endfor %}

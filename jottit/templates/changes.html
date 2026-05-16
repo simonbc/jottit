@@ -16,7 +16,7 @@
       {% for c in changes %}
         <li>
           <a href="{{ site_root_path }}{{ page_slug(c.page_name) }}?r={{ c.revision }}">{{ c.page_name or "Home" }} — revision {{ c.revision }}</a>
-          <time datetime="{{ c.created.isoformat() }}Z">{{ c.created.strftime("%Y-%m-%d %H:%M") }} UTC</time>
+          <time class="js-datestr" datetime="{{ c.created.isoformat() }}Z">{{ c.created.strftime("%Y-%m-%d %H:%M") }} UTC</time>
           {% if c.page_deleted %}<em class="text-muted">(page since deleted)</em>{% endif %}
           {% if c.changes %}<span class="changes">{{ c.changes|safe }}</span>{% endif %}
         </li>

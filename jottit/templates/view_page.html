@@ -48,7 +48,7 @@
   {{ content_html|safe }}
 
   <div class="dateline" id="dateline" aria-label="Page actions">
-    <span>changed <time datetime="{{ revision.created.isoformat() }}Z">{{ revision.created.strftime("%Y-%m-%d %H:%M") }} UTC</time></span>
+    <span>changed <time class="js-datestr" datetime="{{ revision.created.isoformat() }}Z">{{ revision.created.strftime("%Y-%m-%d %H:%M") }} UTC</time></span>
     {% if is_signed_in or is_unclaimed %}
       {% if page_name %}<a href="?m=delete">delete</a>{% endif %}
       <a href="?m=history">history</a>

@@ -1,0 +1,17 @@
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body, h1, h2, h3, h4, h5, h6, p, figure, blockquote, dl, dd, ol, ul, fieldset {
+  margin: 0;
+  padding: 0;
+}
+
+ol, ul { list-style: none; }
+
+img, picture, svg, video { max-width: 100%; display: block; }
+
+button, input, select, textarea {
+  font: inherit;
+  color: inherit;
+}
+
+a { color: inherit; }

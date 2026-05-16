@@ -325,5 +325,7 @@ def hide_primer(site_slug: str) -> ResponseReturnValue:
     if g.site is None:
         abort(404)
     conn = get_request_conn()
+    if conn is None:
+        abort(500)
     conn.execute(sites.update().where(sites.c.id == g.site.id).values(show_primer=False))
     return redirect(site_root(), code=303)

@@ -449,6 +449,15 @@
     color: var(--color-text-muted);
   }
 
+  .settings-status {
+    font-size: 0.85em;
+    color: var(--color-text-muted);
+    font-style: italic;
+    margin-top: 8px;
+    display: block;
+    min-height: 1.2em;
+  }
+
   /* ---------- Edit-page draft banner / status ---------- */
   .draft-banner {
     background: #555;

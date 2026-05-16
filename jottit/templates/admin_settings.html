@@ -1,6 +1,11 @@
 {% extends "site_base.html" %}
 {% block title %}Settings{% endblock %}
 
+{% block scripts %}
+  {{ super() }}
+  <script src="{{ url_for('static', filename='js/settings.js') }}" defer></script>
+{% endblock %}
+
 {% block content %}
   {% include "partials/form_error.html" %}
 
@@ -65,18 +70,18 @@
       {% endif %}
     </table>
 
-    <div class="form-actions">
-      <button type="submit">Save settings</button>
-    </div>
+    <noscript>
+      {# Autosave is JS-driven; non-JS users need an explicit save button. #}
+      <div class="form-actions">
+        <button type="submit">Save settings</button>
+      </div>
+    </noscript>
   </form>
+
+  <div id="settings_status" class="settings-status" aria-live="polite"></div>
 
   <section id="delete_site">
     <h2>Delete site</h2>
     <p>Deleting this site will <strong>immediately</strong> take it down. <a href="{{ site_root_path }}admin/delete">Delete this site</a>.</p>
   </section>
-
-  <nav class="admin-links" aria-label="Other settings">
-    <a href="{{ site_root_path }}admin/design">Design</a>
-    &middot; <a href="{{ site_root_path }}admin/export">Export pages</a>
-  </nav>
 {% endblock %}

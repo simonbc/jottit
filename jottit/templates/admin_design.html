@@ -1,32 +1,47 @@
 {% extends "site_base.html" %}
 {% block title %}Design{% endblock %}
 
+{% block scripts %}
+  {{ super() }}
+  <script src="{{ url_for('static', filename='js/design.js') }}" defer></script>
+{% endblock %}
+
 {% block content %}
   <h1>Design</h1>
 
   {% include "partials/form_error.html" %}
+
+  <datalist id="font_choices">
+    <option value="system-ui, sans-serif">
+    <option value="Helvetica">
+    <option value="Arial Black">
+    <option value="Georgia">
+    <option value="Times New Roman">
+    <option value="Verdana">
+    <option value="Courier New">
+  </datalist>
 
   <form method="post" action="" id="design" class="form">
     <h2>Fonts</h2>
     <table class="settings">
       <tr>
         <th>Title</th>
-        <td><input type="text" name="title_font" value="{{ design.title_font }}"></td>
+        <td><input id="title_font" type="text" name="title_font" list="font_choices" value="{{ design.title_font }}"></td>
         <td class="explain"></td>
       </tr>
       <tr>
         <th>Subtitle</th>
-        <td><input type="text" name="subtitle_font" value="{{ design.subtitle_font }}"></td>
+        <td><input id="subtitle_font" type="text" name="subtitle_font" list="font_choices" value="{{ design.subtitle_font }}"></td>
         <td class="explain"></td>
       </tr>
       <tr>
         <th>Headings</th>
-        <td><input type="text" name="headings_font" value="{{ design.headings_font }}"></td>
+        <td><input id="headings_font" type="text" name="headings_font" list="font_choices" value="{{ design.headings_font }}"></td>
         <td class="explain"></td>
       </tr>
       <tr>
         <th>Content</th>
-        <td><input type="text" name="content_font" value="{{ design.content_font }}"></td>
+        <td><input id="content_font" type="text" name="content_font" list="font_choices" value="{{ design.content_font }}"></td>
         <td class="explain"></td>
       </tr>
     </table>
@@ -35,41 +50,53 @@
     <table class="settings">
       <tr>
         <th>Header</th>
-        <td><input type="text" name="header_color" value="{{ design.header_color }}" placeholder="#003452"></td>
-        <td class="explain">Hex color, e.g. <code>#003452</code></td>
+        <td><input id="header_color" type="color" name="header_color" value="{{ design.header_color or '#003452' }}"></td>
+        <td class="explain">Background behind the title strip</td>
       </tr>
       <tr>
         <th>Title</th>
-        <td><input type="text" name="title_color" value="{{ design.title_color }}" placeholder="#fff"></td>
+        <td><input id="title_color" type="color" name="title_color" value="{{ design.title_color or '#ffffff' }}"></td>
         <td class="explain"></td>
       </tr>
       <tr>
         <th>Subtitle</th>
-        <td><input type="text" name="subtitle_color" value="{{ design.subtitle_color }}" placeholder="#bfe8ff"></td>
+        <td><input id="subtitle_color" type="color" name="subtitle_color" value="{{ design.subtitle_color or '#bfe8ff' }}"></td>
         <td class="explain"></td>
       </tr>
     </table>
 
-    <h2>Sizes</h2>
+    <h2>Sizes (percent)</h2>
     <table class="settings">
       <tr>
         <th>Title</th>
-        <td><input type="number" name="title_size" value="{{ design.title_size }}" min="25" max="500"></td>
-        <td class="explain">Percent (25–500)</td>
+        <td>
+          <input id="title_size" type="range" name="title_size" min="25" max="500" value="{{ design.title_size or 100 }}">
+          <output id="title_size_out" for="title_size">{{ design.title_size or 100 }}</output>%
+        </td>
+        <td class="explain"></td>
       </tr>
       <tr>
         <th>Subtitle</th>
-        <td><input type="number" name="subtitle_size" value="{{ design.subtitle_size }}" min="25" max="500"></td>
+        <td>
+          <input id="subtitle_size" type="range" name="subtitle_size" min="25" max="500" value="{{ design.subtitle_size or 100 }}">
+          <output id="subtitle_size_out" for="subtitle_size">{{ design.subtitle_size or 100 }}</output>%
+        </td>
         <td class="explain"></td>
       </tr>
       <tr>
         <th>Headings</th>
-        <td><input type="number" name="headings_size" value="{{ design.headings_size }}" min="25" max="500"></td>
+        <td>
+          <input id="headings_size" type="range" name="headings_size" min="25" max="500" value="{{ design.headings_size or 100 }}">
+          <output id="headings_size_out" for="headings_size">{{ design.headings_size or 100 }}</output>%
+        </td>
         <td class="explain"></td>
       </tr>
       <tr>
         <th>Content</th>
-        <td><input type="number" name="content_size" value="{{ design.content_size }}" min="25" max="500"></td>
+        <td>
+          <input id="content_size" type="range" name="content_size" min="25" max="500" value="{{ design.content_size or 100 }}">
+          <output id="content_size_out" for="content_size">{{ design.content_size or 100 }}</output>%
+        </td>
         <td class="explain"></td>
       </tr>
     </table>
@@ -78,12 +105,18 @@
     <table class="settings">
       <tr>
         <th>Hue</th>
-        <td><input type="number" name="hue" value="{{ design.hue }}" min="0" max="360"></td>
+        <td>
+          <input id="hue" type="range" name="hue" min="0" max="360" value="{{ design.hue or 0 }}">
+          <output id="hue_out" for="hue">{{ design.hue or 0 }}</output>
+        </td>
         <td class="explain">0–360</td>
       </tr>
       <tr>
         <th>Brightness</th>
-        <td><input type="number" name="brightness" value="{{ design.brightness }}" min="0" max="300"></td>
+        <td>
+          <input id="brightness" type="range" name="brightness" min="0" max="300" value="{{ design.brightness or 0 }}">
+          <output id="brightness_out" for="brightness">{{ design.brightness or 0 }}</output>
+        </td>
         <td class="explain">0–300</td>
       </tr>
     </table>

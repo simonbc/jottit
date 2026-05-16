@@ -6,7 +6,15 @@
   <div class="edit-page">
     <h1 class="edit-heading">Editing: <span class="page_name">{{ page_name or "Home" }}</span></h1>
 
-    <form method="post" action="" id="edit_form" class="form">
+    <div id="draft_banner" class="draft-banner" hidden>
+      <span>You have an unsaved draft from a previous edit.</span>
+      <button type="button" id="draft_restore" class="link-button">Restore it</button>
+      <button type="button" id="draft_discard" class="link-button">Discard</button>
+    </div>
+
+    <form method="post" action="" id="edit_form" class="form"
+          data-original-content="{{ content }}"
+          data-page-name="{{ page_name }}">
       <input type="hidden" name="current_revision" value="{{ current_revision }}">
       <p>
         <label for="content_text" class="visually-hidden">Page content (Markdown)</label>
@@ -18,7 +26,13 @@
         {% if page_name %}
           <button type="submit" name="delete" value="1" id="delete">Delete page</button>
         {% endif %}
+        <span id="draft_status" class="draft-status" aria-live="polite"></span>
       </div>
     </form>
   </div>
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  <script src="{{ url_for('static', filename='js/drafts.js') }}" defer></script>
 {% endblock %}

@@ -1,0 +1,20 @@
+Jottit
+Copyright (C) 2026 Simon Carstensen
+
+This program is free software: you can redistribute it and/or modify it
+under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or (at
+your option) any later version. See LICENSE.md for the full text.
+
+----------------------------------------------------------------------
+
+This work is a port of the 2007 Jottit codebase.
+
+Original Jottit
+Copyright (C) 2007 Simon Carstensen and Aaron Swartz
+Licensed under the GNU Lesser General Public License, version 3.
+
+The LGPLv3 grants the right to relicense under the terms of the GNU
+GPL (LGPLv3 §2), and the GPLv3 explicitly permits combining with the
+AGPLv3 (GPLv3 §13). This relicensing path is confirmed by the FSF
+license compatibility matrix.

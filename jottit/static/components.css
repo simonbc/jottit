@@ -468,15 +468,15 @@
     gap: 10px;
   }
 
-  /* Range inputs styled with gradient tracks and a small house-shape thumb.
+  /* Range inputs styled with gradient tracks and a round thumb.
      The gradient sits on ::-webkit-slider-runnable-track / ::-moz-range-track
      because the outer input's background is hidden by the pseudo-track. */
   .color-picker input[type="range"] {
     -webkit-appearance: none;
     appearance: none;
     width: 264px;
-    height: 22px;
-    border: 1px solid #999;
+    height: 16px;
+    border: 0;
     background: transparent;
     padding: 0;
     margin: 0;
@@ -487,8 +487,9 @@
      recognise one pseudo throws away the entire rule it appears in, so a
      comma-separated webkit+moz selector renders neither track. */
   .color-picker .hue-slider::-webkit-slider-runnable-track {
-    height: 20px;
-    border: 0;
+    height: 8px;
+    border: 1px solid #999;
+    border-radius: 4px;
     background: linear-gradient(
       to right,
       #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%,
@@ -496,8 +497,9 @@
     );
   }
   .color-picker .hue-slider::-moz-range-track {
-    height: 20px;
-    border: 0;
+    height: 8px;
+    border: 1px solid #999;
+    border-radius: 4px;
     background: linear-gradient(
       to right,
       #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%,
@@ -510,8 +512,9 @@
     --track-hue: 210;
   }
   .color-picker .brightness-slider::-webkit-slider-runnable-track {
-    height: 20px;
-    border: 0;
+    height: 8px;
+    border: 1px solid #999;
+    border-radius: 4px;
     background: linear-gradient(
       to right,
       #fff 0%,
@@ -521,8 +524,9 @@
     );
   }
   .color-picker .brightness-slider::-moz-range-track {
-    height: 20px;
-    border: 0;
+    height: 8px;
+    border: 1px solid #999;
+    border-radius: 4px;
     background: linear-gradient(
       to right,
       #fff 0%,
@@ -532,25 +536,29 @@
     );
   }
 
-  /* House-shape thumb — pentagon w/ a pointed top, matching the 2007 handle. */
+  /* Round thumb — white fill with a thin dark border. Sits 4px above the
+     8px track so it overlaps it centrally (track top = 4px inside the
+     16px-tall input). */
   .color-picker input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
     width: 16px;
-    height: 20px;
-    background: #fff;
+    height: 16px;
     border: 1px solid #555;
-    clip-path: polygon(50% 0, 100% 35%, 100% 100%, 0 100%, 0 35%);
-    margin-top: 0;
+    border-radius: 50%;
+    background: #fff;
+    margin-top: -5px;
     cursor: grab;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
   }
   .color-picker input[type="range"]::-moz-range-thumb {
-    width: 14px;
-    height: 18px;
-    background: #fff;
+    width: 16px;
+    height: 16px;
     border: 1px solid #555;
-    clip-path: polygon(50% 0, 100% 35%, 100% 100%, 0 100%, 0 35%);
+    border-radius: 50%;
+    background: #fff;
     cursor: grab;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
   }
 
   .color-swatch {

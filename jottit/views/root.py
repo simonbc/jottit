@@ -5,8 +5,8 @@ from flask.typing import ResponseReturnValue
 from sqlalchemy import text
 from werkzeug.wrappers import Response
 
-from jottit import turnstile
-from jottit.db import get_request_conn, get_site, new_site
+from jottit import mail, turnstile
+from jottit.db import get_request_conn, get_site, get_sites_by_email, new_site
 
 
 def index() -> ResponseReturnValue:
@@ -59,8 +59,28 @@ def _safe_int(value: str | None) -> int:
         return 0
 
 
-def sites() -> str:
-    return f"jottit:sites {request.method} (TODO)"
+def sites() -> ResponseReturnValue:
+    if request.method != "POST":
+        return render_template("sites.html", sent=False)
+
+    email = (request.form.get("email") or "").strip()
+    if email:
+        conn = get_request_conn()
+        if conn is None:
+            abort(500)
+        rows = get_sites_by_email(conn, email=email)
+        if rows:
+            base = f"{request.scheme}://{request.host}"
+            lines = ["Here are the Jottit sites claimed with this email:\n"]
+            for row in rows:
+                title = row.title or "(untitled)"
+                if row.public_url:
+                    url = f"{request.scheme}://{row.public_url}.{request.host}/"
+                else:
+                    url = f"{base}/{row.secret_url}/"
+                lines.append(f"- {title}: {url}")
+            mail.send(to=email, subject="Your Jottit sites", body="\n".join(lines) + "\n")
+    return render_template("sites.html", sent=True)
 
 
 def about() -> ResponseReturnValue:

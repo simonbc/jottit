@@ -217,6 +217,18 @@ def get_site(
     return conn.execute(select(sites).where(*conditions)).first()
 
 
+def get_sites_by_email(conn: Connection, *, email: str) -> list[Row]:
+    """Sites claimed with the given email address (case-insensitive)."""
+    return list(
+        conn.execute(
+            select(sites)
+            .where(func.lower(sites.c.email) == email.strip().lower())
+            .where(sites.c.deleted.is_(False))
+            .order_by(sites.c.created)
+        ).all()
+    )
+
+
 def get_page(
     conn: Connection,
     *,

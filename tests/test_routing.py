@@ -9,8 +9,8 @@ from flask.testing import FlaskClient
     [
         ("GET", "/about", b"Jottit makes getting a website"),
         ("GET", "/help", b"feedback@jottit.pub"),
-        ("GET", "/sites", b"jottit:sites"),
-        ("POST", "/sites", b"jottit:sites"),
+        ("GET", "/sites", b"find your site"),
+        ("POST", "/sites", b"find your site"),
         ("GET", "/feedback", b"jottit:feedback"),
         ("POST", "/feedback", b"jottit:feedback"),
     ],

@@ -1,0 +1,25 @@
+{% extends "main_base.html" %}
+{% set page_url = "/sites" %}
+
+{% block title %}find your site{% endblock %}
+
+{% block header %}
+  <h1 class="page-heading">find your site</h1>
+{% endblock %}
+
+{% block content %}
+  <article class="content-card">
+    {% if sent %}
+      <div class="note note-success">
+        Sent! Check your inbox for links to your Jottit sites.
+      </div>
+    {% endif %}
+
+    <p><strong>Enter your email</strong> and we'll send you a message with links to the Jottit sites that were claimed with that email.</p>
+
+    <form method="post" action="/sites" class="find-site-form">
+      <input type="email" name="email" size="28" required>
+      <button type="submit">Send me my sites!</button>
+    </form>
+  </article>
+{% endblock %}

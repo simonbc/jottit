@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from flask import abort, redirect, render_template, request, url_for
+from flask.typing import ResponseReturnValue
 from sqlalchemy import text
 from werkzeug.wrappers import Response
 
@@ -8,7 +9,7 @@ from jottit import turnstile
 from jottit.db import get_request_conn, get_site, new_site
 
 
-def index() -> Response | str:
+def index() -> ResponseReturnValue:
     if request.method == "POST":
         if not turnstile.verify():
             return render_template("index.html", error="Please complete the challenge."), 400

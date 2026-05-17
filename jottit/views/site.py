@@ -115,7 +115,7 @@ def signin(site_slug: str) -> ResponseReturnValue:
             error="That password doesn't match.",
         ), 401
 
-    auth.sign_in(g.site.id)
+    auth.sign_in(g.site.id, remember=bool(request.form.get("remember")))
     return redirect(site_root() + return_to.lstrip("/"), code=303)
 
 

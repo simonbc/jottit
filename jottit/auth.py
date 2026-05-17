@@ -45,16 +45,20 @@ def generate_change_password_token() -> str:
 # ---- Multi-site session state ----
 
 
-def sign_in(site_id: int) -> None:
+def sign_in(site_id: int, *, remember: bool = False) -> None:
     """Mark the current visitor as signed in to `site_id`.
 
     A single Flask cookie holds the list of all sites the visitor is
     currently signed in to — so going from site A to site B doesn't sign
-    you out of A.
+    you out of A. When `remember` is True, mark the session as permanent
+    so the cookie outlives the browser session (lifetime is governed by
+    PERMANENT_SESSION_LIFETIME on the Flask app).
     """
     signed_in = _signed_in_sites()
     if site_id not in signed_in:
         session[_SESSION_KEY] = [*signed_in, site_id]
+    if remember:
+        session.permanent = True
 
 
 def sign_out(site_id: int) -> None:

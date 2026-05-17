@@ -53,7 +53,7 @@ def test_get_forgot_password_renders_form(client: FlaskClient, db_engine: Engine
     response = client.get("/site/forgot-password", base_url="http://alpha.jottit.test/")
 
     assert response.status_code == 200
-    assert "Email me a reset link" in response.data.decode()
+    assert "Send password" in response.data.decode()
 
 
 def test_get_forgot_password_redirects_when_unclaimed(

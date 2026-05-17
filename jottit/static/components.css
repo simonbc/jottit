@@ -195,6 +195,20 @@
     margin: 0 0 15px 0;
   }
 
+  .signin-password-row {
+    display: flex;
+    align-items: baseline;
+    gap: 0.4em;
+    flex-wrap: wrap;
+  }
+
+  .signin-remember-row label.checkbox {
+    font-weight: normal;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
   .main-nav {
     background: #fff;
     text-align: center;

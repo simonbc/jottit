@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+from datetime import timedelta
 
 from flask import Flask
 from werkzeug.middleware.proxy_fix import ProxyFix
@@ -19,6 +20,9 @@ def create_app() -> Flask:
     app = Flask(__name__, subdomain_matching=True)
     app.config["SERVER_NAME"] = os.environ.get("JOTTIT_DOMAIN", "localhost:5000")
     app.config["SECRET_KEY"] = os.environ["SECRET_KEY"]
+    # "Remember me" on the signin form marks the session permanent; this is
+    # how long it lives once that flag is set.
+    app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=30)
     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)  # type: ignore[method-assign]
 
     database_url = os.environ.get("DATABASE_URL")

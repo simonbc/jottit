@@ -57,13 +57,15 @@
     white-space: nowrap;
   }
 
-  .site-nav a {
+  .site-nav a,
+  .site-nav .link-button {
     color: var(--color-subtitle);
     text-decoration: underline;
     padding: 0 2px;
   }
 
-  .site-nav a:hover {
+  .site-nav a:hover,
+  .site-nav .link-button:hover {
     color: #fff;
     background: #555;
     text-decoration: none;

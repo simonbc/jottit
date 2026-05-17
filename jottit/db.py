@@ -47,6 +47,7 @@ sites = Table(
     Column("password", Text),
     Column("change_pwd_token", Text),
     Column("security", Text),  # private | public | open
+    Column("home_layout", Text, nullable=False, server_default=text("'page'")),  # page | feed
     Column("show_primer", Boolean, nullable=False, server_default=text("true")),
     Column("deleted", Boolean, nullable=False, server_default=text("false")),
     Column("created", DateTime, nullable=False, server_default=_UTC_NOW),
@@ -564,6 +565,7 @@ def update_site(
     subtitle: str | None = None,
     email: str | None = None,
     security: str | None = None,
+    home_layout: str | None = None,
 ) -> None:
     """Patch a subset of the site settings fields. Unprovided fields are untouched."""
     values: dict[str, str | None] = {}
@@ -575,6 +577,8 @@ def update_site(
         values["email"] = email
     if security is not None:
         values["security"] = security
+    if home_layout is not None:
+        values["home_layout"] = home_layout
     if not values:
         return
     conn.execute(update(sites).where(sites.c.id == site_id).values(**values))

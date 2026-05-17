@@ -1,12 +1,23 @@
+"""Outbound email.
+
+Two backends, picked at send time by the env:
+
+- Resend HTTP API when `RESEND_API_KEY` and `MAIL_FROM` are set
+  (production path; see https://resend.com/docs/api-reference).
+- An in-process outbox otherwise (dev + tests inspect what would
+  have been sent without making a network call).
+
+The outbox is always populated, so tests can assert what we tried to
+send even when the live backend isn't wired.
+"""
+
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass, field
 
+import requests
 from flask import current_app
-
-# Log-only mail stub. M8 will swap the body of `send()` for real SMTP and
-# keep the outbox shape (or replace it with the equivalent record-mode the
-# SMTP backend ships).
 
 
 @dataclass
@@ -29,6 +40,27 @@ def outbox() -> Outbox:
 
 
 def send(*, to: str, subject: str, body: str) -> None:
-    """Record an outbound email. Logs a one-liner; full body lives in the outbox."""
+    """Send an outbound email. Records the attempt in the outbox either way."""
     current_app.logger.info("mail: to=%s subject=%r", to, subject)
     outbox().sent.append(SentEmail(to=to, subject=subject, body=body))
+
+    api_key = os.environ.get("RESEND_API_KEY")
+    sender = os.environ.get("MAIL_FROM")
+    if not api_key or not sender:
+        return
+
+    try:
+        response = requests.post(
+            "https://api.resend.com/emails",
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json",
+            },
+            json={"from": sender, "to": to, "subject": subject, "text": body},
+            timeout=10,
+        )
+        response.raise_for_status()
+    except requests.RequestException:
+        # Don't bubble up — the user-visible action (claim / forgot-password)
+        # should still succeed; missed emails surface in app logs.
+        current_app.logger.exception("mail: Resend delivery failed (to=%s)", to)

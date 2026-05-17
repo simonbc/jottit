@@ -36,6 +36,13 @@ def view(site_slug: str, page_name: str) -> ResponseReturnValue:
         abort(500)
 
     mode = request.args.get("m", "view")
+
+    # No-JS fallback for the sidebar's "Create a new page" form: a GET
+    # of `/<slug>/?m=edit&name=Foo` lands here on the home page; redirect
+    # to `/<slug>/Foo?m=edit` so the user actually edits the new page.
+    if mode == "edit" and not page_name and (new_name := request.args.get("name", "").strip()):
+        return redirect(f"{site_root()}{page_slug(new_name)}?m=edit", code=303)
+
     action = _action_for(mode)
     if (response := auth.gate(action)) is not None:
         return response
@@ -269,12 +276,16 @@ def _render_history(conn: Connection, page_name: str) -> ResponseReturnValue:
 def _render_edit_form(conn: Connection, page_name: str) -> ResponseReturnValue:
     page = get_page(conn, site_id=g.site.id, page_name=page_name)
     if page is None:
+        # Brand-new page: prefill with an h1 of the page name so the user
+        # doesn't have to type the title themselves. Home (empty name)
+        # stays blank — there's no name to use.
+        prefill = f"# {page_name}\n\n" if page_name else ""
         return render_template(
             "edit_page.html",
             page_name=page_name,
-            content="",
+            content=prefill,
             current_revision=0,
-            caret_pos=0,
+            caret_pos=len(prefill),
             scroll_pos=0,
         )
 

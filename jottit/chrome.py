@@ -10,7 +10,7 @@ from typing import Any
 
 from flask import g, request
 
-from jottit import auth
+from jottit import auth, turnstile
 from jottit.db import get_design, get_request_conn, list_pages
 from jottit.urls import page_slug, site_root
 
@@ -32,6 +32,7 @@ def chrome_context() -> dict[str, Any]:
             "site_root_path": "/",
             "page_slug": page_slug,
             "current_path": request.path,
+            "turnstile_sitekey": turnstile.sitekey(),
         }
 
     conn = get_request_conn()
@@ -46,4 +47,5 @@ def chrome_context() -> dict[str, Any]:
         "site_root_path": site_root(),
         "page_slug": page_slug,
         "current_path": request.path,
+        "turnstile_sitekey": turnstile.sitekey(),
     }

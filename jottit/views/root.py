@@ -4,13 +4,16 @@ from flask import abort, redirect, render_template, request, url_for
 from sqlalchemy import text
 from werkzeug.wrappers import Response
 
+from jottit import turnstile
 from jottit.db import get_request_conn, get_site, new_site
 
 
 def index() -> Response | str:
     if request.method == "POST":
+        if not turnstile.verify():
+            return render_template("index.html", error="Please complete the challenge."), 400
         return _create_site()
-    return render_template("index.html")
+    return render_template("index.html", error=None)
 
 
 def _create_site() -> Response:

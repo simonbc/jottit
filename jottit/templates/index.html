@@ -3,9 +3,19 @@
 
 {% block title %}Jottit{% endblock %}
 
+{% block head %}
+  {% if turnstile_sitekey %}
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+  {% endif %}
+{% endblock %}
+
 {% block content %}
+  {% if error %}<p class="form-error">{{ error }}</p>{% endif %}
   <form class="front-form" method="post" action="/">
     <textarea id="content" name="content" rows="15" cols="50" autofocus></textarea>
+    {% if turnstile_sitekey %}
+      <div class="cf-turnstile" data-sitekey="{{ turnstile_sitekey }}"></div>
+    {% endif %}
     <p><button type="submit">Create a site</button></p>
   </form>
 {% endblock %}

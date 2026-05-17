@@ -242,12 +242,47 @@
   .dialog a { color: var(--color-link); padding: 2px; }
 
   /* ---------- Buttons ---------- */
+  /* Shared chrome for every <button> and submit-style input. Specialized
+     variants (.link-button, .button-cancel, .draft-banner-dismiss) opt
+     out by overriding background/border. */
+  button,
+  input[type="submit"],
+  input[type="button"],
+  input[type="reset"] {
+    display: inline-block;
+    background: #e5e5e5;
+    border: 1px solid #ccc;
+    padding: 4px 10px;
+    font: inherit;
+    font-weight: bold;
+    color: inherit;
+    cursor: pointer;
+    line-height: 1.4;
+  }
+
+  button:hover:not(:disabled),
+  input[type="submit"]:hover:not(:disabled),
+  input[type="button"]:hover:not(:disabled),
+  input[type="reset"]:hover:not(:disabled) {
+    background: #d8d8d8;
+    border-color: #b3b3b3;
+  }
+
+  button:disabled,
+  input[type="submit"]:disabled,
+  input[type="button"]:disabled,
+  input[type="reset"]:disabled {
+    color: #888;
+    cursor: not-allowed;
+  }
+
   .button-cancel,
   a.button-cancel {
     color: red;
     background: none;
     border: 0;
     padding: 2px;
+    font-weight: normal;
     text-decoration: underline;
     cursor: pointer;
     font-size: inherit;
@@ -267,6 +302,7 @@
     color: var(--color-link);
     cursor: pointer;
     font: inherit;
+    font-weight: normal;
     text-decoration: underline;
     min-height: auto;
   }
@@ -895,21 +931,15 @@
     margin: 0 0 0 3px;
     font-size: 0.9em;
     color: initial;
-    height: 22px;
     min-height: 0;
     box-sizing: border-box;
-    padding: 2px 4px;
+    padding: 2px 8px;
   }
 
   /* ---------- Sidebar "Create a new page" widget ---------- */
   #new_page button {
     margin: 0 2px 15px 0;
-    background: #e5e5e5;
-    border: 1px solid #ccc;
-    padding: 4px 5px;
     font-size: 0.8em;
-    font-weight: bold;
-    cursor: pointer;
     min-height: auto;
   }
 

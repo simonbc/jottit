@@ -2,7 +2,11 @@
   body {
     background: #ffffff;
     color: var(--color-text);
-    font-family: var(--font-family-content);
+    /* Site chrome (header, sidebar, footer, admin pages) stays in the
+       system font no matter what the user picks in the design panel.
+       The .prose / .edit-preview wrappers below switch to the design's
+       fonts for rendered markdown only. */
+    font-family: var(--font-stack-system);
     font-size: var(--font-size-base);
     line-height: var(--line-height-normal);
   }
@@ -17,7 +21,8 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-family-headings);
+    /* Headings inherit the body font (system, in chrome contexts). The
+       design's heading font only applies inside .prose / .edit-preview. */
     line-height: var(--line-height-tight);
     margin: 1em 0 0.5em 0;
     font-weight: bold;

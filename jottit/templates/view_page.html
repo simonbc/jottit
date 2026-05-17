@@ -45,7 +45,9 @@
     </div>
   {% endif %}
 
-  {{ content_html|safe }}
+  <div class="prose">
+    {{ content_html|safe }}
+  </div>
 
   <div class="dateline" id="dateline" aria-label="Page actions">
     <span>changed <time class="js-datestr" datetime="{{ revision.created.isoformat() }}Z">{{ revision.created.strftime("%Y-%m-%d %H:%M") }} UTC</time></span>

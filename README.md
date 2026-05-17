@@ -2,7 +2,7 @@
 
 Jottit makes getting a website as easy as filling out a textbox. Each site lives at its own subdomain (`myblog.jottit.org`) or its own secret URL (`jottit.org/abc12/`).
 
-This is a modern port of the [2007 Jottit](https://github.com/aaronsw/jottit) codebase originally written by Simon Carstensen and Aaron Swartz. The Python 2 + web.py + Jinja 1 + psycopg2 stack has been rewritten on Flask 3 + SQLAlchemy Core 2 + Jinja2 + psycopg3, with the original look-and-feel preserved.
+This is a modern port of the 2007 Jottit codebase originally written by Simon Carstensen and Aaron Swartz. The Python 2 + web.py + Jinja 1 + psycopg2 stack has been rewritten on Flask 3 + SQLAlchemy Core 2 + Jinja2 + psycopg3, with the original look-and-feel preserved.
 
 ## Running locally
 

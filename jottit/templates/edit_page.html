@@ -30,9 +30,6 @@
     <div class="edit-actions">
       <button type="submit">Publish</button>
       or <a class="button-cancel" href="{{ site_root_path }}{{ page_slug(page_name) }}">Cancel</a>
-      {% if page_name %}
-        <button type="submit" name="delete" value="1" id="delete">Delete page</button>
-      {% endif %}
       <span id="draft_status" class="draft-status" aria-live="polite"></span>
     </div>
   </form>

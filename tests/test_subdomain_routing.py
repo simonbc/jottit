@@ -14,4 +14,4 @@ from flask.testing import FlaskClient
 def test_root_blueprint_still_works_alongside_subdomains(client: FlaskClient) -> None:
     response = client.get("/about", base_url="http://jottit.test/")
     assert response.status_code == 200
-    assert response.data.decode() == "jottit:about (TODO)"
+    assert b"Jottit makes getting a website" in response.data

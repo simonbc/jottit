@@ -63,12 +63,12 @@ def sites() -> str:
     return f"jottit:sites {request.method} (TODO)"
 
 
-def about() -> str:
-    return "jottit:about (TODO)"
+def about() -> ResponseReturnValue:
+    return render_template("about.html")
 
 
-def help_page() -> str:
-    return "jottit:help (TODO)"
+def help_page() -> ResponseReturnValue:
+    return render_template("help.html")
 
 
 def feedback() -> str:

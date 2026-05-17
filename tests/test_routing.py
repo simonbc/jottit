@@ -5,10 +5,10 @@ from flask.testing import FlaskClient
 
 
 @pytest.mark.parametrize(
-    ("method", "path", "stub_prefix"),
+    ("method", "path", "needle"),
     [
-        ("GET", "/about", b"jottit:about"),
-        ("GET", "/help", b"jottit:help"),
+        ("GET", "/about", b"Jottit makes getting a website"),
+        ("GET", "/help", b"feedback@jottit.pub"),
         ("GET", "/sites", b"jottit:sites"),
         ("POST", "/sites", b"jottit:sites"),
         ("GET", "/feedback", b"jottit:feedback"),
@@ -16,8 +16,8 @@ from flask.testing import FlaskClient
     ],
 )
 def test_root_routes_serve_stubs(
-    client: FlaskClient, method: str, path: str, stub_prefix: bytes
+    client: FlaskClient, method: str, path: str, needle: bytes
 ) -> None:
     response = client.open(path, method=method)
     assert response.status_code == 200
-    assert response.data.startswith(stub_prefix)
+    assert needle in response.data

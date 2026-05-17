@@ -22,4 +22,4 @@ def test_apex_static_routes_still_win_over_secret_prefix(client: FlaskClient) ->
     # converter rules of the same length).
     response = client.get("/about", base_url=APEX)
     assert response.status_code == 200
-    assert response.data.decode() == "jottit:about (TODO)"
+    assert b"Jottit makes getting a website" in response.data

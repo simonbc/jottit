@@ -664,6 +664,45 @@ def list_pages(conn: Connection, *, site_id: int) -> list[Row]:
     return sorted(rows, key=lambda r: (r.name != "", r.name.lower()))
 
 
+def list_pages_for_feed(conn: Connection, *, site_id: int) -> list[Row]:
+    """Latest non-deleted pages with their latest revision content, newest-first.
+
+    Returns rows shaped like (page_name, content, created). Used by the
+    home-page feed render when `sites.home_layout == 'feed'`. Ordering is
+    by the latest revision's created timestamp, so a freshly-edited page
+    rises to the top — exactly what a blog-style home expects.
+    """
+    latest_revision = (
+        select(
+            revisions.c.page_id,
+            func.max(revisions.c.revision).label("max_revision"),
+        )
+        .where(revisions.c.revision > 0)
+        .group_by(revisions.c.page_id)
+        .subquery()
+    )
+    stmt = (
+        select(
+            pages.c.name.label("page_name"),
+            revisions.c.content,
+            revisions.c.created,
+        )
+        .select_from(
+            pages.join(latest_revision, latest_revision.c.page_id == pages.c.id).join(
+                revisions,
+                (revisions.c.page_id == pages.c.id)
+                & (revisions.c.revision == latest_revision.c.max_revision),
+            )
+        )
+        .where(pages.c.site_id == site_id, pages.c.deleted.is_(False))
+        # Tiebreak by revision id so pages created in the same transaction
+        # (matching `current_timestamp`) still get a deterministic order —
+        # the newer-inserted row wins.
+        .order_by(revisions.c.created.desc(), revisions.c.id.desc())
+    )
+    return list(conn.execute(stmt).all())
+
+
 def get_pages_for_export(conn: Connection, *, site_id: int) -> list[Row]:
     """Latest non-deleted pages with their latest revision content, for export.
 

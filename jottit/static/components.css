@@ -969,6 +969,28 @@
     background: #555;
   }
 
+  /* ---------- Feed entries (home_layout=feed) ---------- */
+  .feed-entry + .feed-entry {
+    margin-top: 2.5em;
+    padding-top: 1.5em;
+    border-top: 1px solid var(--color-rule);
+  }
+
+  .feed-entry-title {
+    font-family: var(--font-stack-system);
+    font-size: 1.4em;
+    margin: 0 0 0.5em 0;
+  }
+
+  .feed-entry-title a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .feed-entry-title a:hover {
+    text-decoration: underline;
+  }
+
   /* ---------- Claim-this-site black banner ---------- */
   #claim_site {
     text-align: left;

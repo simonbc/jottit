@@ -6,7 +6,7 @@ import pytest
 from flask.testing import FlaskClient
 from sqlalchemy import Engine
 
-from jottit.db import delete_page, get_page, metadata, new_page, new_site, update_page
+from jottit.db import delete_page, get_page, metadata, new_page, new_site, update_page, update_site
 
 APEX = "http://jottit.test/"
 
@@ -152,3 +152,61 @@ def test_wikilinks_resolve_against_subdomain_root(client: FlaskClient, db_engine
 
     assert response.status_code == 200
     assert 'href="/notes"' in response.data.decode()
+
+
+# ---- home_layout=feed ----
+
+
+def test_home_renders_feed_when_home_layout_is_feed(
+    client: FlaskClient, db_engine: Engine
+) -> None:
+    site_id = _seed_site(db_engine, secret_url="fd1", public_url="feed-alpha", content="home body")
+    with db_engine.begin() as conn:
+        new_page(conn, site_id=site_id, name="post-one", content="**first post**")
+        new_page(conn, site_id=site_id, name="post-two", content="second post")
+        update_site(conn, site_id=site_id, home_layout="feed")
+
+    response = client.get("/", base_url="http://feed-alpha.jottit.test/")
+
+    assert response.status_code == 200
+    body = response.data.decode()
+    # All three pages render, including the empty-name home, with full content.
+    assert "<strong>first post</strong>" in body
+    assert "second post" in body
+    assert "home body" in body
+    # Empty-name page surfaces as "Home" in the entry title.
+    assert ">Home</a>" in body
+    # Newest page sorts above older ones.
+    assert body.index("post-two") < body.index("post-one") < body.index("home body")
+
+
+def test_home_feed_empty_state(client: FlaskClient, db_engine: Engine) -> None:
+    # Brand-new site with only its empty home page; flip to feed mode. The
+    # feed still lists the home entry — empty-feed state only fires when
+    # there are zero pages.
+    site_id = _seed_site(db_engine, secret_url="fd2", public_url="feed-beta", content="hi")
+    with db_engine.begin() as conn:
+        home = get_page(conn, site_id=site_id, page_name="")
+        assert home is not None
+        delete_page(conn, page_id=home.id)
+        update_site(conn, site_id=site_id, home_layout="feed")
+
+    response = client.get("/", base_url="http://feed-beta.jottit.test/")
+
+    assert response.status_code == 200
+    assert "No pages yet" in response.data.decode()
+
+
+def test_home_still_renders_page_in_default_mode(
+    client: FlaskClient, db_engine: Engine
+) -> None:
+    # Sanity-check the default branch survives the home_layout addition.
+    _seed_site(db_engine, secret_url="fd3", public_url="feed-gamma", content="just a page")
+
+    response = client.get("/", base_url="http://feed-gamma.jottit.test/")
+
+    assert response.status_code == 200
+    body = response.data.decode()
+    assert "just a page" in body
+    # The single-page render doesn't add per-entry titles.
+    assert "feed-entry" not in body

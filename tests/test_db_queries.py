@@ -22,6 +22,7 @@ from jottit.db import (
     get_revisions_count,
     get_site,
     is_public_url_available,
+    list_pages_for_feed,
     new_page,
     new_site,
     pages,
@@ -655,6 +656,57 @@ def test_get_pages_for_export_scoped_to_site(db_conn: Connection) -> None:
     new_page(db_conn, site_id=site_b, name="b-page", content="b-only")
 
     rows = get_pages_for_export(db_conn, site_id=site_a)
+
+    names = [r.page_name for r in rows]
+    assert "b-page" not in names
+
+
+# ---- list_pages_for_feed ----
+
+
+def test_list_pages_for_feed_orders_by_latest_revision_desc(db_conn: Connection) -> None:
+    site_id = new_site(db_conn, content="home v1", secret_url="lf1")
+    # Add a second page; its revision is newer than home v1 so it should
+    # come first.
+    new_page(db_conn, site_id=site_id, name="notes", content="notes body")
+
+    rows = list_pages_for_feed(db_conn, site_id=site_id)
+
+    assert [r.page_name for r in rows] == ["notes", ""]
+
+
+def test_list_pages_for_feed_uses_latest_revision_for_ordering(db_conn: Connection) -> None:
+    site_id = new_site(db_conn, content="home v1", secret_url="lf2")
+    new_page(db_conn, site_id=site_id, name="older", content="older body")
+    # Touch the home page so its latest revision is newer than `older`'s.
+    home = get_page(db_conn, site_id=site_id, page_name="")
+    assert home is not None
+    update_page(db_conn, page_id=home.id, content="home v2")
+
+    rows = list_pages_for_feed(db_conn, site_id=site_id)
+
+    assert [r.page_name for r in rows] == ["", "older"]
+    assert rows[0].content == "home v2"
+
+
+def test_list_pages_for_feed_skips_deleted_pages(db_conn: Connection) -> None:
+    site_id = new_site(db_conn, content="home", secret_url="lf3")
+    new_page(db_conn, site_id=site_id, name="gone", content="bye")
+    gone = get_page(db_conn, site_id=site_id, page_name="gone")
+    assert gone is not None
+    delete_page(db_conn, page_id=gone.id)
+
+    rows = list_pages_for_feed(db_conn, site_id=site_id)
+
+    assert [r.page_name for r in rows] == [""]
+
+
+def test_list_pages_for_feed_scoped_to_site(db_conn: Connection) -> None:
+    site_a = new_site(db_conn, content="a", secret_url="lf4a")
+    site_b = new_site(db_conn, content="b", secret_url="lf4b")
+    new_page(db_conn, site_id=site_b, name="b-page", content="b-only")
+
+    rows = list_pages_for_feed(db_conn, site_id=site_a)
 
     names = [r.page_name for r in rows]
     assert "b-page" not in names

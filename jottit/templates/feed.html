@@ -1,0 +1,38 @@
+{% extends "site_base.html" %}
+
+{% block title %}{% if site and site.title %}{{ site.title }}{% else %}Home{% endif %}{% endblock %}
+
+{% block head %}
+  <link rel="alternate" type="application/rss+xml"
+        title="{{ site.title or 'Site' }} recent changes"
+        href="{{ site_root_path }}site/changes.rss">
+{% endblock %}
+
+{% block content %}
+  {% if site.show_primer and (is_signed_in or is_unclaimed) %}
+    <form method="post" action="{{ site_root_path }}site/hide-primer" id="primer" class="primer">
+      <button type="submit" class="primer-dismiss link-button">Remove this message</button>
+      <h1>That was easy!</h1>
+      <p>Here's your new site. Be sure to bookmark it so you can find it again. To change it, just press the edit button at the bottom of the page. Enjoy!</p>
+    </form>
+  {% endif %}
+
+  {% if not entries %}
+    <div class="prose">
+      <p>No pages yet.{% if is_signed_in or is_unclaimed %} Create one from the sidebar.{% endif %}</p>
+    </div>
+  {% else %}
+    {% for entry in entries %}
+      <article class="feed-entry">
+        <h2 class="feed-entry-title"><a href="{{ entry.href }}">{{ entry.title }}</a></h2>
+        <div class="prose">
+          {{ entry.content_html|safe }}
+        </div>
+        <div class="dateline">
+          <span>changed <time class="js-datestr" datetime="{{ entry.created.isoformat() }}Z">{{ entry.created.strftime("%Y-%m-%d %H:%M") }} UTC</time></span>
+          <a href="{{ entry.href }}">permalink</a>
+        </div>
+      </article>
+    {% endfor %}
+  {% endif %}
+{% endblock %}

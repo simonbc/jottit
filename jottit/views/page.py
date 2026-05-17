@@ -13,6 +13,7 @@ from jottit.db import (
     get_revision,
     get_revisions,
     get_revisions_count,
+    list_pages_for_feed,
     new_page,
     new_revision,
     undelete_page,
@@ -24,7 +25,33 @@ from jottit.urls import page_slug, site_root
 
 
 def home(site_slug: str) -> ResponseReturnValue:
+    if g.site is not None and g.site.home_layout == "feed":
+        return _render_feed()
     return view(site_slug, "")
+
+
+def _render_feed() -> ResponseReturnValue:
+    # The home-page feed is a public read like /; gate it through the same
+    # "view" action so private sites still require auth.
+    if (response := auth.gate("view")) is not None:
+        return response
+
+    conn = get_request_conn()
+    if conn is None:
+        abort(500)
+
+    rows = list_pages_for_feed(conn, site_id=g.site.id)
+    entries = [
+        {
+            "page_name": row.page_name,
+            "title": row.page_name or "Home",
+            "href": site_root() + page_slug(row.page_name),
+            "content_html": format_content(row.content, site_root=site_root()),
+            "created": row.created,
+        }
+        for row in rows
+    ]
+    return render_template("feed.html", entries=entries)
 
 
 def view(site_slug: str, page_name: str) -> ResponseReturnValue:

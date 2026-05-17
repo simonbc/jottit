@@ -1,53 +1,41 @@
-// Design panel island. Two range sliders (hue, brightness) snap to one
-// of the 21 hard-coded palettes that ship with new sites; each scheme
-// supplies a matched header / title / subtitle color, so a single slider
-// gesture re-themes the site chrome end-to-end.
+// Design panel island. Two range sliders (hue, brightness) drive a
+// continuous color picker — header is hsl(hue, 100%, lightness%) where
+// lightness comes from brightness, and title + subtitle are derived from
+// header for contrast. Same look as the 21 ship-with-new-site palettes
+// in jottit/db.py:COLOR_SCHEMES, just continuous.
 //
 // Font + size dropdowns each map to a CSS custom property on :root so
 // the chrome updates instantly. Every change debounces a POST so the
 // server stores the new values — no Save button.
-//
-// Mirrors jottit/db.py:COLOR_SCHEMES.
 (() => {
   const form = document.getElementById("design");
   if (!form) return;
 
-  const SCHEMES = [
-    { header: "#520000", title: "#fff", subtitle: "#ffbfbf", hue: 0,   brightness: 214 },
-    { header: "#523000", title: "#fff", subtitle: "#ffe5bf", hue: 25,  brightness: 214 },
-    { header: "#515200", title: "#fff", subtitle: "#feffbf", hue: 43,  brightness: 214 },
-    { header: "#2c5200", title: "#fff", subtitle: "#e2ffbf", hue: 62,  brightness: 214 },
-    { header: "#003452", title: "#fff", subtitle: "#bfe8ff", hue: 143, brightness: 214 },
-    { header: "#001152", title: "#fff", subtitle: "#bfcdff", hue: 161, brightness: 214 },
-    { header: "#4d0052", title: "#fff", subtitle: "#fbbfff", hue: 210, brightness: 214 },
-    { header: "#520036", title: "#fff", subtitle: "#ffbfe9", hue: 227, brightness: 214 },
-    { header: "#760000", title: "#fff", subtitle: "#ffbfbf", hue: 0,   brightness: 196 },
-    { header: "#764000", title: "#fff", subtitle: "#ffe2bf", hue: 23,  brightness: 196 },
-    { header: "#087600", title: "#fff", subtitle: "#c4ffbf", hue: 82,  brightness: 196 },
-    { header: "#004876", title: "#fff", subtitle: "#bfe6ff", hue: 144, brightness: 196 },
-    { header: "#760043", title: "#fff", subtitle: "#ffbfe3", hue: 231, brightness: 196 },
-    { header: "#92e600", title: "#000", subtitle: "#3a5c00", hue: 58,  brightness: 140 },
-    { header: "#d7ecff", title: "#000", subtitle: "#003566", hue: 148, brightness: 20  },
-    { header: "#d8ffd7", title: "#000", subtitle: "#026600", hue: 84,  brightness: 20  },
-    { header: "#fcd7ff", title: "#000", subtitle: "#5e0066", hue: 209, brightness: 20  },
-    { header: "#ffffd7", title: "#000", subtitle: "#656600", hue: 43,  brightness: 20  },
-    { header: "#ffd7d7", title: "#000", subtitle: "#660000", hue: 0,   brightness: 20  },
-    { header: "#d7fff9", title: "#000", subtitle: "#006656", hue: 121, brightness: 20  },
-    { header: "#d7d7ff", title: "#000", subtitle: "#000066", hue: 170, brightness: 20  },
-  ];
+  // Convert HSL (h: 0..360, s: 0..100, l: 0..100) to a #rrggbb hex string,
+  // because the server's _HEX_COLOR_RE only accepts hex.
+  const hslToHex = (h, s, l) => {
+    l /= 100;
+    const a = (s * Math.min(l, 1 - l)) / 100;
+    const f = (n) => {
+      const k = (n + h / 30) % 12;
+      const c = l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1));
+      return Math.round(255 * c).toString(16).padStart(2, "0");
+    };
+    return `#${f(0)}${f(8)}${f(4)}`;
+  };
 
-  // Hue distance is circular (0° == 360°); brightness is linear over 0..300.
-  // Normalise both before Euclidean distance so neither axis dominates.
-  const nearestScheme = (hue, brightness) => {
-    let best = SCHEMES[0];
-    let bestDist = Infinity;
-    for (const s of SCHEMES) {
-      const dh = Math.min(Math.abs(s.hue - hue), 360 - Math.abs(s.hue - hue)) / 180;
-      const db = (s.brightness - brightness) / 300;
-      const d = dh * dh + db * db;
-      if (d < bestDist) { bestDist = d; best = s; }
-    }
-    return best;
+  // Brightness 0..300 maps to lightness 99..16 (linear fit through the
+  // four lightness anchors used by COLOR_SCHEMES: b=20 ≈ L92, b=140 ≈ L45,
+  // b=196 ≈ L23, b=214 ≈ L16). Title is white on dark headers, black on
+  // light. Subtitle is the complementary lightness in the same hue.
+  const compute = (hue, brightness) => {
+    const headerL = Math.max(5, Math.min(95, 99 - brightness * 0.39));
+    const subtitleL = headerL < 50 ? 85 : 20;
+    return {
+      header: hslToHex(hue, 100, headerL),
+      title: headerL < 50 ? "#ffffff" : "#000000",
+      subtitle: hslToHex(hue, 100, subtitleL),
+    };
   };
 
   const hueInput = document.getElementById("hue");
@@ -59,22 +47,19 @@
   const status = document.getElementById("design_status");
   const root = document.documentElement.style;
 
-  const applyScheme = (scheme) => {
-    headerColor.value = scheme.header;
-    titleColor.value = scheme.title;
-    subtitleColor.value = scheme.subtitle;
-    root.setProperty("--color-header", scheme.header);
-    root.setProperty("--color-title", scheme.title);
-    root.setProperty("--color-subtitle", scheme.subtitle);
-    if (swatch) swatch.style.background = scheme.header;
-    // Re-tint the brightness slider's track to the current hue.
-    if (brightnessInput) brightnessInput.style.setProperty("--track-hue", scheme.hue);
-  };
-
   const refreshFromSliders = () => {
     const hue = parseInt(hueInput.value, 10) || 0;
     const brightness = parseInt(brightnessInput.value, 10) || 0;
-    applyScheme(nearestScheme(hue, brightness));
+    const c = compute(hue, brightness);
+    headerColor.value = c.header;
+    titleColor.value = c.title;
+    subtitleColor.value = c.subtitle;
+    root.setProperty("--color-header", c.header);
+    root.setProperty("--color-title", c.title);
+    root.setProperty("--color-subtitle", c.subtitle);
+    if (swatch) swatch.style.background = c.header;
+    // Re-tint the brightness slider's track to the current hue.
+    if (brightnessInput) brightnessInput.style.setProperty("--track-hue", hue);
   };
 
   hueInput?.addEventListener("input", refreshFromSliders);

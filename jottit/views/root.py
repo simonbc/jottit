@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from flask import abort, redirect, render_template, request, url_for
+from sqlalchemy import text
 from werkzeug.wrappers import Response
 
 from jottit.db import get_request_conn, get_site, new_site
@@ -68,3 +69,17 @@ def help_page() -> str:
 
 def feedback() -> str:
     return f"jottit:feedback {request.method} (TODO)"
+
+
+def healthz() -> tuple[str, int]:
+    """Liveness + readiness probe for Fly's http_service.checks.
+
+    Returns 200 only if the DB is reachable; Fly will keep the old machine
+    routing traffic while a new one fails its health check, so a broken
+    deploy doesn't take production down.
+    """
+    conn = get_request_conn()
+    if conn is None:
+        return "no db", 503
+    conn.execute(text("SELECT 1"))
+    return "ok", 200

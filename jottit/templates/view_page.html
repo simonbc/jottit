@@ -14,6 +14,11 @@
         href="{{ site_root_path }}site/changes.rss">
 {% endblock %}
 
+{% block scripts %}
+  {{ super() }}
+  <script src="{{ url_for('static', filename='js/rev-picker.js') }}" defer></script>
+{% endblock %}
+
 {% block content %}
   {% if site.show_primer and (is_signed_in or is_unclaimed) and not page_name %}
     <form method="post" action="{{ site_root_path }}site/hide-primer" id="primer" class="primer">
@@ -23,26 +28,50 @@
     </form>
   {% endif %}
 
-  {% if is_old_revision %}
-    <div id="browse_revs" class="revision-banner">
-      <p>
-        Viewing revision <strong>{{ revision.revision }}</strong> of {{ latest_revision_number }}.
-        <a href="{{ site_root_path }}{{ page_slug(page_name) }}">Latest</a>
-        {% if revision.revision > 1 %}
-          | <a href="?r={{ revision.revision - 1 }}">&laquo; prev</a>
+  {% if is_revision_view %}
+    <form method="post" action="" id="browse_revs" class="revision-banner">
+      <input type="hidden" name="m" value="revert">
+      <input type="hidden" name="r" value="{{ revision.revision }}">
+      <div class="browse-revs-left">
+        <p>
+          {% if revision.revision == latest_revision_number %}This is the current version of{% else %}This is the version of{% endif %}
+          <a href="{{ site_root_path }}{{ page_slug(page_name) }}"><strong>{{ page_name or "Home" }}</strong></a>
+          posted <strong><time class="js-datestr" datetime="{{ revision.created.isoformat() }}Z">{{ revision.created.strftime("%Y-%m-%d %H:%M") }} UTC</time></strong>.
+        </p>
+        {% if is_signed_in or is_unclaimed %}
+          <button type="submit" id="revert_button"
+                  {% if revision.revision == latest_revision_number %}disabled{% endif %}>
+            revert to this
+          </button>
         {% endif %}
-        {% if revision.revision < latest_revision_number %}
-          | <a href="?r={{ revision.revision + 1 }}">next &raquo;</a>
-        {% endif %}
-      </p>
-      {% if is_signed_in or is_unclaimed %}
-        <form action="" method="post" class="revert">
-          <input type="hidden" name="m" value="revert">
-          <input type="hidden" name="r" value="{{ revision.revision }}">
-          <button type="submit">Revert to this revision</button>
-        </form>
-      {% endif %}
-    </div>
+      </div>
+      <div class="browse-revs-right">
+        <p class="rev-nav">
+          {% if revision.revision == 1 %}
+            &laquo; prev
+          {% else %}
+            <a href="?r={{ revision.revision - 1 }}">&laquo; prev</a>
+          {% endif %}
+          | <a href="?m=history">history</a> |
+          {% if revision.revision == latest_revision_number %}
+            next &raquo;
+          {% else %}
+            <a href="?r={{ revision.revision + 1 }}">next &raquo;</a>
+          {% endif %}
+        </p>
+        <select id="change_rev">
+          {% for r in revisions %}
+            {% if loop.first %}
+              <option value="{{ r.revision }}" data-datetime="{{ r.created.isoformat() }}Z"
+                      {% if r.revision == revision.revision %}selected{% endif %}>current revision</option>
+            {% else %}
+              <option value="{{ r.revision }}" data-datetime="{{ r.created.isoformat() }}Z" data-rev="{{ r.revision }}"
+                      {% if r.revision == revision.revision %}selected{% endif %}>#{{ r.revision }} ({{ r.created.strftime("%Y-%m-%d") }})</option>
+            {% endif %}
+          {% endfor %}
+        </select>
+      </div>
+    </form>
   {% endif %}
 
   <div class="prose">

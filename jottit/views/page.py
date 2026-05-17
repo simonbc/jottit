@@ -108,14 +108,17 @@ def _render_view(conn: Connection, page_name: str) -> ResponseReturnValue:
 
     latest = get_revision(conn, page_id=page.id)
     rendered = format_content(revision.content, site_root=site_root())
+    is_revision_view = requested_revision is not None
+    revisions_list = (
+        get_revisions(conn, page_id=page.id, limit=100) if is_revision_view else []
+    )
     return render_template(
         "view_page.html",
         page_name=page_name,
         revision=revision,
         latest_revision_number=latest.revision if latest is not None else revision.revision,
-        is_old_revision=requested_revision is not None
-        and latest is not None
-        and revision.revision != latest.revision,
+        is_revision_view=is_revision_view,
+        revisions=revisions_list,
         content_html=rendered,
     )
 

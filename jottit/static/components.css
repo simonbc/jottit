@@ -376,11 +376,29 @@
     padding: 1em;
     border: 1px solid #ccc;
     background: #eee;
+    display: flex;
+    justify-content: space-between;
+    gap: 1em;
+    flex-wrap: wrap;
   }
 
   #browse_revs a,
   .revision-banner a {
     color: var(--color-link);
+  }
+
+  .browse-revs-left p,
+  .browse-revs-right p {
+    margin: 0 0 0.5em 0;
+  }
+
+  .browse-revs-right {
+    text-align: right;
+  }
+
+  #change_rev {
+    display: block;
+    margin-left: auto;
   }
 
   /* ---------- Pagination ---------- */

@@ -443,6 +443,124 @@
     color: red;
   }
 
+  /* ---------- Design page (compact 2007 layout) ---------- */
+  .design-form .design-section {
+    border-top: 1px solid var(--color-rule);
+    padding: 12px 0 18px 0;
+    margin: 0;
+  }
+  .design-form .design-section:first-of-type { border-top: 0; padding-top: 0; }
+  .design-form h2 {
+    font-size: 1em;
+    font-weight: bold;
+    margin: 0 0 10px 0;
+  }
+
+  .color-picker {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .color-picker .sliders {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  /* Range inputs styled with gradient tracks and a small house-shape thumb. */
+  .color-picker input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 264px;
+    height: 18px;
+    border: 1px solid #999;
+    background: #fff;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+  }
+
+  .color-picker .hue-slider {
+    background: linear-gradient(
+      to right,
+      #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%,
+      #00f 67%, #f0f 83%, #f00 100%
+    );
+  }
+
+  .color-picker .brightness-slider {
+    /* The track fades from white (at --track-hue saturation) through the
+       full-saturation hue to black. JS updates --track-hue on every hue
+       change so this gradient re-tints in real time. */
+    --track-hue: 210;
+    background: linear-gradient(
+      to right,
+      #fff 0%,
+      hsl(var(--track-hue) 80% 80%) 30%,
+      hsl(var(--track-hue) 80% 35%) 70%,
+      #000 100%
+    );
+  }
+
+  .color-picker input[type="range"]::-webkit-slider-runnable-track {
+    height: 18px;
+    background: transparent;
+    border: 0;
+  }
+  .color-picker input[type="range"]::-moz-range-track {
+    height: 18px;
+    background: transparent;
+    border: 0;
+  }
+
+  /* House-shape thumb — pentagon w/ a pointed top, matching the 2007 handle. */
+  .color-picker input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 18px;
+    background: #fff;
+    border: 1px solid #555;
+    clip-path: polygon(50% 0, 100% 35%, 100% 100%, 0 100%, 0 35%);
+    margin-top: 0;
+    cursor: grab;
+  }
+  .color-picker input[type="range"]::-moz-range-thumb {
+    width: 14px;
+    height: 16px;
+    background: #fff;
+    border: 1px solid #555;
+    clip-path: polygon(50% 0, 100% 35%, 100% 100%, 0 100%, 0 35%);
+    cursor: grab;
+  }
+
+  .color-swatch {
+    width: 64px;
+    height: 50px;
+    border: 1px solid #999;
+    background: var(--color-header, #003452);
+  }
+
+  /* Tight fonts table — label + font dropdown + size dropdown per row. */
+  .fonts-table {
+    border-collapse: collapse;
+    margin: 0;
+  }
+  .fonts-table th {
+    text-align: left;
+    font-weight: normal;
+    padding: 4px 8px 4px 0;
+    color: var(--color-text);
+    white-space: nowrap;
+  }
+  .fonts-table td {
+    padding: 4px 6px 4px 0;
+  }
+  .fonts-table select {
+    font-size: 0.95em;
+  }
+
   .admin-links {
     margin-top: 32px;
     font-size: 0.9em;

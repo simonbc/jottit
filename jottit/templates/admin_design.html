@@ -6,124 +6,84 @@
   <script src="{{ url_for('static', filename='js/design.js') }}" defer></script>
 {% endblock %}
 
-{% block content %}
-  <h1>Design</h1>
+{% set FONTS = [
+  ("system-ui, sans-serif", "System"),
+  ("Arial Black", "Arial Black"),
+  ("Courier New", "Courier"),
+  ("Georgia", "Georgia"),
+  ("Helvetica", "Helvetica"),
+  ("Times New Roman", "Times"),
+  ("Verdana", "Verdana"),
+] %}
+{% set SIZES = [50, 75, 100, 125, 150, 200, 300] %}
 
+{% macro font_select(field, value) %}
+  <select id="{{ field }}_font" name="{{ field }}_font">
+    {% for stack, label in FONTS %}
+      <option value="{{ stack }}"{% if stack == value %} selected{% endif %}>{{ label }}</option>
+    {% endfor %}
+  </select>
+{% endmacro %}
+
+{% macro size_select(field, value) %}
+  <select id="{{ field }}_size" name="{{ field }}_size">
+    {% for size in SIZES %}
+      <option value="{{ size }}"{% if size|string == value|string %} selected{% endif %}>{{ size }}%</option>
+    {% endfor %}
+  </select>
+{% endmacro %}
+
+{% block content %}
   {% include "partials/form_error.html" %}
 
-  <datalist id="font_choices">
-    <option value="system-ui, sans-serif">
-    <option value="Helvetica">
-    <option value="Arial Black">
-    <option value="Georgia">
-    <option value="Times New Roman">
-    <option value="Verdana">
-    <option value="Courier New">
-  </datalist>
+  <form method="post" action="" id="design" class="design-form">
+    <section class="design-section">
+      <h2>Color scheme</h2>
+      <div class="color-picker">
+        <div class="sliders">
+          <input type="range" id="hue" name="hue" min="0" max="360" value="{{ design.hue or 210 }}" class="hue-slider">
+          <input type="range" id="brightness" name="brightness" min="0" max="300" value="{{ design.brightness or 214 }}" class="brightness-slider">
+        </div>
+        <div id="color_swatch" class="color-swatch" aria-hidden="true"></div>
+        <input type="hidden" id="header_color" name="header_color" value="{{ design.header_color or '#003452' }}">
+        <input type="hidden" id="title_color" name="title_color" value="{{ design.title_color or '#ffffff' }}">
+        <input type="hidden" id="subtitle_color" name="subtitle_color" value="{{ design.subtitle_color or '#bfe8ff' }}">
+      </div>
+    </section>
 
-  <form method="post" action="" id="design" class="form">
-    <h2>Fonts</h2>
-    <table class="settings">
-      <tr>
-        <th>Title</th>
-        <td><input id="title_font" type="text" name="title_font" list="font_choices" value="{{ design.title_font }}"></td>
-        <td class="explain"></td>
-      </tr>
-      <tr>
-        <th>Subtitle</th>
-        <td><input id="subtitle_font" type="text" name="subtitle_font" list="font_choices" value="{{ design.subtitle_font }}"></td>
-        <td class="explain"></td>
-      </tr>
-      <tr>
-        <th>Headings</th>
-        <td><input id="headings_font" type="text" name="headings_font" list="font_choices" value="{{ design.headings_font }}"></td>
-        <td class="explain"></td>
-      </tr>
-      <tr>
-        <th>Content</th>
-        <td><input id="content_font" type="text" name="content_font" list="font_choices" value="{{ design.content_font }}"></td>
-        <td class="explain"></td>
-      </tr>
-    </table>
-
-    <h2>Colors</h2>
-    <table class="settings">
-      <tr>
-        <th>Header</th>
-        <td><input id="header_color" type="color" name="header_color" value="{{ design.header_color or '#003452' }}"></td>
-        <td class="explain">Background behind the title strip</td>
-      </tr>
-      <tr>
-        <th>Title</th>
-        <td><input id="title_color" type="color" name="title_color" value="{{ design.title_color or '#ffffff' }}"></td>
-        <td class="explain"></td>
-      </tr>
-      <tr>
-        <th>Subtitle</th>
-        <td><input id="subtitle_color" type="color" name="subtitle_color" value="{{ design.subtitle_color or '#bfe8ff' }}"></td>
-        <td class="explain"></td>
-      </tr>
-    </table>
-
-    <h2>Sizes (percent)</h2>
-    <table class="settings">
-      <tr>
-        <th>Title</th>
-        <td>
-          <input id="title_size" type="range" name="title_size" min="25" max="500" value="{{ design.title_size or 100 }}">
-          <output id="title_size_out" for="title_size">{{ design.title_size or 100 }}</output>%
-        </td>
-        <td class="explain"></td>
-      </tr>
-      <tr>
-        <th>Subtitle</th>
-        <td>
-          <input id="subtitle_size" type="range" name="subtitle_size" min="25" max="500" value="{{ design.subtitle_size or 100 }}">
-          <output id="subtitle_size_out" for="subtitle_size">{{ design.subtitle_size or 100 }}</output>%
-        </td>
-        <td class="explain"></td>
-      </tr>
-      <tr>
-        <th>Headings</th>
-        <td>
-          <input id="headings_size" type="range" name="headings_size" min="25" max="500" value="{{ design.headings_size or 100 }}">
-          <output id="headings_size_out" for="headings_size">{{ design.headings_size or 100 }}</output>%
-        </td>
-        <td class="explain"></td>
-      </tr>
-      <tr>
-        <th>Content</th>
-        <td>
-          <input id="content_size" type="range" name="content_size" min="25" max="500" value="{{ design.content_size or 100 }}">
-          <output id="content_size_out" for="content_size">{{ design.content_size or 100 }}</output>%
-        </td>
-        <td class="explain"></td>
-      </tr>
-    </table>
-
-    <h2>Background</h2>
-    <table class="settings">
-      <tr>
-        <th>Hue</th>
-        <td>
-          <input id="hue" type="range" name="hue" min="0" max="360" value="{{ design.hue or 0 }}">
-          <output id="hue_out" for="hue">{{ design.hue or 0 }}</output>
-        </td>
-        <td class="explain">0–360</td>
-      </tr>
-      <tr>
-        <th>Brightness</th>
-        <td>
-          <input id="brightness" type="range" name="brightness" min="0" max="300" value="{{ design.brightness or 0 }}">
-          <output id="brightness_out" for="brightness">{{ design.brightness or 0 }}</output>
-        </td>
-        <td class="explain">0–300</td>
-      </tr>
-    </table>
+    <section class="design-section">
+      <h2>Fonts</h2>
+      <table class="fonts-table">
+        <tr>
+          <th>Title</th>
+          <td>{{ font_select("title", design.title_font) }}</td>
+          <td>{{ size_select("title", design.title_size or 100) }}</td>
+        </tr>
+        <tr>
+          <th>Subtitle</th>
+          <td>{{ font_select("subtitle", design.subtitle_font) }}</td>
+          <td>{{ size_select("subtitle", design.subtitle_size or 100) }}</td>
+        </tr>
+        <tr>
+          <th>Headings</th>
+          <td>{{ font_select("headings", design.headings_font) }}</td>
+          <td>{{ size_select("headings", design.headings_size or 100) }}</td>
+        </tr>
+        <tr>
+          <th>Content</th>
+          <td>{{ font_select("content", design.content_font) }}</td>
+          <td>{{ size_select("content", design.content_size or 100) }}</td>
+        </tr>
+      </table>
+    </section>
 
     <div class="form-actions">
-      <button type="submit">Save design</button>
-      <a href="{{ site_root_path }}admin/settings" class="button-cancel">Cancel</a>
+      <a href="{{ site_root_path }}admin/design" class="button-cancel">Revert changes</a>
+      <span id="design_status" class="settings-status" aria-live="polite"></span>
+      <noscript>
+        {# Autosave is JS-driven; non-JS users need an explicit save. #}
+        <button type="submit">Save design</button>
+      </noscript>
     </div>
   </form>
 {% endblock %}

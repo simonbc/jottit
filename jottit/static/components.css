@@ -188,6 +188,11 @@
     color: var(--color-text-muted);
   }
 
+  .main-nav-source {
+    margin-top: 4px;
+    font-size: 0.9em;
+  }
+
   .main-nav a {
     color: var(--color-link);
     text-decoration: underline;

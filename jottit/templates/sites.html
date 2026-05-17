@@ -13,6 +13,8 @@
       <div class="note note-success">
         We've sent a list of your sites. Go check your email!
       </div>
+    {% elif error %}
+      <div class="note note-error">{{ error }}</div>
     {% endif %}
 
     <p><strong>Enter your email</strong> and we'll send you a message with links to the Jottit sites that were claimed with that email.</p>

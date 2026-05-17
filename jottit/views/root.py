@@ -61,26 +61,32 @@ def _safe_int(value: str | None) -> int:
 
 def sites() -> ResponseReturnValue:
     if request.method != "POST":
-        return render_template("sites.html", sent=False)
+        return render_template("sites.html", sent=False, error=None)
 
     email = (request.form.get("email") or "").strip()
-    if email:
-        conn = get_request_conn()
-        if conn is None:
-            abort(500)
-        rows = get_sites_by_email(conn, email=email)
-        if rows:
-            base = f"{request.scheme}://{request.host}"
-            lines = ["Here are the Jottit sites claimed with this email:\n"]
-            for row in rows:
-                title = row.title or "(untitled)"
-                if row.public_url:
-                    url = f"{request.scheme}://{row.public_url}.{request.host}/"
-                else:
-                    url = f"{base}/{row.secret_url}/"
-                lines.append(f"- {title}: {url}")
-            mail.send(to=email, subject="Your Jottit sites", body="\n".join(lines) + "\n")
-    return render_template("sites.html", sent=True)
+    if not email:
+        return render_template("sites.html", sent=False, error=None)
+
+    conn = get_request_conn()
+    if conn is None:
+        abort(500)
+    rows = get_sites_by_email(conn, email=email)
+    if not rows:
+        return render_template(
+            "sites.html", sent=False, error="Sorry, there are no sites with that email"
+        )
+
+    base = f"{request.scheme}://{request.host}"
+    lines = ["Here are the Jottit sites claimed with this email:\n"]
+    for row in rows:
+        title = row.title or "(untitled)"
+        if row.public_url:
+            url = f"{request.scheme}://{row.public_url}.{request.host}/"
+        else:
+            url = f"{base}/{row.secret_url}/"
+        lines.append(f"- {title}: {url}")
+    mail.send(to=email, subject="Your Jottit sites", body="\n".join(lines) + "\n")
+    return render_template("sites.html", sent=True, error=None)
 
 
 def about() -> ResponseReturnValue:

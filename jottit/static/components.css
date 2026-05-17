@@ -187,6 +187,14 @@
     margin: 0 0 15px 0;
   }
 
+  .note-error {
+    background: #ffd6d8;
+    border: 2px solid red;
+    color: red;
+    padding: 5px 12px;
+    margin: 0 0 15px 0;
+  }
+
   .main-nav {
     background: #fff;
     text-align: center;

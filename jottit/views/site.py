@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from urllib.parse import urlparse
 
-from flask import abort, g, redirect, render_template, request
+from flask import abort, flash, g, redirect, render_template, request
 from flask.typing import ResponseReturnValue
 
 from jottit import auth, mail
@@ -63,6 +63,7 @@ def claim(site_slug: str) -> ResponseReturnValue:
     )
     auth.sign_in(g.site.id)
     _send_welcome_email(to=email)
+    flash("Congratulations! You've claimed your site.", "success")
     return redirect(site_root(), code=303)
 
 

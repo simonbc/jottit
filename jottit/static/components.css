@@ -179,6 +179,14 @@
     max-width: 500px;
   }
 
+  .note-success {
+    background: #dfd;
+    border: 2px solid #beb;
+    color: #252;
+    padding: 5px 12px;
+    margin: 0 0 15px 0;
+  }
+
   .main-nav {
     background: #fff;
     text-align: center;

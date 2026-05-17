@@ -327,6 +327,11 @@
     font-weight: normal;
     color: var(--color-text);
     margin: 0;
+    line-height: 1;
+  }
+
+  .rev-pick input[type="checkbox"] {
+    margin: 0;
   }
 
   .revisions time {

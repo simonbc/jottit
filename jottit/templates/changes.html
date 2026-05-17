@@ -12,16 +12,24 @@
   <h1>Recent changes</h1>
 
   {% if changes %}
-    <ol class="revisions" id="changes">
-      {% for c in changes %}
-        <li>
-          <a href="{{ site_root_path }}{{ page_slug(c.page_name) }}?r={{ c.revision }}">{{ c.page_name or "Home" }} — revision {{ c.revision }}</a>
-          <time class="js-datestr" datetime="{{ c.created.isoformat() }}Z">{{ c.created.strftime("%Y-%m-%d %H:%M") }} UTC</time>
-          {% if c.page_deleted %}<em class="text-muted">(page since deleted)</em>{% endif %}
-          {% if c.changes %}<span class="changes">{{ c.changes|safe }}</span>{% endif %}
-        </li>
-      {% endfor %}
-    </ol>
+    <table class="changes-table" id="changes">
+      <tbody>
+        {% for c in changes %}
+          {% set page_path = site_root_path + page_slug(c.page_name) %}
+          <tr{% if loop.index is even %} class="gray"{% endif %}>
+            <td><a href="{{ page_path }}?r={{ c.revision }}">{{ c.page_name or "Home" }}</a></td>
+            <td><time class="js-datestr" datetime="{{ c.created.isoformat() }}Z">{{ c.created.strftime("%Y-%m-%d %H:%M") }} UTC</time></td>
+            <td>
+              {% if c.changes %}{{ c.changes|safe }}{% endif %}
+              {% if c.revision > 1 %}
+                (<a href="{{ page_path }}?m=diff&amp;r={{ c.revision }}">comparison</a>)
+              {% endif %}
+              {% if c.page_deleted %}<em class="text-muted">(page since deleted)</em>{% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
 
     {% if older_before %}
       <p class="pagination"><a href="?before={{ older_before }}">Older &rarr;</a></p>
@@ -29,6 +37,4 @@
   {% else %}
     <p class="text-muted">No changes yet.</p>
   {% endif %}
-
-  <p><a href="{{ site_root_path }}">Back to site</a></p>
 {% endblock %}

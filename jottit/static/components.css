@@ -395,6 +395,21 @@
     font-size: 0.9em;
   }
 
+  .changes-table {
+    margin-top: 10px;
+    border-collapse: collapse;
+  }
+
+  .changes-table td {
+    padding: 4px 1.5em 2px 5px;
+    vertical-align: top;
+    white-space: nowrap;
+  }
+
+  .changes-table tr.gray {
+    background: var(--color-code-bg);
+  }
+
   .diff-body {
     margin: 10px 0;
     padding: 10px;

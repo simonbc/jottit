@@ -100,8 +100,8 @@ def test_changes_empty_site_shows_only_seed_revision(
     response = client.get("/site/changes", base_url="http://gamma.jottit.test/")
 
     assert response.status_code == 200
-    # new_site seeds revision 1 of the home page.
-    assert "revision 1" in response.data.decode()
+    # new_site seeds revision 1 of the home page; the row links to ?r=1.
+    assert "?r=1" in response.data.decode()
 
 
 def test_changes_marks_deleted_pages(client: FlaskClient, db_engine: Engine) -> None:

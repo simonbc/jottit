@@ -131,4 +131,24 @@
 
   form.addEventListener("input", schedule);
   form.addEventListener("change", schedule);
+
+  // Revert: snapshot every field's value at page load and restore them on
+  // click. With autosave on, the link doesn't reload the page — the cancel
+  // semantics live entirely in JS.
+  const snapshot = new Map();
+  for (const el of form.querySelectorAll("input, select")) {
+    snapshot.set(el, el.value);
+  }
+  const revertLink = form.querySelector("a.button-cancel");
+  revertLink?.addEventListener("click", (e) => {
+    e.preventDefault();
+    for (const [el, value] of snapshot) el.value = value;
+    refreshFromSliders();
+    // Re-fire change events so font / size dropdowns push values back
+    // through their CSS custom property bindings.
+    for (const el of form.querySelectorAll("select")) {
+      el.dispatchEvent(new Event("change"));
+    }
+    schedule();
+  });
 })();

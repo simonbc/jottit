@@ -483,24 +483,35 @@
     cursor: pointer;
   }
 
-  .color-picker .hue-slider::-webkit-slider-runnable-track,
-  .color-picker .hue-slider::-moz-range-track {
+  /* Vendor pseudos must live in their own rules — a browser that doesn't
+     recognise one pseudo throws away the entire rule it appears in, so a
+     comma-separated webkit+moz selector renders neither track. */
+  .color-picker .hue-slider::-webkit-slider-runnable-track {
     height: 20px;
+    border: 0;
     background: linear-gradient(
       to right,
       #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%,
       #00f 67%, #f0f 83%, #f00 100%
     );
+  }
+  .color-picker .hue-slider::-moz-range-track {
+    height: 20px;
     border: 0;
+    background: linear-gradient(
+      to right,
+      #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%,
+      #00f 67%, #f0f 83%, #f00 100%
+    );
   }
 
   .color-picker .brightness-slider {
     /* JS updates --track-hue on every hue change so the gradient re-tints. */
     --track-hue: 210;
   }
-  .color-picker .brightness-slider::-webkit-slider-runnable-track,
-  .color-picker .brightness-slider::-moz-range-track {
+  .color-picker .brightness-slider::-webkit-slider-runnable-track {
     height: 20px;
+    border: 0;
     background: linear-gradient(
       to right,
       #fff 0%,
@@ -508,7 +519,17 @@
       hsl(var(--track-hue) 80% 35%) 70%,
       #000 100%
     );
+  }
+  .color-picker .brightness-slider::-moz-range-track {
+    height: 20px;
     border: 0;
+    background: linear-gradient(
+      to right,
+      #fff 0%,
+      hsl(var(--track-hue) 80% 80%) 30%,
+      hsl(var(--track-hue) 80% 35%) 70%,
+      #000 100%
+    );
   }
 
   /* House-shape thumb — pentagon w/ a pointed top, matching the 2007 handle. */

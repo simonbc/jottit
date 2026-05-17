@@ -21,10 +21,70 @@
     </div>
 
     <div class="edit-split">
-      <a id="formatting_help_link" href="https://daringfireball.net/projects/markdown/syntax" target="_blank" rel="noopener">Formatting help</a>
+      <a id="formatting_help_link" href="#help">Formatting help</a>
       <label for="content_text" class="visually-hidden">Page content (Markdown)</label>
       <textarea id="content_text" name="content" autofocus>{{ content }}</textarea>
       <div id="preview" class="edit-preview" aria-live="polite" aria-label="Preview"></div>
+      <div id="help" class="edit-help" hidden aria-label="Formatting help">
+        <table>
+          <tr class="gray"><th>To get this:</th><th>Type this:</th></tr>
+          <tr>
+            <td>I <em>love</em> that.</td>
+            <td class="src">I _love_ that.</td>
+          </tr>
+          <tr class="gray">
+            <td>Let's go. <strong>Now.</strong></td>
+            <td class="src">Let's go. **Now.**</td>
+          </tr>
+          <tr>
+            <td>Visit <a href="https://jottit.pub/">Jottit</a>.</td>
+            <td class="src">Visit [Jottit](https://jottit.pub/).</td>
+          </tr>
+          <tr class="gray">
+            <td><a href="https://jottit.pub/">https://jottit.pub/</a>.</td>
+            <td class="src">&lt;https://jottit.pub/&gt;.</td>
+          </tr>
+          <tr>
+            <td><h1 style="margin:0;font-size:1.5em">Headline</h1></td>
+            <td class="src"># Headline</td>
+          </tr>
+          <tr class="gray">
+            <td><h2 style="margin:0;font-size:1.2em">Smaller headline</h2></td>
+            <td class="src">## Smaller headline</td>
+          </tr>
+          <tr>
+            <td><h6 style="margin:0;font-size:0.9em">Smallest headline</h6></td>
+            <td class="src">###### Smallest headline</td>
+          </tr>
+          <tr class="gray">
+            <td>
+              <ol style="margin:0;padding-left:1.4em">
+                <li>Buy groceries
+                  <ul style="padding-left:1.2em;list-style:disc">
+                    <li>Eggs</li><li>Milk</li><li>Cereal</li>
+                  </ul>
+                </li>
+                <li>Check mail</li>
+                <li>Do laundry</li>
+              </ol>
+            </td>
+            <td class="src">1. Buy Groceries<br>&nbsp;&nbsp;&nbsp;&nbsp;* Eggs<br>&nbsp;&nbsp;&nbsp;&nbsp;* Milk<br>&nbsp;&nbsp;&nbsp;&nbsp;* Cereal<br>2. Check mail<br>3. Do laundry</td>
+          </tr>
+          <tr>
+            <td>
+              <blockquote style="margin:0;border-left:3px solid #ccc;padding-left:8px">
+                Carpenter writes:<br>Everyone dies.
+              </blockquote>
+            </td>
+            <td class="src">&gt; Carpenter writes:<br>&gt;<br>&gt; Everyone dies.</td>
+          </tr>
+          <tr class="gray">
+            <td>How do I love thee?<br>Let me count the ways.</td>
+            <td>End each line with two spaces.</td>
+          </tr>
+        </table>
+        <p class="edit-help-footer">We use a formatting system called <a href="https://daringfireball.net/projects/markdown/syntax" target="_blank" rel="noopener">Markdown</a>.</p>
+      </div>
     </div>
 
     <div class="edit-actions">
@@ -40,4 +100,5 @@
   <script src="{{ url_for('static', filename='js/drafts.js') }}" defer></script>
   <script src="{{ url_for('static', filename='js/vendor/marked.min.js') }}" defer></script>
   <script src="{{ url_for('static', filename='js/preview.js') }}" defer></script>
+  <script src="{{ url_for('static', filename='js/help-toggle.js') }}" defer></script>
 {% endblock %}

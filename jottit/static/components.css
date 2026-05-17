@@ -725,7 +725,8 @@
     resize: none;
   }
 
-  .edit-preview {
+  .edit-preview,
+  .edit-help {
     flex: 1 1 0;
     min-width: 0;
     background: #fff;
@@ -737,6 +738,32 @@
   }
 
   .edit-preview > :first-child { margin-top: 0; }
+
+  /* Markdown reference table inside .edit-help — two columns, zebra-striped. */
+  .edit-help table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0;
+  }
+  .edit-help th,
+  .edit-help td {
+    vertical-align: top;
+    padding: 12px 12px;
+    text-align: left;
+  }
+  .edit-help th { font-weight: bold; }
+  .edit-help tr.gray td,
+  .edit-help tr.gray th { background: var(--color-code-bg); }
+  .edit-help .src {
+    font-family: var(--font-stack-mono);
+    white-space: pre-wrap;
+    font-size: 0.95em;
+  }
+  .edit-help-footer {
+    margin: 12px 12px 4px;
+    color: var(--color-text-muted);
+    font-size: 0.9em;
+  }
 
   .edit-actions {
     margin: 6px 0 12px 0;

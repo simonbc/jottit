@@ -23,6 +23,7 @@ from jottit.db import (
 from jottit.urls import site_root
 
 _ALLOWED_SECURITY_LEVELS = {"private", "public", "open"}
+_ALLOWED_HOME_LAYOUTS = {"page", "feed"}
 _PUBLIC_URL_RE = re.compile(r"^[a-z0-9-]+$")
 _HEX_COLOR_RE = re.compile(r"^#[0-9a-fA-F]{3,8}$")
 
@@ -44,6 +45,7 @@ def settings(site_slug: str) -> ResponseReturnValue:
             subtitle=g.site.subtitle or "",
             email=g.site.email or "",
             security=g.site.security or "private",
+            home_layout=g.site.home_layout or "page",
             public_url=g.site.public_url or "",
             error=None,
         )
@@ -52,8 +54,9 @@ def settings(site_slug: str) -> ResponseReturnValue:
     subtitle = request.form.get("subtitle", "")
     email = request.form.get("email", "")
     security = request.form.get("security", g.site.security or "private")
+    home_layout = request.form.get("home_layout", g.site.home_layout or "page")
 
-    error = _validate_settings(email=email, security=security)
+    error = _validate_settings(email=email, security=security, home_layout=home_layout)
     if error is not None:
         return render_template(
             "admin_settings.html",
@@ -61,6 +64,7 @@ def settings(site_slug: str) -> ResponseReturnValue:
             subtitle=subtitle,
             email=email,
             security=security,
+            home_layout=home_layout,
             public_url=g.site.public_url or "",
             error=error,
         ), 400
@@ -73,15 +77,18 @@ def settings(site_slug: str) -> ResponseReturnValue:
         subtitle=subtitle,
         email=email,
         security=security,
+        home_layout=home_layout,
     )
     return redirect(site_root(), code=303)
 
 
-def _validate_settings(*, email: str, security: str) -> str | None:
+def _validate_settings(*, email: str, security: str, home_layout: str) -> str | None:
     if email and "@" not in email:
         return "Please enter a valid email address."
     if security not in _ALLOWED_SECURITY_LEVELS:
         return "Pick a valid security level."
+    if home_layout not in _ALLOWED_HOME_LAYOUTS:
+        return "Pick a valid home page layout."
     return None
 
 

@@ -33,6 +33,24 @@
         </td>
         <td class="explain">Give your website an address that's easy to remember</td>
       </tr>
+      <tr>
+        <th>Home page</th>
+        <td>
+          <table class="security">
+            <tr>
+              <td><input type="radio" id="home_layout_page" name="home_layout" value="page" {% if home_layout == "page" %}checked{% endif %}></td>
+              <td><label for="home_layout_page">A page</label></td>
+              <td class="explain">Show a single page on the home page</td>
+            </tr>
+            <tr>
+              <td><input type="radio" id="home_layout_feed" name="home_layout" value="feed" {% if home_layout == "feed" %}checked{% endif %}></td>
+              <td><label for="home_layout_feed">A feed of pages</label></td>
+              <td class="explain">Show every page in reverse-chronological order, blog-style</td>
+            </tr>
+          </table>
+        </td>
+        <td class="explain"></td>
+      </tr>
       {% if not is_unclaimed %}
         <tr>
           <th>Password</th>

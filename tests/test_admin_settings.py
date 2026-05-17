@@ -103,6 +103,7 @@ def test_post_settings_updates_fields_and_redirects(client: FlaskClient, db_engi
             "subtitle": "New Subtitle",
             "email": "new@example.com",
             "security": "public",
+            "home_layout": "feed",
         },
     )
 
@@ -116,6 +117,45 @@ def test_post_settings_updates_fields_and_redirects(client: FlaskClient, db_engi
         assert row.subtitle == "New Subtitle"
         assert row.email == "new@example.com"
         assert row.security == "public"
+        assert row.home_layout == "feed"
+
+
+def test_post_settings_rejects_invalid_home_layout(client: FlaskClient, db_engine: Engine) -> None:
+    site_id = _seed_claimed_site(db_engine, secret_url="s_hl", public_url="kappa")
+    _sign_in(client, base_url="http://kappa.jottit.test/", site_id=site_id)
+
+    response = client.post(
+        "/admin/settings",
+        base_url="http://kappa.jottit.test/",
+        data={
+            "title": "x",
+            "subtitle": "y",
+            "email": "",
+            "security": "private",
+            "home_layout": "wiki",
+        },
+    )
+
+    assert response.status_code == 400
+    with db_engine.connect() as conn:
+        row = get_site(conn, site_id=site_id)
+        assert row is not None
+        assert row.home_layout == "page"
+
+
+def test_get_settings_renders_home_layout_radios(client: FlaskClient, db_engine: Engine) -> None:
+    site_id = _seed_claimed_site(db_engine, secret_url="s_hl2", public_url="lambda")
+    _sign_in(client, base_url="http://lambda.jottit.test/", site_id=site_id)
+
+    response = client.get("/admin/settings", base_url="http://lambda.jottit.test/")
+
+    assert response.status_code == 200
+    body = response.data.decode()
+    assert 'name="home_layout"' in body
+    assert 'value="page"' in body
+    assert 'value="feed"' in body
+    # Default is 'page' for a fresh site.
+    assert 'value="page" checked' in body
 
 
 def test_post_settings_rejects_invalid_email(client: FlaskClient, db_engine: Engine) -> None:

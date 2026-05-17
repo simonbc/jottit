@@ -319,6 +319,16 @@
     background: var(--color-code-bg);
   }
 
+  .rev-pick {
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+    white-space: nowrap;
+    font-weight: normal;
+    color: var(--color-text);
+    margin: 0;
+  }
+
   .revisions time {
     color: var(--color-text-muted);
     font-size: 0.9em;

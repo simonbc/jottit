@@ -1,6 +1,11 @@
 {% extends "site_base.html" %}
 {% block title %}History: {{ page_name or "Home" }}{% endblock %}
 
+{% block scripts %}
+  {{ super() }}
+  <script src="{{ url_for('static', filename='js/history-compare.js') }}" defer></script>
+{% endblock %}
+
 {% block head %}
   <link rel="alternate" type="application/rss+xml"
         title="{{ page_name or 'Home' }} history"
@@ -11,22 +16,29 @@
 {% endblock %}
 
 {% block content %}
-  <h1>History: {{ page_name or "Home" }}</h1>
-  <p class="text-muted">{{ total }} revision{{ "s" if total != 1 }}.</p>
+  <p>You're viewing the history of <a href="{{ site_root_path }}{{ page_slug(page_name) }}"><strong>{{ page_name or "Home" }}</strong></a>.</p>
 
-  <ol class="revisions" id="revisions">
-    {% for r in revisions %}
-      <li>
-        <a href="{{ site_root_path }}{{ page_slug(page_name) }}?r={{ r.revision }}">Revision {{ r.revision }}</a>
-        <time class="js-datestr" datetime="{{ r.created.isoformat() }}Z">{{ r.created.strftime("%Y-%m-%d %H:%M") }} UTC</time>
-        {% if r.changes %}<span class="changes">{{ r.changes|safe }}</span>{% endif %}
-      </li>
-    {% endfor %}
-  </ol>
+  <form method="get" action="" id="history_form">
+    <input type="hidden" name="m" value="diff">
+    <ol class="revisions" id="revisions">
+      {% for r in revisions %}
+        <li>
+          <label class="rev-pick">
+            <input type="checkbox" name="r" value="{{ r.revision }}">
+            <a href="{{ site_root_path }}{{ page_slug(page_name) }}?r={{ r.revision }}">{{ r.revision }}</a>
+          </label>
+          <time class="js-datestr" datetime="{{ r.created.isoformat() }}Z">{{ r.created.strftime("%Y-%m-%d %H:%M") }} UTC</time>
+          {% if r.changes %}<span class="changes">{{ r.changes|safe }}</span>{% endif %}
+        </li>
+      {% endfor %}
+    </ol>
+
+    {% if revisions|length > 1 %}
+      <p><button type="submit" id="history_compare" disabled>Compare</button></p>
+    {% endif %}
+  </form>
 
   {% if older_before %}
     <p class="pagination"><a href="?m=history&amp;before={{ older_before }}">Older &rarr;</a></p>
   {% endif %}
-
-  <p id="done"><a href="{{ site_root_path }}{{ page_slug(page_name) }}">Back to page</a></p>
 {% endblock %}

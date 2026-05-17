@@ -68,25 +68,8 @@ def test_history_lists_revisions_newest_first(client: FlaskClient, db_engine: En
 
     assert response.status_code == 200
     body = response.data.decode()
-    # Newest revision number appears before older ones.
-    assert body.index("Revision 3") < body.index("Revision 2") < body.index("Revision 1")
-
-
-def test_history_renders_total_count(client: FlaskClient, db_engine: Engine) -> None:
-    site_id = _seed_site(db_engine, secret_url="h2", public_url="beta")
-    _make_revisions(db_engine, site_id, "", count=4)
-
-    response = client.get("/?m=history", base_url="http://beta.jottit.test/")
-
-    assert "4 revisions" in response.data.decode()
-
-
-def test_history_singular_count_for_one_revision(client: FlaskClient, db_engine: Engine) -> None:
-    _seed_site(db_engine, secret_url="h3", public_url="gamma")
-
-    response = client.get("/?m=history", base_url="http://gamma.jottit.test/")
-
-    assert "1 revision." in response.data.decode()
+    # Newest revision row appears before older ones.
+    assert body.index('value="3"') < body.index('value="2"') < body.index('value="1"')
 
 
 def test_history_for_named_page(client: FlaskClient, db_engine: Engine) -> None:
@@ -97,8 +80,9 @@ def test_history_for_named_page(client: FlaskClient, db_engine: Engine) -> None:
 
     assert response.status_code == 200
     body = response.data.decode()
-    assert "History: notes" in body
-    assert "Revision 2" in body
+    assert "history of <a" in body  # the intro line links the page name
+    assert ">notes</strong>" in body
+    assert 'value="2"' in body
 
 
 # ---- Pagination ----
@@ -112,9 +96,9 @@ def test_history_first_page_capped_at_twenty(client: FlaskClient, db_engine: Eng
 
     body = response.data.decode()
     # Latest 20 shown (revisions 25..6), older link points back further.
-    assert "Revision 25" in body
-    assert "Revision 6" in body
-    assert "Revision 5" not in body
+    assert 'value="25"' in body
+    assert 'value="6"' in body
+    assert 'value="5"' not in body
     assert "Older" in body
     assert "before=6" in body
 
@@ -127,9 +111,9 @@ def test_history_older_link_pages_back(client: FlaskClient, db_engine: Engine) -
 
     body = response.data.decode()
     # Revisions 5..1 shown; no more "Older" link because that's the tail.
-    assert "Revision 5" in body
-    assert "Revision 1" in body
-    assert "Revision 6" not in body
+    assert 'value="5"' in body
+    assert 'value="1"' in body
+    assert 'value="6"' not in body
     assert "Older" not in body
 
 

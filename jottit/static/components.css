@@ -13,7 +13,7 @@
     align-items: flex-start;
     justify-content: space-between;
     gap: 16px;
-    padding: 4px 7px 4px 56px;
+    padding: 8px 12px 10px 56px;
   }
 
   .site-titles {
@@ -42,7 +42,7 @@
     font-size: 1.1em;
     color: var(--color-subtitle);
     margin: 0;
-    padding-left: 0.1em;
+    padding: 4px 0 4px 0.1em;
   }
 
   .site-subtitle:empty { display: none; }
@@ -468,32 +468,39 @@
     gap: 10px;
   }
 
-  /* Range inputs styled with gradient tracks and a small house-shape thumb. */
+  /* Range inputs styled with gradient tracks and a small house-shape thumb.
+     The gradient sits on ::-webkit-slider-runnable-track / ::-moz-range-track
+     because the outer input's background is hidden by the pseudo-track. */
   .color-picker input[type="range"] {
     -webkit-appearance: none;
     appearance: none;
     width: 264px;
-    height: 18px;
+    height: 22px;
     border: 1px solid #999;
-    background: #fff;
+    background: transparent;
     padding: 0;
     margin: 0;
     cursor: pointer;
   }
 
-  .color-picker .hue-slider {
+  .color-picker .hue-slider::-webkit-slider-runnable-track,
+  .color-picker .hue-slider::-moz-range-track {
+    height: 20px;
     background: linear-gradient(
       to right,
       #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%,
       #00f 67%, #f0f 83%, #f00 100%
     );
+    border: 0;
   }
 
   .color-picker .brightness-slider {
-    /* The track fades from white (at --track-hue saturation) through the
-       full-saturation hue to black. JS updates --track-hue on every hue
-       change so this gradient re-tints in real time. */
+    /* JS updates --track-hue on every hue change so the gradient re-tints. */
     --track-hue: 210;
+  }
+  .color-picker .brightness-slider::-webkit-slider-runnable-track,
+  .color-picker .brightness-slider::-moz-range-track {
+    height: 20px;
     background: linear-gradient(
       to right,
       #fff 0%,
@@ -501,16 +508,6 @@
       hsl(var(--track-hue) 80% 35%) 70%,
       #000 100%
     );
-  }
-
-  .color-picker input[type="range"]::-webkit-slider-runnable-track {
-    height: 18px;
-    background: transparent;
-    border: 0;
-  }
-  .color-picker input[type="range"]::-moz-range-track {
-    height: 18px;
-    background: transparent;
     border: 0;
   }
 
@@ -519,7 +516,7 @@
     -webkit-appearance: none;
     appearance: none;
     width: 16px;
-    height: 18px;
+    height: 20px;
     background: #fff;
     border: 1px solid #555;
     clip-path: polygon(50% 0, 100% 35%, 100% 100%, 0 100%, 0 35%);
@@ -528,7 +525,7 @@
   }
   .color-picker input[type="range"]::-moz-range-thumb {
     width: 14px;
-    height: 16px;
+    height: 18px;
     background: #fff;
     border: 1px solid #555;
     clip-path: polygon(50% 0, 100% 35%, 100% 100%, 0 100%, 0 35%);

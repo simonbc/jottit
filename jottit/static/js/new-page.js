@@ -30,7 +30,8 @@
     if (!value) return;
     e.preventDefault();
     const base = form.getAttribute("action") || "/";
-    const href = `${base}${encodeURIComponent(value)}?m=edit`;
+    const slug = value.toLowerCase().replaceAll(" ", "_");
+    const href = `${base}${encodeURIComponent(slug)}?m=edit`;
     window.location.assign(href);
   });
 })();

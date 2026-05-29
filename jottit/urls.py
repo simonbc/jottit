@@ -10,6 +10,16 @@ def page_slug(name: str) -> str:
     return quote(name.lower().replace(" ", "_"))
 
 
+def page_name_from_slug(slug: str) -> str:
+    """Best-effort page name from a URL slug.
+
+    Page URLs are the lowercased page name with spaces written as
+    underscores. Flask has already percent-decoded the route segment by the
+    time views receive it.
+    """
+    return slug.lower().replace("_", " ")
+
+
 def site_root() -> str:
     """URL path prefix that page names hang off for the current request.
 

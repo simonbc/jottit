@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from flask import Flask
 
-from jottit.urls import page_slug, site_root
+from jottit.urls import page_name_from_slug, page_slug, site_root
 
 # ---- page_slug ----
 
@@ -17,6 +17,13 @@ def test_page_slug_percent_encodes_unsafe_chars() -> None:
 
 def test_page_slug_empty_returns_empty() -> None:
     assert page_slug("") == ""
+
+
+# ---- page_name_from_slug ----
+
+
+def test_page_name_from_slug_restores_spaces_and_lowercases() -> None:
+    assert page_name_from_slug("Foo_Bar") == "foo bar"
 
 
 # ---- site_root ----

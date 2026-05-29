@@ -149,6 +149,29 @@ def test_post_create_new_page_on_save(client: FlaskClient, db_engine: Engine) ->
         assert rev.revision == 1
 
 
+def test_post_create_page_with_space_redirects_to_readable_slug(
+    client: FlaskClient, db_engine: Engine
+) -> None:
+    site_id = _seed_site(db_engine, secret_url="e7space", public_url="etaspace")
+
+    response = client.post(
+        "/foo_bar",
+        base_url="http://etaspace.jottit.test/",
+        data={"content": "first version"},
+    )
+
+    assert response.status_code == 303
+    assert response.headers["Location"].endswith("/foo_bar")
+
+    follow = client.get("/foo_bar", base_url="http://etaspace.jottit.test/")
+    assert follow.status_code == 200
+    assert b"first version" in follow.data
+
+    with db_engine.connect() as conn:
+        page = get_page(conn, site_id=site_id, page_name="foo bar")
+        assert page is not None
+
+
 def test_post_create_via_secret_url_redirects_under_prefix(
     client: FlaskClient, db_engine: Engine
 ) -> None:

@@ -21,7 +21,7 @@ from jottit.db import (
 )
 from jottit.diff import better_diff
 from jottit.render import format_content
-from jottit.urls import page_slug, site_root
+from jottit.urls import page_name_from_slug, page_slug, site_root
 
 
 def home(site_slug: str) -> ResponseReturnValue:
@@ -69,6 +69,8 @@ def view(site_slug: str, page_name: str) -> ResponseReturnValue:
     # to `/<slug>/Foo?m=edit` so the user actually edits the new page.
     if mode == "edit" and not page_name and (new_name := request.args.get("name", "").strip()):
         return redirect(f"{site_root()}{page_slug(new_name)}?m=edit", code=303)
+
+    page_name = page_name_from_slug(page_name)
 
     action = _action_for(mode)
     if (response := auth.gate(action)) is not None:

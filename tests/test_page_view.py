@@ -157,9 +157,7 @@ def test_wikilinks_resolve_against_subdomain_root(client: FlaskClient, db_engine
 # ---- home_layout=feed ----
 
 
-def test_home_renders_feed_when_home_layout_is_feed(
-    client: FlaskClient, db_engine: Engine
-) -> None:
+def test_home_renders_feed_when_home_layout_is_feed(client: FlaskClient, db_engine: Engine) -> None:
     site_id = _seed_site(db_engine, secret_url="fd1", public_url="feed-alpha", content="home body")
     with db_engine.begin() as conn:
         new_page(conn, site_id=site_id, name="post-one", content="**first post**")
@@ -197,9 +195,7 @@ def test_home_feed_empty_state(client: FlaskClient, db_engine: Engine) -> None:
     assert "No pages yet" in response.data.decode()
 
 
-def test_home_still_renders_page_in_default_mode(
-    client: FlaskClient, db_engine: Engine
-) -> None:
+def test_home_still_renders_page_in_default_mode(client: FlaskClient, db_engine: Engine) -> None:
     # Sanity-check the default branch survives the home_layout addition.
     _seed_site(db_engine, secret_url="fd3", public_url="feed-gamma", content="just a page")
 

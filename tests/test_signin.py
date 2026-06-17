@@ -238,9 +238,7 @@ def test_email_only_site_signin_redirects_to_email_form(
     assert 'name="password"' not in body
 
 
-def test_email_only_site_can_sign_in_with_code(
-    client: FlaskClient, db_engine: Engine
-) -> None:
+def test_email_only_site_can_sign_in_with_code(client: FlaskClient, db_engine: Engine) -> None:
     site_id = _seed_email_only_site(
         db_engine,
         secret_url="eo2",

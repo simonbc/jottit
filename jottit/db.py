@@ -556,7 +556,9 @@ def set_signin_code(conn: Connection, *, site_id: int, code: str) -> None:
         .where(sites.c.id == site_id)
         .values(
             signin_code=code,
-            signin_code_expires=text("(current_timestamp at time zone 'utc') + interval '10 minutes'"),
+            signin_code_expires=text(
+                "(current_timestamp at time zone 'utc') + interval '10 minutes'"
+            ),
         )
     )
 

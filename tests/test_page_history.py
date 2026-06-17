@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from collections.abc import Iterator
 
 import pytest
@@ -69,7 +70,8 @@ def test_history_lists_revisions_newest_first(client: FlaskClient, db_engine: En
     assert response.status_code == 200
     body = response.data.decode()
     # Newest revision row appears before older ones.
-    assert body.index('value="3"') < body.index('value="2"') < body.index('value="1"')
+    history_form = body[body.index('id="history_form"') : body.index('id="sidebar"')]
+    assert re.findall(r'name="r" value="(\d+)"', history_form) == ["3", "2", "1"]
 
 
 def test_history_for_named_page(client: FlaskClient, db_engine: Engine) -> None:

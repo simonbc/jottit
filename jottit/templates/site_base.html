@@ -11,6 +11,7 @@
     <form method="post" action="{{ site_root_path }}site/claim" id="claim_site">
       <a href="{{ site_root_path }}site/claim">Claim this site</a>
       <span id="pick_password">
+        <input type="hidden" name="from_banner" value="1">
         <label for="claim-banner-password">Pick a password:</label>
         <input id="claim-banner-password" type="password" name="password" autocomplete="new-password">
         <button type="submit">Claim</button>

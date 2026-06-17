@@ -2,7 +2,7 @@
 {% block title %}Sign in{% endblock %}
 
 {% block content %}
-  <h1>Please enter the password for the site</h1>
+  <h1>Sign in to this site</h1>
 
   {% include "partials/form_error.html" %}
 
@@ -11,7 +11,7 @@
     <p class="signin-password-row">
       <label for="password" class="visually-hidden">Password</label>
       <input id="password" type="password" name="password" autocomplete="current-password" required autofocus>
-      (<a href="{{ site_root_path }}site/forgot-password">I forgot the password</a>)
+      <span>(<a href="{{ site_root_path }}site/forgot-password">I forgot the password</a>)</span>
     </p>
     <p class="signin-remember-row">
       <label class="checkbox">
@@ -20,6 +20,7 @@
     </p>
     <div class="form-actions">
       <button type="submit">Sign in</button>
+      or <a href="{{ site_root_path }}site/signin/email?return_to={{ return_to|urlencode }}">sign in by email instead</a>
     </div>
   </form>
 {% endblock %}

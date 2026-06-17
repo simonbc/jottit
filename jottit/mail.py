@@ -47,6 +47,12 @@ def send(*, to: str, subject: str, body: str) -> None:
     api_key = os.environ.get("RESEND_API_KEY")
     sender = os.environ.get("MAIL_FROM")
     if not api_key or not sender:
+        current_app.logger.warning(
+            "mail dev outbox:\nTo: %s\nSubject: %s\n\n%s",
+            to,
+            subject,
+            body,
+        )
         return
 
     try:

@@ -119,6 +119,29 @@ def test_post_claim_sends_welcome_email(client: FlaskClient, db_engine: Engine, 
     assert "claimed" in msg.subject.lower()
 
 
+def test_post_claim_with_banner_password_prefills_full_form_without_error(
+    client: FlaskClient, db_engine: Engine
+) -> None:
+    site_id = _seed_site(db_engine, secret_url="cl10", public_url="lambda")
+
+    response = client.post(
+        "/site/claim",
+        base_url="http://lambda.jottit.test/",
+        data={"from_banner": "1", "password": "hunter2"},
+    )
+
+    assert response.status_code == 200
+    body = response.data.decode()
+    assert 'name="email"' in body
+    assert "Please enter a valid email address." not in body
+    assert 'value="hunter2"' in body
+
+    with db_engine.connect() as conn:
+        site = get_site(conn, site_id=site_id)
+        assert site is not None
+        assert site.password is None
+
+
 def test_post_claim_rejects_missing_password(client: FlaskClient, db_engine: Engine) -> None:
     site_id = _seed_site(db_engine, secret_url="cl6", public_url="zeta")
 

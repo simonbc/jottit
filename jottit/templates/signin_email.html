@@ -1,0 +1,27 @@
+{% extends "dialog_base.html" %}
+{% block title %}Sign in by email{% endblock %}
+
+{% block content %}
+  <h1>Sign in by email</h1>
+
+  {% include "partials/form_error.html" %}
+
+  {% if email_sent %}
+    <p>We've emailed a sign-in code to {{ email }}. Enter it to continue.</p>
+    <p><a href="{{ site_root_path }}site/signin/verify?return_to={{ return_to|urlencode }}&email={{ email|urlencode }}">Enter sign-in code</a></p>
+  {% else %}
+    <form method="post" action="" class="form signin-form">
+      <input type="hidden" name="return_to" value="{{ return_to }}">
+      <p class="form-row">
+        <label for="email">Email address</label>
+        <input id="email" type="email" name="email" autocomplete="email" value="{{ email or '' }}" required autofocus>
+      </p>
+      <div class="form-actions">
+        <button type="submit">Email me a sign-in code</button>
+        {% if has_password %}
+          or <a href="{{ site_root_path }}site/signin?return_to={{ return_to|urlencode }}">use password</a>
+        {% endif %}
+      </div>
+    </form>
+  {% endif %}
+{% endblock %}

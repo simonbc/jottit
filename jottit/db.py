@@ -46,6 +46,8 @@ sites = Table(
     Column("email", Text),
     Column("password", Text),
     Column("change_pwd_token", Text),
+    Column("signin_code", Text),
+    Column("signin_code_expires", DateTime),
     Column("security", Text),  # private | public | open
     Column("show_primer", Boolean, nullable=False, server_default=text("true")),
     Column("deleted", Boolean, nullable=False, server_default=text("false")),
@@ -545,6 +547,33 @@ def set_password(conn: Connection, *, site_id: int, password_hash: str) -> None:
 def set_change_pwd_token(conn: Connection, *, site_id: int, token: str) -> None:
     """Store a one-time token used by the password-recovery email link."""
     conn.execute(update(sites).where(sites.c.id == site_id).values(change_pwd_token=token))
+
+
+def set_signin_code(conn: Connection, *, site_id: int, code: str) -> None:
+    """Store a short-lived one-time code for passwordless site sign-in."""
+    conn.execute(
+        update(sites)
+        .where(sites.c.id == site_id)
+        .values(
+            signin_code=code,
+            signin_code_expires=text("(current_timestamp at time zone 'utc') + interval '10 minutes'"),
+        )
+    )
+
+
+def consume_signin_code(conn: Connection, *, site_id: int, code: str) -> bool:
+    """Consume a valid sign-in code and clear it atomically."""
+    row = conn.execute(
+        update(sites)
+        .where(
+            sites.c.id == site_id,
+            sites.c.signin_code == code,
+            sites.c.signin_code_expires >= text("(current_timestamp at time zone 'utc')"),
+        )
+        .values(signin_code=None, signin_code_expires=None)
+        .returning(sites.c.id)
+    ).first()
+    return row is not None
 
 
 def recover_password(conn: Connection, *, site_id: int, password_hash: str) -> None:

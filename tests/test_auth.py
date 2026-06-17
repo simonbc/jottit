@@ -6,6 +6,7 @@ from flask import Flask
 
 from jottit.auth import (
     generate_change_password_token,
+    generate_signin_code,
     hash_password,
     is_action_allowed,
     is_signed_in_to,
@@ -19,6 +20,7 @@ from jottit.auth import (
 class _FakeSite:
     id: int
     password: str | None = None
+    email: str | None = None
     security: str = "private"
 
 
@@ -52,6 +54,12 @@ def test_generate_change_password_token_is_long_and_unique() -> None:
     # token_urlsafe(32) is 43 chars; bound loosely for libstdlib versioning.
     assert len(a) >= 40
     assert a != b
+
+
+def test_generate_signin_code_is_six_digits() -> None:
+    code = generate_signin_code()
+    assert len(code) == 6
+    assert code.isdigit()
 
 
 # ---- session helpers ----
@@ -124,6 +132,14 @@ def test_signed_in_user_can_do_anything(app: Flask) -> None:
 
 def test_private_site_denies_signed_out_visitors(app: Flask) -> None:
     site = _FakeSite(id=1, password="$argon2id$x", security="private")
+    with app.test_request_context("/"):
+        assert is_action_allowed(site=site, action="view") is False
+        assert is_action_allowed(site=site, action="edit") is False
+        assert is_action_allowed(site=site, action="admin") is False
+
+
+def test_email_only_site_counts_as_claimed(app: Flask) -> None:
+    site = _FakeSite(id=1, email="owner@example.com", security="private")
     with app.test_request_context("/"):
         assert is_action_allowed(site=site, action="view") is False
         assert is_action_allowed(site=site, action="edit") is False

@@ -1,0 +1,26 @@
+{% extends "dialog_base.html" %}
+{% block title %}Enter sign-in code{% endblock %}
+
+{% block content %}
+  <h1>Enter sign-in code</h1>
+
+  {% include "partials/form_error.html" %}
+
+  <form method="post" action="" class="form signin-form">
+    <input type="hidden" name="return_to" value="{{ return_to }}">
+    <input type="hidden" name="email" value="{{ email }}">
+    <p class="form-row">
+      <label for="code">Code</label>
+      <input id="code" type="text" name="code" inputmode="numeric" autocomplete="one-time-code" required autofocus>
+    </p>
+    <p class="signin-remember-row">
+      <label class="checkbox">
+        <input type="checkbox" name="remember" value="1"> Remember me
+      </label>
+    </p>
+    <div class="form-actions">
+      <button type="submit">Sign in</button>
+      <a href="{{ site_root_path }}site/signin?return_to={{ return_to|urlencode }}">Back</a>
+    </div>
+  </form>
+{% endblock %}

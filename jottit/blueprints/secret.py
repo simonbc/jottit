@@ -46,6 +46,18 @@ secret_bp.add_url_rule(
     "/site/signin", endpoint="site_signin", view_func=site_views.signin, methods=["GET", "POST"]
 )
 secret_bp.add_url_rule(
+    "/site/signin/email",
+    endpoint="site_signin_email",
+    view_func=site_views.signin_email,
+    methods=["GET", "POST"],
+)
+secret_bp.add_url_rule(
+    "/site/signin/verify",
+    endpoint="site_signin_verify",
+    view_func=site_views.signin_verify,
+    methods=["GET", "POST"],
+)
+secret_bp.add_url_rule(
     "/site/signout", endpoint="site_signout", view_func=site_views.signout, methods=["POST"]
 )
 secret_bp.add_url_rule(

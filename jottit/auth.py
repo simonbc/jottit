@@ -42,6 +42,11 @@ def generate_change_password_token() -> str:
     return secrets.token_urlsafe(32)
 
 
+def generate_signin_code() -> str:
+    """Six-digit one-time code for passwordless site sign-in."""
+    return f"{secrets.randbelow(1_000_000):06d}"
+
+
 # ---- Multi-site session state ----
 
 
@@ -78,6 +83,11 @@ def _signed_in_sites() -> list[int]:
 # ---- Permission matrix ----
 
 
+def is_claimed(site: Any) -> bool:
+    """A site is claimed when it has either legacy password auth or an owner email."""
+    return site is not None and (site.password is not None or site.email is not None)
+
+
 def is_action_allowed(*, site: Any, action: str) -> bool:
     """Return True if the current visitor can perform `action` on `site`.
 
@@ -93,7 +103,7 @@ def is_action_allowed(*, site: Any, action: str) -> bool:
     """
     if site is None:
         return False
-    if site.password is None:
+    if not is_claimed(site):
         return True
 
     if is_signed_in_to(site.id):

@@ -8,6 +8,8 @@ site_bp = Blueprint("site", __name__, subdomain="<site_slug>", url_prefix="/site
 
 site_bp.add_url_rule("/claim", view_func=views.claim, methods=["GET", "POST"])
 site_bp.add_url_rule("/signin", view_func=views.signin, methods=["GET", "POST"])
+site_bp.add_url_rule("/signin/email", view_func=views.signin_email, methods=["GET", "POST"])
+site_bp.add_url_rule("/signin/verify", view_func=views.signin_verify, methods=["GET", "POST"])
 site_bp.add_url_rule("/signout", view_func=views.signout, methods=["POST"])
 site_bp.add_url_rule("/forgot-password", view_func=views.forgot_password, methods=["GET", "POST"])
 site_bp.add_url_rule("/change-password", view_func=views.change_password, methods=["GET", "POST"])

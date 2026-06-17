@@ -211,6 +211,12 @@
     gap: 6px;
   }
 
+  .signin-divider {
+    color: var(--color-text-muted);
+    font-size: 0.9em;
+    margin: 18px 0 12px;
+  }
+
   .main-nav {
     background: #fff;
     text-align: center;
@@ -293,7 +299,7 @@
 
   .dialog label { color: #000; }
   .dialog input { font-size: 120%; margin: 0; }
-  .dialog a { color: var(--color-link); padding: 2px; }
+  .dialog a { color: var(--color-link); }
 
   /* ---------- Buttons ---------- */
   /* Shared chrome for every <button> and submit-style input. Specialized

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from urllib.parse import urlparse
+from urllib.parse import quote, urlparse
 
 from flask import abort, flash, g, redirect, render_template, request
 from flask.typing import ResponseReturnValue
@@ -8,10 +8,12 @@ from flask.typing import ResponseReturnValue
 from jottit import auth, mail
 from jottit.db import (
     claim_site,
+    consume_signin_code,
     get_changes,
     get_request_conn,
     recover_password,
     set_change_pwd_token,
+    set_signin_code,
     sites,
 )
 from jottit.render import format_content
@@ -23,7 +25,7 @@ _ALLOWED_SECURITY_LEVELS = {"private", "public", "open"}
 def claim(site_slug: str) -> ResponseReturnValue:
     if g.site is None:
         abort(404)
-    if g.site.password is not None:
+    if auth.is_claimed(g.site):
         # Already claimed — claim is one-shot, send the visitor home.
         return redirect(site_root(), code=303)
 
@@ -39,6 +41,15 @@ def claim(site_slug: str) -> ResponseReturnValue:
     password = request.form.get("password", "")
     email = request.form.get("email", "")
     security = request.form.get("security", "private")
+
+    if request.form.get("from_banner"):
+        return render_template(
+            "claim_site.html",
+            password=password,
+            email="",
+            security=security,
+            error=None,
+        )
 
     error = _validate_claim(password=password, email=email, security=security)
     if error is not None:
@@ -95,10 +106,16 @@ def signin(site_slug: str) -> ResponseReturnValue:
         abort(404)
     # An unclaimed site has no password to compare against — sign-in is a no-op
     # there; send them home so they can claim instead.
-    if g.site.password is None:
+    if not auth.is_claimed(g.site):
         return redirect(site_root(), code=303)
 
     return_to = _safe_return_to(request.values.get("return_to", ""))
+
+    if not g.site.password:
+        return redirect(
+            f"{site_root()}site/signin/email?return_to={quote(return_to, safe='/?=&')}",
+            code=303,
+        )
 
     if request.method == "GET":
         return render_template(
@@ -113,6 +130,110 @@ def signin(site_slug: str) -> ResponseReturnValue:
             "signin.html",
             return_to=return_to,
             error="That password doesn't match.",
+        ), 401
+
+    auth.sign_in(g.site.id, remember=bool(request.form.get("remember")))
+    return redirect(site_root() + return_to.lstrip("/"), code=303)
+
+
+def signin_email(site_slug: str) -> ResponseReturnValue:
+    if g.site is None:
+        abort(404)
+    if not auth.is_claimed(g.site):
+        return redirect(site_root(), code=303)
+
+    return_to = _safe_return_to(request.values.get("return_to", ""))
+
+    if request.method == "GET":
+        return render_template(
+            "signin_email.html",
+            return_to=return_to,
+            error=None,
+            email_sent=False,
+            email="",
+            has_password=bool(g.site.password),
+        )
+
+    email = request.form.get("email", "").strip().lower()
+    if not email:
+        return render_template(
+            "signin_email.html",
+            return_to=return_to,
+            error="Please enter the email address for this site.",
+            email_sent=False,
+            email=email,
+            has_password=bool(g.site.password),
+        ), 400
+
+    if g.site.email and email == g.site.email.strip().lower():
+        conn = get_request_conn()
+        if conn is None:
+            abort(500)
+        code = auth.generate_signin_code()
+        set_signin_code(conn, site_id=g.site.id, code=code)
+        _send_signin_code_email(to=email, code=code)
+
+    return render_template(
+        "signin_email.html",
+        return_to=return_to,
+        error=None,
+        email_sent=True,
+        email=email,
+        has_password=bool(g.site.password),
+    )
+
+
+def _send_signin_code_email(*, to: str, code: str) -> None:
+    verify_url = f"https://{request.host}{site_root()}site/signin/verify"
+    mail.send(
+        to=to,
+        subject="Your Jottit sign-in code",
+        body=(
+            "Use this code to sign in to your Jottit site:\n\n"
+            f"{code}\n\n"
+            "Enter it here:\n"
+            f"{verify_url}\n\n"
+            "This code expires in 10 minutes.\n"
+        ),
+    )
+
+
+def signin_verify(site_slug: str) -> ResponseReturnValue:
+    if g.site is None:
+        abort(404)
+    if not auth.is_claimed(g.site):
+        return redirect(site_root(), code=303)
+
+    return_to = _safe_return_to(request.values.get("return_to", ""))
+    email = request.values.get("email", "").strip().lower()
+
+    if request.method == "GET":
+        return render_template(
+            "signin_verify.html",
+            return_to=return_to,
+            email=email,
+            error=None,
+        )
+
+    code = request.form.get("code", "").strip()
+    if not code:
+        return render_template(
+            "signin_verify.html",
+            return_to=return_to,
+            email=email,
+            error="Please enter the code from the email.",
+        ), 400
+
+    conn = get_request_conn()
+    if conn is None:
+        abort(500)
+
+    if not consume_signin_code(conn, site_id=g.site.id, code=code):
+        return render_template(
+            "signin_verify.html",
+            return_to=return_to,
+            email=email,
+            error="That code is invalid or expired.",
         ), 401
 
     auth.sign_in(g.site.id, remember=bool(request.form.get("remember")))
@@ -147,7 +268,7 @@ def _safe_return_to(value: str) -> str:
 def forgot_password(site_slug: str) -> ResponseReturnValue:
     if g.site is None:
         abort(404)
-    if g.site.password is None:
+    if not auth.is_claimed(g.site):
         # Nothing to recover on an unclaimed site.
         return redirect(site_root(), code=303)
 
@@ -167,7 +288,7 @@ def forgot_password(site_slug: str) -> ResponseReturnValue:
 def change_password(site_slug: str) -> ResponseReturnValue:
     if g.site is None:
         abort(404)
-    if g.site.password is None:
+    if not auth.is_claimed(g.site):
         return redirect(site_root(), code=303)
 
     token = request.values.get("d", "")

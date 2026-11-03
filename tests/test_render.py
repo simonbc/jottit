@@ -56,3 +56,44 @@ def test_full_html_passthrough_bypasses_markdown_and_sanitize() -> None:
     raw = "<html><body><script>x</script></body></html>"
     out = format_content(raw, site_root="/")
     assert out == raw
+
+
+# ---- images ----
+
+
+def test_uploaded_image_passes_sanitizer() -> None:
+    out = format_content("![cat](/site/uploads/abc.png)", site_root="/")
+    assert '<img src="/site/uploads/abc.png" alt="cat">' in out
+
+
+def test_uploaded_image_is_rerooted_for_secret_url_sites() -> None:
+    out = format_content("![cat](/site/uploads/abc.png)", site_root="/abc12/")
+    assert '<img src="/abc12/site/uploads/abc.png" alt="cat">' in out
+
+
+def test_uploaded_image_is_rerooted_against_absolute_feed_root() -> None:
+    out = format_content("![cat](/site/uploads/abc.png)", site_root="https://a.jottit.pub/")
+    assert '<img src="https://a.jottit.pub/site/uploads/abc.png" alt="cat">' in out
+
+
+def test_upload_path_outside_img_src_is_not_rewritten() -> None:
+    text = 'see src="/site/uploads/abc.png" and <a title=\'x src="/site/uploads/a"\'>y</a>'
+    out = format_content(text, site_root="/abc12/")
+    assert "/abc12/" not in out
+
+
+def test_external_image_still_allowed_as_before() -> None:
+    out = format_content("![x](https://example.com/x.png)", site_root="/abc12/")
+    assert '<img src="https://example.com/x.png" alt="x">' in out
+
+
+def test_javascript_image_src_still_stripped() -> None:
+    out = format_content('<img src="javascript:alert(1)">', site_root="/")
+    assert "javascript" not in out
+    assert "<img>" in out
+
+
+def test_image_event_handlers_still_stripped() -> None:
+    out = format_content('<img src="/site/uploads/a.png" onerror="alert(1)">', site_root="/")
+    assert "onerror" not in out
+    assert '<img src="/site/uploads/a.png">' in out

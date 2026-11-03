@@ -10,7 +10,10 @@
 {% block body %}
   <form method="post" action="" id="edit_form"
         data-original-content="{{ content }}"
-        data-page-name="{{ page_name }}">
+        data-page-name="{{ page_name }}"
+        data-site-root="{{ site_root_path }}"
+        data-upload-url="{{ site_root_path }}site/uploads"
+        data-max-upload-bytes="{{ config.MAX_UPLOAD_BYTES }}">
     <input type="hidden" name="current_revision" value="{{ current_revision }}">
     <input type="hidden" id="caret_pos" name="caret_pos" value="{{ caret_pos }}">
     <input type="hidden" id="scroll_pos" name="scroll_pos" value="{{ scroll_pos }}">
@@ -90,6 +93,12 @@
     <div class="edit-actions">
       <button type="submit">Publish</button>
       or <a class="button-cancel" href="{{ site_root_path }}{% if not is_new %}{{ page_slug(page_name) }}{% endif %}">Cancel</a>
+      <span class="edit-image">
+        &middot; <button type="button" id="image_button" class="link-button">Add an image</button>
+        <span class="edit-image-hint">(or drag one into the text)</span>
+        <input type="file" id="image_input" accept="image/png,image/jpeg,image/gif,image/webp" multiple hidden>
+      </span>
+      <span id="upload_error" class="upload-error" role="alert" hidden></span>
       <span id="draft_status" class="draft-status" aria-live="polite"></span>
     </div>
   </form>
@@ -101,4 +110,5 @@
   <script src="{{ url_for('static', filename='js/vendor/marked.min.js') }}" defer></script>
   <script src="{{ url_for('static', filename='js/preview.js') }}" defer></script>
   <script src="{{ url_for('static', filename='js/help-toggle.js') }}" defer></script>
+  <script src="{{ url_for('static', filename='js/uploads.js') }}" defer></script>
 {% endblock %}

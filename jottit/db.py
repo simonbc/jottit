@@ -110,6 +110,19 @@ drafts = Table(
     Column("created", DateTime, nullable=False, server_default=_UTC_NOW),
 )
 
+uploads = Table(
+    "uploads",
+    metadata,
+    Column("id", Integer, primary_key=True),
+    Column("site_id", Integer, ForeignKey("sites.id"), nullable=False, index=True),
+    Column("storage_key", Text, nullable=False, unique=True),
+    Column("filename", Text),
+    Column("content_type", Text, nullable=False),
+    Column("size", Integer, nullable=False),
+    Column("ip", Text),
+    Column("created", DateTime, nullable=False, server_default=_UTC_NOW),
+)
+
 
 def make_engine(database_url: str) -> Engine:
     return create_engine(_normalize_postgres_url(database_url), pool_pre_ping=True)
@@ -514,6 +527,37 @@ def new_draft(conn: Connection, *, page_id: int, content: str) -> None:
         conn.execute(insert(drafts).values(page_id=page_id, content=content))
     else:
         conn.execute(update(drafts).where(drafts.c.page_id == page_id).values(content=content))
+
+
+# ---- Uploads ----
+
+
+def new_upload(
+    conn: Connection,
+    *,
+    site_id: int,
+    storage_key: str,
+    filename: str | None,
+    content_type: str,
+    size: int,
+    ip: str | None,
+) -> None:
+    conn.execute(
+        insert(uploads).values(
+            site_id=site_id,
+            storage_key=storage_key,
+            filename=filename,
+            content_type=content_type,
+            size=size,
+            ip=ip,
+        )
+    )
+
+
+def get_upload(conn: Connection, *, site_id: int, storage_key: str) -> Row | None:
+    return conn.execute(
+        select(uploads).where(uploads.c.site_id == site_id, uploads.c.storage_key == storage_key)
+    ).first()
 
 
 # ---- Site auth + settings ----

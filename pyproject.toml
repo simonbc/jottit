@@ -15,6 +15,7 @@ dependencies = [
     "python-dotenv>=1.0",
     "requests>=2.31",
     "gunicorn>=21.2",
+    "boto3>=1.35",
 ]
 
 [dependency-groups]

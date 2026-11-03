@@ -14,6 +14,7 @@ from jottit.blueprints.site import site_bp
 from jottit.chrome import chrome_context
 from jottit.db import close_request_conn, make_engine
 from jottit.site_resolver import resolve_site
+from jottit.storage import storage_from_env
 
 
 def create_app() -> Flask:
@@ -23,11 +24,14 @@ def create_app() -> Flask:
     # "Remember me" on the signin form marks the session permanent; this is
     # how long it lives once that flag is set.
     app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=30)
+    app.config["MAX_UPLOAD_BYTES"] = int(os.environ.get("JOTTIT_MAX_UPLOAD_BYTES", 5 * 1024 * 1024))
     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)  # type: ignore[method-assign]
 
     database_url = os.environ.get("DATABASE_URL")
     if database_url:
         app.extensions["db_engine"] = make_engine(database_url)
+
+    app.extensions["storage"] = storage_from_env(os.path.join(app.instance_path, "uploads"))
 
     app.register_blueprint(root_bp)
     app.register_blueprint(site_bp)

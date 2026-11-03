@@ -15,6 +15,13 @@ _WIKILINK_RE = re.compile(r"(?<!\\)\[\[(.*?)(?:\|(.*?))?\]\]")
 # reaches the browser, so unsafe tags don't survive.
 _markdown = mistune.create_markdown(escape=False)
 
+# The editor inserts uploaded images as `/site/uploads/<name>`, which is
+# right for subdomain sites. The same page is also served under its secret
+# URL (and in feeds, against an absolute root), so re-root the src there.
+# Runs on nh3 output, where `<` and `>` in text and attribute values are
+# entity-escaped, so this only matches a real <img> tag's src.
+_UPLOAD_SRC_RE = re.compile(r'(<img\b[^>]*?\ssrc=")/site/uploads/')
+
 
 def _wikify(html: str, *, site_root: str) -> str:
     def mangle(match: re.Match[str]) -> str:
@@ -30,7 +37,8 @@ def format_content(text: str, *, site_root: str) -> str:
     """Render page content (markdown + embedded HTML + wikilinks) as safe HTML.
 
     `site_root` is the URL prefix that page names hang off (e.g. `/` for a
-    subdomain site, `/abc12/` for one accessed via its secret URL).
+    subdomain site, `/abc12/` for one accessed via its secret URL). Uploaded
+    image srcs are re-rooted against it too.
 
     Wikilinks (`[[name]]` or `[[name|anchor]]`) run after sanitization so the
     `class="internal"` marker we add isn't stripped. `[[home]]` is a special
@@ -45,4 +53,5 @@ def format_content(text: str, *, site_root: str) -> str:
 
     html = _markdown(text)
     assert isinstance(html, str)  # default HTML renderer always returns str
-    return _wikify(nh3.clean(html), site_root=site_root)
+    html = _UPLOAD_SRC_RE.sub(lambda m: f"{m.group(1)}{site_root}site/uploads/", nh3.clean(html))
+    return _wikify(html, site_root=site_root)

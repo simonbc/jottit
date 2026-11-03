@@ -7,10 +7,17 @@
   const preview = document.getElementById("preview");
   if (!textarea || !preview) return;
 
+  // Uploaded images are written as `/site/uploads/<name>`; on a secret-URL
+  // site they live under the site's prefix, as the server renders them.
+  const siteRoot = textarea.form?.dataset.siteRoot || "/";
+
   const render = () => {
     if (!window.marked) return;
     try {
       preview.innerHTML = window.marked.parse(textarea.value || "");
+      for (const img of preview.querySelectorAll('img[src^="/site/uploads/"]')) {
+        img.setAttribute("src", siteRoot + img.getAttribute("src").slice(1));
+      }
     } catch {
       // Leave the preview stale; server-side render still wins on Save.
     }

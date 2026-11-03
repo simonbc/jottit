@@ -6,6 +6,7 @@ from jottit.views import admin as admin_views
 from jottit.views import draft as draft_views
 from jottit.views import page as page_views
 from jottit.views import site as site_views
+from jottit.views import uploads as upload_views
 
 secret_bp = Blueprint("secret", __name__, url_prefix="/<site_slug>")
 
@@ -88,6 +89,17 @@ secret_bp.add_url_rule(
     endpoint="site_hide_primer",
     view_func=site_views.hide_primer,
     methods=["POST"],
+)
+secret_bp.add_url_rule(
+    "/site/uploads",
+    endpoint="site_upload",
+    view_func=upload_views.upload,
+    methods=["POST"],
+)
+secret_bp.add_url_rule(
+    "/site/uploads/<name>",
+    endpoint="site_upload_serve",
+    view_func=upload_views.serve,
 )
 
 # Admin

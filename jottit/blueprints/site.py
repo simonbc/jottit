@@ -3,6 +3,7 @@ from __future__ import annotations
 from flask import Blueprint
 
 from jottit.views import site as views
+from jottit.views import uploads as upload_views
 
 site_bp = Blueprint("site", __name__, subdomain="<site_slug>", url_prefix="/site")
 
@@ -17,3 +18,5 @@ site_bp.add_url_rule("/changes", view_func=views.changes)
 site_bp.add_url_rule("/changes.rss", view_func=views.changes_rss)
 site_bp.add_url_rule("/changes.json", view_func=views.changes_json)
 site_bp.add_url_rule("/hide-primer", view_func=views.hide_primer, methods=["POST"])
+site_bp.add_url_rule("/uploads", endpoint="upload", view_func=upload_views.upload, methods=["POST"])
+site_bp.add_url_rule("/uploads/<name>", endpoint="upload_serve", view_func=upload_views.serve)

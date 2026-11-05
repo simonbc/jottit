@@ -9,6 +9,35 @@
 
 {% block content %}
   <article class="content-card">
+    <h2>Writing a page</h2>
+
+    <p>Pages are written in <a href="https://daringfireball.net/projects/markdown/syntax">Markdown</a>. Leave a blank line between paragraphs.</p>
+
+    <h3>Headings</h3>
+    <p>Start a line with <code>#</code> for a heading, and add more for smaller ones:</p>
+    <pre><code># Heading
+## Smaller heading</code></pre>
+
+    <h3>Lists</h3>
+    <p>Start each line with <code>-</code> or <code>*</code> for a bulleted list, or a number for a numbered one:</p>
+    <pre><code>- Eggs
+- Milk
+
+1. Buy groceries
+2. Check mail</code></pre>
+
+    <h3>Links to other pages</h3>
+    <p>Put a page's name in double square brackets to link to it. Add <code>|</code> and some text to change what the link says. <code>[[home]]</code> links to your site's front page.</p>
+    <pre><code>See [[Recipes]].
+See [[Grocery list|my list]].
+Back to [[home]].</code></pre>
+    <p>If the page doesn't exist yet, following the link lets you create it.</p>
+
+    <h3>Links to other sites</h3>
+    <p>Put the link text in square brackets and the address in parentheses right after it:</p>
+    <pre><code>Visit [Jottit](https://jottit.pub/).</code></pre>
+
+    <h2>Contact</h2>
     <p>For help with Jottit, please email <a href="mailto:feedback@jottit.pub">feedback@jottit.pub</a>. Please include the URL of your Jottit site in your email.</p>
   </article>
 {% endblock %}
